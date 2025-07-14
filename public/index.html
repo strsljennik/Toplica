@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Galaksija</title>   <!-- tedikavtumenpkkl0402 -->
+     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+   <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css"> <!-- Povezivanje CSS datoteke -->
+    <link rel="stylesheet" href="dj.css"> <!-- Povezivanje dj.css sa index.html -->
+    <link rel="stylesheet" href="gradi.css"> <!-- Povezivanje gradi.css sa index.html -->
+     <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
+
+    <script>
+        window.socket = io(); // Inicializacija socket-a
+    </script>
+
+</head>
+<body>
+    
+<button id="retryBtn" onclick="document.getElementById('w2g').src += '';" style="display: none;">
+ ▶  ⏹
+</button>
+<br>
+<iframe id="w2g" frameborder="0" width="1000" height="600"
+        src="https://w2g.tv/embed?room_id=dthbo6gc3ya5j5dv4c"
+        allowfullscreen allow="autoplay; fullscreen; camera; microphone;"
+        style="display: none;"></iframe>
+
+    <div id="authContainer" style="display: none;">
+    <!-- Forma za registraciju -->
+    <form id="registerForm">
+        <input type="text" id="registerUsername" placeholder="Napavi Nik" required>
+        <input type="password" id="registerPassword" placeholder="Lozinka" required>
+        <button type="submit">Registracija</button>
+    </form>
+    
+    <!-- Forma za prijavu -->
+    <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Login" required>
+        <input type="password" id="loginPassword" placeholder="Lozinka" required>
+        <button type="submit">Prijava</button>
+    </form>
+</div>
+
+<div id="chatContainer">
+    <div id="toolbar">
+         <button id="openModal" class="toolbarBtn">D</button>
+ <button class="toolbarBtn" id="NIK">Login</button>
+        <button class="toolbarBtn" id="sound">Play</button>
+        <button class="toolbarBtn" id="smilesBtn">😊</button>
+        <button class="toolbarBtn" id="GBtn">G</button>
+  <button class="toolbarBtn" id="boldBtn">Bold</button>
+    <button class="toolbarBtn" id="italicBtn">Italic</button>
+<button class="toolbarBtn" id="plusBtn" onclick="increaseFontSize()">+</button>
+    <button class="toolbarBtn" id="minusBtn" onclick="decreaseFontSize()">-</button>
+   <button class="toolbarBtn" id="linijadoleBtn">Temelj</button>
+   <button class="toolbarBtn" id="colorBtn">Color</button>
+    <input type="color" id="colorPicker" style="display: none;">
+    </div>
+
+<!-- Modal -->
+<div id="gostimodal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <!-- Dugmici unutar modala -->
+     <button class="toolbarBtn" id="font">Font</button>
+     <button class="toolbarBtn" id="farbe">Farbe</button>
+     <button class="toolbarBtn" id="linijadoleBtn">Temelj</button>
+    <button class="toolbarBtn" id="linijagoreBtn">Krov</button>
+    <button class="toolbarBtn" id="sl">Slike</button>
+        <button id="nik">LiLi&Sandra&X</button>
+          <button class="toolbarBtn" id="tube">Play1</button>
+  </div>
+</div>
+    
+
+<div id="functionModal" class="modal" style="display: none;" draggable="true">
+  <span class="close" id="closeModal">&times;</span>
+  <h2>Galaksija</h2>
+
+<button id="sn">SnimanjePoruka</button>
+  <button id="clearChat">Obriši chat</button>
+  <button id="privateMessage">Privat</button>
+  <button id="pozadina">Pozadina</button>
+   <button id="addImage"> WebSlike</button>
+  <button id="anitext">anitext</button>
+  <button id="spisak">Spisak</button>
+  <button id="chat">Chat</button>
+  <button id="gradi">Okvir</button>
+  <button id="baro">Sirina</button>
+  <button id="pesme">Mixer</button>
+  <button id="mem">WebMaska</button>
+  <button id="govna">*__X__*</button>
+  <button id="maska">ChatMaska</button>
+  <button id="ram">Ram</button>
+  <button id="pi">*Galaksija*</button>
+  </div>
+
+
+<div id="uuidModal" style="display: none;">
+    <h3>BY *__X__*</h3>
+    <ul id="uuidList"></ul>
+<button id="blokip"> Blokip </button>
+<button id="delete"> Delete </button>
+</div>
+    
+<table id="tabela" style="display:none;"></table>
+<div id="avatar" style="display: none;"></div>
+
+<div id="gradijent" style="display: none;">
+  <!-- Gradijent boxovi 1 do 30 (postojeći) -->
+  <div class="gradijent-box gradient-1">1</div>
+  <div class="gradijent-box gradient-2">2</div>
+  <div class="gradijent-box gradient-3">3</div>
+  <div class="gradijent-box gradient-4">4</div>
+  <div class="gradijent-box gradient-5">5</div>
+  <div class="gradijent-box gradient-6">6</div>
+  <div class="gradijent-box gradient-7">7</div>
+  <div class="gradijent-box gradient-8">8</div>
+  <div class="gradijent-box gradient-9">9</div>
+  <div class="gradijent-box gradient-10">10</div>
+  <div class="gradijent-box gradient-11">11</div>
+  <div class="gradijent-box gradient-12">12</div>
+  <div class="gradijent-box gradient-13">13</div>
+  <div class="gradijent-box gradient-14">14</div>
+  <div class="gradijent-box gradient-15">15</div>
+  <div class="gradijent-box gradient-16">16</div>
+  <div class="gradijent-box gradient-17">17</div>
+  <div class="gradijent-box gradient-18">18</div>
+  <div class="gradijent-box gradient-19">19</div>
+  <div class="gradijent-box gradient-20">20</div>
+  <div class="gradijent-box gradient-21">21</div>
+  <div class="gradijent-box gradient-22">22</div>
+  <div class="gradijent-box gradient-23">23</div>
+  <div class="gradijent-box gradient-24">24</div>
+  <div class="gradijent-box gradient-25">25</div>
+  <div class="gradijent-box gradient-26">26</div>
+  <div class="gradijent-box gradient-27">27</div>
+  <div class="gradijent-box gradient-28">28</div>
+  <div class="gradijent-box gradient-29">29</div>
+  <div class="gradijent-box gradient-30">30</div>
+  <div class="gradijent-box gradient-31">31</div>
+  <div class="gradijent-box gradient-32">32</div>
+  <div class="gradijent-box gradient-33">33</div>
+  <div class="gradijent-box gradient-34">34</div>
+  <div class="gradijent-box gradient-35">35</div>
+  <div class="gradijent-box gradient-36">36</div>
+  <div class="gradijent-box gradient-37">37</div>
+  <div class="gradijent-box gradient-38">38</div>
+  <div class="gradijent-box gradient-39">39</div>
+  <div class="gradijent-box gradient-40">40</div>
+  <div class="gradijent-box gradient-41">41</div>
+  <div class="gradijent-box gradient-42">42</div>
+  <div class="gradijent-box gradient-43">43</div>
+  <div class="gradijent-box gradient-44">44</div>
+  <div class="gradijent-box gradient-45">45</div>
+  <div class="gradijent-box gradient-46">46</div>
+  <div class="gradijent-box gradient-47">47</div>
+  <div class="gradijent-box gradient-48">48</div>
+  <div class="gradijent-box gradient-49">49</div>
+  <div class="gradijent-box gradient-50">50</div>
+</div>
+
+ <div id="messageArea"></div>
+
+<textarea id="chatInput" rows="1" placeholder="Ispeci Pa Reci...Godjaja Lafi....." maxlength="200"></textarea>
+
+    <div id="guestList"></div>
+      <div id="mixer">
+        <audio id="audioPlayer" controls style="position: absolute; top: 0px; left: 0;"></audio>
+        <h2 class="title" style="position: absolute; top: 60px; left: 0;">By *__X__*</h2>
+        <input type="file" id="fileInput" multiple style="position: absolute; top: 90px; left: 0; right: 0; margin-bottom: 10px;">
+
+        <ul id="songList"></ul>
+        
+        <div id="mixer-buttons">
+            <button id="playSelected">Play</button>
+            <button id="deleteSelected">Obriši</button>
+            
+             </div>
+    </div>
+
+     <audio id="radioStream" preload="auto">
+  <source src="https://stream.zeno.fm/krdfduyswxhtv" type="audio/mp3">
+  Vaš pregledač ne podržava audio element.
+</audio>
+    
+     <script src="regist.js"></script>
+ <script src="elementi.js"></script>   
+    <script src="konobarica.js"></script>
+<script src="formatiranje.js"></script> 
+ <script src="funkcije.js"></script>
+<script src="smile.js"></script> 
+ <script src="poruke.js"></script>
+    <script src="privat.js"></script>
+     <script src="spisak.js"></script>
+       <script src="ava.js"></script>
+      <script src="font.js"></script>
+       <script src="stats.js"></script>
+      <script src="mixer.js"></script>
+     <script src="nikani.js"></script>
+      <script src="gradi.js"></script>
+   <script src="mem.js"></script>
+    <script src="diz.js"></script>
+      <script src="sirina.js"></script>
+      <script src="slike.js"></script>
+  <script src="snimak.js"></script>
+     
+  
+            <!-- Default Statcounter code for Galaksija
+https://radiogalaksija.onrender.com/ -->
+<script type="text/javascript">
+var sc_project=13110379; 
+var sc_invisible=1; 
+var sc_security="58b9edbb"; 
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics"
+href="https://statcounter.com/" target="_blank"><img
+class="statcounter"
+src="https://c.statcounter.com/13110379/0/58b9edbb/1/"
+alt="Web Analytics"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+   </body>
+</html>
