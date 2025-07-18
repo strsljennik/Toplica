@@ -98,9 +98,8 @@ body {
     border-radius: 5px;
     border: 2px solid white;
     background-color: black;
-    color: white;
+    color: rgba(200, 200, 200, 0.5); 
     font-size: 17px;
-    resize: none;
     overflow: hidden;
     outline: none;
     
