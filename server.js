@@ -10,6 +10,7 @@ const pingService = require('./ping');
 const privatmodul = require('./privatmodul'); // Podesi putanju ako je u drugom folderu
 require('dotenv').config();
 const cors = require('cors');
+const setupUserCounter = require('./brojacmodul');
 
 
 const app = express();
@@ -26,6 +27,7 @@ const io = socketIo(server, {
 connectDB(); // Povezivanje na bazu podataka
 konobaricaModul(io);
 slikemodul.setSocket(io);
+setupUserCounter(io);
 
 // Middleware za parsiranje JSON podataka i serviranje statičkih fajlova
 app.use(express.json());
