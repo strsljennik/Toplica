@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     style.textContent = `
       #user-stats {
         position: fixed;
-        top: 50px;
+        top: 20px;
         left: 20px;
-        background: rgba(0,0,0,0.8);
+        background: transparent;
         color: white;
         border-radius: 5px;
         font-family: Arial, sans-serif;
@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       #local-time-div {
         position: fixed;
-        top: 50px;
+        top: 20px;
         right: 20px;
-        background: rgba(0,0,0,0.8);
+        background: transparent;
         color: white;
         padding: 10px;
         border-radius: 5px;
