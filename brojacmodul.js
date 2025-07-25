@@ -8,6 +8,24 @@ const Counter = mongoose.model('Counter', counterSchema);
 
 let currentUsers = 0;
 
+// GLOBALNO stanje svih divova
+const divStates = {};
+
+// Funkcija za čuvanje stanja diva
+function updateDivState(data) {
+  divStates[data.id] = {
+    id: data.id,
+    left: data.left,
+    top: data.top,
+    width: data.width,
+    height: data.height,
+    color: data.color,
+    backgroundImage: data.backgroundImage,
+    isGradientText: data.isGradientText,
+    fontSize: data.fontSize || ''
+  };
+}
+
 async function setupUserCounter(io) {
   io.on('connection', async (socket) => {
     try {
@@ -17,30 +35,38 @@ async function setupUserCounter(io) {
       counter.total++;
       await counter.save();
 
-      // Emitovanje svima
-      io.emit('usersCount', { 
-        current: currentUsers, 
-        total: counter.total 
+      io.emit('usersCount', {
+        current: currentUsers,
+        total: counter.total
       });
 
-      // Obrada zahtjeva za podacima
-      socket.on('requestUsersCount', async () => {
+      // Pošalji SVE divove odmah novom korisniku
+      Object.values(divStates).forEach(div => {
+        socket.emit('updateDiv', div);
+      });
+
+      socket.on('requestUsersCount', () => {
         socket.emit('usersCount', {
           current: currentUsers,
           total: counter.total
         });
       });
 
-      socket.on('disconnect', async () => {
+      socket.on('updateDiv', (data) => {
+        updateDivState(data);
+        io.emit('updateDiv', data); // šalji svima, uključujući pošiljaoca
+      });
+
+      socket.on('disconnect', () => {
         currentUsers--;
-        io.emit('usersCount', { 
-          current: currentUsers, 
-          total: counter.total 
+        io.emit('usersCount', {
+          current: currentUsers,
+          total: counter.total
         });
       });
 
     } catch (err) {
-      console.error('Greška u brojaču:', err);
+      console.error('Greška:', err);
     }
   });
 }
