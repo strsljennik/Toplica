@@ -11,6 +11,7 @@ const privatmodul = require('./privatmodul'); // Podesi putanju ako je u drugom 
 require('dotenv').config();
 const cors = require('cors');
 const setupUserCounter = require('./brojacmodul');
+const { startVirtualGuests, toggleVirtualGuests } = require('./virtualGuests');
 
 
 const app = express();
@@ -66,6 +67,7 @@ setupSocketEvents(io, guests, bannedUsers); // Dodavanje guests i bannedUsers u 
 privatmodul(io, guests);
 let currentBackground = "";
 let textElements = [];
+startVirtualGuests(io, guests);
 
 // Socket.io događaji
 io.on('connection', (socket) => {
@@ -205,6 +207,10 @@ socket.on('avatarChange', (data) => {
     socket.broadcast.emit('avatarChange', data); // Pošalji svima ostalima (i kad je avatar prazan)
   }
 });
+socket.on('toggleVirtualGuests', enabled => {
+  toggleVirtualGuests(io, guests, enabled);
+});
+
    // Obrada diskonekcije korisnika
     socket.on('disconnect', () => {
         console.log(`${guests[socket.id]} se odjavio. IP adresa korisnika: ${ipAddress}`);
