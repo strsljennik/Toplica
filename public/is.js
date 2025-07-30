@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!document.getElementById('local-time-div')) {
       const timeDiv = document.createElement('div');
       timeDiv.id = 'local-time-div';
-      timeDiv.innerHTML = `<p id="local-time"><b><i>Vreme: --:--:--</i></b></p>`;
-  Object.assign(timeDiv.style, {
+   timeDiv.innerHTML = `<p id="local-time"><b><i>--:--:--</i></b></p>`;
+   Object.assign(timeDiv.style, {
   position: 'absolute',
   top: '50px',
   left: '1000px',
@@ -188,8 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         const localTimeEl = document.getElementById('local-time');
         if (localTimeEl) {
-          localTimeEl.innerHTML = `<b><i>Vreme: ${now.toLocaleTimeString()}</i></b>`;
-        }
+         localTimeEl.innerHTML = `<b><i>${now.toLocaleTimeString()}</i></b>`;
+         }
       }, 1000);
     }
   }
