@@ -37,13 +37,13 @@ snButton.addEventListener('click', () => {
 document.getElementById('kr').addEventListener('click', () => {
   snimanjeAktivno = true;
   porukeZaSnimanje = []; // Resetuj stare poruke
-  console.log('✅ Snimanje počelo');
-});
 
-// Dugme STOP
-document.getElementById('st').addEventListener('click', () => {
-  snimanjeAktivno = false;
-  console.log('🛑 Snimanje zaustavljeno');
+  // Dodaj sve postojeće poruke odmah
+  document.querySelectorAll('#messageArea .message').forEach(msg => {
+    porukeZaSnimanje.push(msg.outerHTML);
+  });
+
+  console.log('✅ Snimanje počelo (uključene i postojeće poruke)');
 });
 
 // Dugme SACUVAJ
@@ -60,8 +60,8 @@ document.getElementById('aj').addEventListener('click', () => {
   <meta charset="UTF-8">
   <title>Snimljene poruke</title>
   <style>
-    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; }
-    .message { margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    body { font-family: sans-serif; background: #000; color: white; padding: 20px; }
+    .message { margin-bottom: 10px; padding: 8px; background: #222; border-radius: 6px; box-shadow: 0 1px 3px rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
@@ -76,9 +76,8 @@ document.getElementById('aj').addEventListener('click', () => {
   link.download = 'chat_poruke.html';
   link.click();
 
-  console.log('💾 Poruke snimljene');
+  console.log('💾 Poruke snimljene (crna pozadina)');
 });
-
 // MutationObserver koji hvata svaku novu poruku sa stilovima
 const messageArea = document.getElementById('messageArea');
 const observer = new MutationObserver(mutations => {
@@ -92,3 +91,4 @@ const observer = new MutationObserver(mutations => {
   });
 });
 observer.observe(messageArea, { childList: true });
+
