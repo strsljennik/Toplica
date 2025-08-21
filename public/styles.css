@@ -138,15 +138,16 @@ body {
     align-items: center;
     margin: 5px 0;
     padding-left: 5px;
-    font-weight: bold;
-    font-style: italic;
+     font-size: 15px;
+     font-weight: bold;
+     font-style: italic;
      color: rgba(200, 200, 200, 0.5); 
   }
 
 .guest::before, .virtual-guest::before {
-    content: "☕"; 
+    content: "🧡"; 
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 15px;
 }
 
 .guest.selected-overlay {
@@ -413,3 +414,4 @@ body {
       z-index: 999;
       display: none;
     }
+
