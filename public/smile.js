@@ -117,7 +117,7 @@ const allItems = [
         'dance3.gif', 'ily1.gif', 'ily2.gif', 'beba.gif', 
         'rg.gif', 'x.gif', 'x1.gif', 'kiss.gif', 'kiss1.gif', 
         'patak1.avifs', 'patak2.avifs', 'jerry1.avifs', 'jerry2.avifs', 'jerry3.avifs', 'jerry.webp', 
-  'kiss2.gif', 'srce2.gif', 'srce3.gif', 'srce4.gif', 
+        'mx.avifs', 'kiss2.gif', 'srce2.gif', 'srce3.gif', 'srce4.gif', 
   'nov1.gif', 'nov3.gif', 'nov4.gif', 'nov5.gif', 'nov6.gif', 
   'nov7.gif', 'nov8.gif', 'nov9.gif', 'nov10.gif', 'nov11.gif', 'nov12.gif', 
   'nov13.gif', 'nov15.gif', 'nov16.gif', 'nov17.gif', 'nov18.gif', 
@@ -134,4 +134,5 @@ const saveImagesToLocalStorage = () => {
 
 // Pozivamo funkciju da sačuvamo slike u localStorage
 saveImagesToLocalStorage();
+
 
