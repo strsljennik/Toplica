@@ -135,6 +135,7 @@ const saveImagesToLocalStorage = () => {
 // Pozivamo funkciju da sačuvamo slike u localStorage
 saveImagesToLocalStorage();
 
+
 // === Nezavisne animacije za slike iz modala ===
 const imageAnimations = {
     "#1": (img) => {
@@ -171,24 +172,84 @@ const imageAnimations = {
         setTimeout(() => {
             img.style.transform = "scale(3.5)";
         }, 50);
+    },
+    "#6": (img) => {
+        img.style.opacity = "0";
+        img.style.transition = "opacity 3s ease-in-out";
+        setTimeout(() => {
+            img.style.opacity = "1";
+        }, 50);
+
+        // dodaj sjajne tačkice direktno u animContainer
+        const animContainer = img.parentElement;
+        for (let i = 0; i < 50; i++) {
+            const dot = document.createElement("div");
+            Object.assign(dot.style, {
+                position: "absolute",
+                width: "4px",
+                height: "4px",
+                borderRadius: "50%",
+                background: "white",
+                top: Math.random() * 100 + "%",
+                left: Math.random() * 100 + "%",
+                opacity: "0",
+                boxShadow: "0 0 8px white"
+            });
+            animContainer.appendChild(dot);
+
+            setTimeout(() => {
+                dot.style.transition = "opacity 0.5s ease-in-out";
+                dot.style.opacity = "1";
+                setTimeout(() => {
+                    dot.style.opacity = "0";
+                }, 1500 + Math.random() * 1000);
+            }, Math.random() * 2000);
+        }
+    },
+    "#7": (img) => {
+        img.style.transform = "scale(0)";
+        img.style.transition = "transform 5s ease-out";
+        setTimeout(() => {
+            img.style.transform = "scale(2)";
+        }, 50);
+
+        // lepršava zastava efekat
+        let angle = 0;
+        const flap = setInterval(() => {
+            angle = Math.sin(Date.now() / 200) * 10; // oscilacija -10° do 10°
+            img.style.transform = `scale(2) rotate(${angle}deg)`;
+        }, 30);
+
+        setTimeout(() => {
+            clearInterval(flap);
+            img.style.transform = "scale(2) rotate(0deg)";
+        }, 5000); // trajanje animacije 5s
     }
 };
 
-// Funkcija za pokretanje animacije na odabranoj slici
-const triggerImageAnimation = (imgSrc, codeOverride) => {
+const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, gradient) => {
     const code = codeOverride || prompt("Unesi kod animacije (#1 - #5):");
     if (!code || !imageAnimations[code]) return;
 
-    // Zatvori modal nakon unosa koda
+    if (!userText) {
+        userText = prompt("Unesi tekst koji želiš da prikažeš:");
+    }
+
     const modal = document.getElementById('smileModal');
     if (modal) modal.style.display = 'none';
 
     if (!codeOverride) {
-        // Emit samo ako nije emitovana od servera
-        socket.emit('imageAnimation', { src: imgSrc, code: code });
+        socket.emit('imageAnimation', { 
+            src: imgSrc, 
+            code: code, 
+            nickname: nickname || myNickname, 
+            text: userText, 
+            color: currentColor, 
+            gradient: currentGradient 
+        });
     }
 
-    const chatContainer = document.getElementById('chatContainer'); // zamena za body
+    const chatContainer = document.getElementById('chatContainer');
     const animContainer = document.createElement("div");
     Object.assign(animContainer.style, {
         position: "absolute",
@@ -197,6 +258,7 @@ const triggerImageAnimation = (imgSrc, codeOverride) => {
         transform: "translate(-50%, -50%)",
         pointerEvents: "none",
         zIndex: "9999",
+        textAlign: "center",
     });
 
     const img = document.createElement("img");
@@ -207,14 +269,68 @@ const triggerImageAnimation = (imgSrc, codeOverride) => {
     animContainer.appendChild(img);
     chatContainer.appendChild(animContainer);
 
+    // Nickname na dnu
+    const nameTag = document.createElement("div");
+    nameTag.innerText = nickname || myNickname;
+    Object.assign(nameTag.style, {
+        position: "absolute",
+        bottom: "40px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontWeight: "bold",
+        fontStyle: "italic",
+        fontSize: "24px",
+        zIndex: "10000",
+        pointerEvents: "none",
+    });
+
+    // Text ispod nicka
+    const textTag = document.createElement("div");
+    textTag.innerText = userText;
+    Object.assign(textTag.style, {
+        position: "absolute",
+        bottom: "10px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontWeight: "bold",
+        fontStyle: "italic",
+        fontSize: "20px",
+        zIndex: "10000",
+        pointerEvents: "none",
+    });
+
+    const divId = `guest-${nickname || myNickname}`;
+    const userDiv = document.getElementById(divId);
+
+    if (color) {
+        nameTag.style.color = color;
+        textTag.style.color = color;
+    } else if (gradient || (userDiv && userDiv.classList.contains('use-gradient'))) {
+        const gradientClass = gradient || (userDiv ? Array.from(userDiv.classList).find(c => c.startsWith('gradient-')) : null);
+        if (gradientClass) {
+            const bg = getComputedStyle(document.querySelector(`.${gradientClass}`)).backgroundImage;
+            [nameTag, textTag].forEach(tag => {
+                tag.style.backgroundImage = bg;
+                tag.style.backgroundClip = 'text';
+                tag.style.webkitBackgroundClip = 'text';
+                tag.style.webkitTextFillColor = 'transparent';
+            });
+        }
+    }
+
+    chatContainer.appendChild(nameTag);
+    chatContainer.appendChild(textTag);
+
     imageAnimations[code](img);
 
     setTimeout(() => {
         chatContainer.removeChild(animContainer);
+        chatContainer.removeChild(nameTag);
+        chatContainer.removeChild(textTag);
     }, 9000);
 };
 
-// === Dodavanje desnog klika u postojeći modal ===
+// Desni klik
 document.getElementById('smileContainer').addEventListener('contextmenu', (e) => {
     e.preventDefault();
     const target = e.target.closest('img');
@@ -223,8 +339,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
     }
 });
 
-// === Socket.io event listener ===
+// Socket listener
 socket.on('imageAnimation', (data) => {
-    // Pokreće animaciju koja je emitovana od drugog klijenta
-    triggerImageAnimation(data.src, data.code); 
+    triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient);
 });
