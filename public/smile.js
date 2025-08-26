@@ -227,18 +227,42 @@ const imageAnimations = {
     }
 };
 
-const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, gradient) => {
+// Ograničenja
+let lastAnimTime = 0;
+let animInProgress = false;
+
+// lista ovlašćenih korisnika (dolazi sa servera)
+const authorizedUsers = new Set(['Radio Galaksija', 'ZI ZU', '*__X__*']);
+
+const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, gradient, isRemote = false) => {
+    // === GLOBALNA BLOKADA AKO ANIMACIJA VEĆ TRAJE ===
+    if (animInProgress && !isRemote) {
+        alert("Već je u toku animacija – sačekaj da završi.");
+        return;
+    }
+
+    // === RATE LIMIT 1 animacija / 5 min za neovlašćene ===
+    if (!authorizedUsers.has(nickname || myNickname) && !isRemote) {
+        const now = Date.now();
+        if (now - lastAnimTime < 5 * 60 * 1000) {
+            alert("Možeš poslati samo 1 animaciju na svakih 5 minuta.");
+            return;
+        }
+        lastAnimTime = now;
+    }
+
     const code = codeOverride || prompt("Unesi kod animacije (#1 - #5):");
     if (!code || !imageAnimations[code]) return;
 
-    if (!userText) {
+    // prompt samo ako je lokalni korisnik
+    if (!userText && !isRemote) {
         userText = prompt("Unesi tekst koji želiš da prikažeš:");
     }
 
     const modal = document.getElementById('smileModal');
     if (modal) modal.style.display = 'none';
 
-    if (!codeOverride) {
+    if (!codeOverride && !isRemote) {
         socket.emit('imageAnimation', { 
             src: imgSrc, 
             code: code, 
@@ -248,6 +272,9 @@ const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, 
             gradient: currentGradient 
         });
     }
+
+    // === START animacije ===
+    animInProgress = true;
 
     const chatContainer = document.getElementById('chatContainer');
     const animContainer = document.createElement("div");
@@ -327,6 +354,9 @@ const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, 
         chatContainer.removeChild(animContainer);
         chatContainer.removeChild(nameTag);
         chatContainer.removeChild(textTag);
+
+        // === KRAJ animacije ===
+        animInProgress = false;
     }, 9000);
 };
 
@@ -341,5 +371,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 
 // Socket listener
 socket.on('imageAnimation', (data) => {
-    triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient);
+    triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
+
