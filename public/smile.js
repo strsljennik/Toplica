@@ -231,9 +231,6 @@ const imageAnimations = {
 let lastAnimTime = 0;
 let animInProgress = false;
 
-// lista ovlašćenih korisnika (dolazi sa servera)
-const authorizedUsers = new Set(['Radio Galaksija', 'ZI ZU', '*__X__*']);
-
 const triggerImageAnimation = (imgSrc, codeOverride, nickname, userText, color, gradient, isRemote = false) => {
     // === GLOBALNA BLOKADA AKO ANIMACIJA VEĆ TRAJE ===
     if (animInProgress && !isRemote) {
@@ -373,5 +370,6 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
