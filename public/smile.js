@@ -223,7 +223,7 @@ const imageAnimations = {
         setTimeout(() => {
             clearInterval(flap);
             img.style.transform = "scale(2) rotate(0deg)";
-        }, 5000); // trajanje animacije 5s
+        }, 9000); // trajanje animacije 5s
     }
 };
 
@@ -370,6 +370,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
