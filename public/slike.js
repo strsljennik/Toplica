@@ -43,7 +43,7 @@ function addImageToDOM(imageUrl, position, dimensions) {
         newImage.style.position = "absolute";
         newImage.style.left = position.x + 'px';
         newImage.style.top = position.y + 'px';
-        newImage.style.zIndex = "1000";
+        newImage.style.zIndex = "3";
         newImage.classList.add('draggable', 'resizable');
 
         const authorizedUsers = new Set(['Radio Galaksija', 'ZI ZU', '*__X__*']); 
