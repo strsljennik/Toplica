@@ -88,55 +88,6 @@ button:focus {
     text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff; /* Neon efekat na hover */
 }
 
- /* Osnovni stil za desktop */
-body {
-    font-size: 16px;
-   background-color: black;
-    margin: 0;
-    padding: 0;
-}
-
-h1 {
-    font-size: 2em;
-}
-
-.container {
-    width: 80%;
-    margin: 0 auto;
-}
-
-    /* Stil za ekrane sa širinom manjom od 768px (tablet i mobilni uređaji) */
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-        background-color: #e0e0e0;
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-
-    .container {
-        width: 95%;
-    }
-}
-
-/* Stil za ekrane sa širinom manjom od 480px (mobilni uređaji) */
-@media (max-width: 480px) {
-    body {
-        font-size: 12px;
-        background-color: #ccc;
-    }
-
-    h1 {
-        font-size: 1.2em;
-    }
-
-    .container {
-        width: 100%;
-    }
-}
-
 /* Stil za modal sa id 'gostimodal' */
 #gostimodal {
     display: none;
@@ -255,4 +206,5 @@ iframe {
   opacity: 1 !important;               /* bez providnosti */
   filter: none !important;             /* ukloni filtere */
 }
+
 
