@@ -50,22 +50,39 @@ window.onload = function () {
         tabela.appendChild(red);
     }
 
-    function setupStream(buttonId, streamUrl, displayText, originalText) {
-        const btn = document.getElementById(buttonId);
-        const player = new Audio(streamUrl);
+ function setupStream(buttonId, streamUrl, displayText, originalText) {
+    const btn = document.getElementById(buttonId);
+    const player = new Audio();
+    let isPlaying = false;
 
-        btn.addEventListener("click", () => {
-            if (player.paused) {
-                player.play();
-                btn.textContent = displayText;
-            } else {
-                player.pause();
-                btn.textContent = originalText;
-            }
-        });
+    function playStream() {
+        player.src = streamUrl;
+        player.load();
+        player.play().then(() => {
+            btn.textContent = displayText;
+            isPlaying = true;
+        }).catch(err => console.error("Greška pri puštanju:", err));
     }
 
-    setupStream("mia", "https://stm1.srvif.com:7258/stream", "Stop", "R-Mia");
-    setupStream("pink", "https://edge9.pink.rs/pinkstream", "Stop", "Pinkradio");
-    setupStream("rs", "https://stream.radios.rs:9016/;*.mp3", "Stop", "RadioSr");
-};
+    btn.addEventListener("click", () => {
+        btn.blur();
+        if (isPlaying) {
+            player.pause();
+            btn.textContent = originalText;
+            isPlaying = false;
+        } else {
+            playStream();
+        }
+    });
+
+    // automatski retry ako pukne stream
+    player.addEventListener("error", () => {
+        if (isPlaying) {
+            setTimeout(playStream, 3000);
+        }
+    });
+}
+
+setupStream("mia", "https://stm1.srvif.com:7258/stream", "Stop", "R-Mia");
+setupStream("pink", "https://edge9.pink.rs/pinkstream", "Stop", "Pinkradio");
+setupStream("rs", "https://stream.radios.rs:9016/;*.mp3", "Stop", "RadioSr");
