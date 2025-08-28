@@ -14,7 +14,7 @@ window.onload = function () {
         height: 600px;
         background: black;
         border: 2px solid;
-        border-image: linear-gradient(to right, green, blue, yellow, red) 1;
+        border-image: linear-gradient(to right, #ffffff, #ffff66, #66ccff) 1;
         padding: 10px;
         overflow-y: auto;
         display: none;
@@ -26,7 +26,7 @@ window.onload = function () {
             margin-bottom: 5px;
             padding-bottom: 5px;
             border-bottom: 1px solid;
-            border-image: linear-gradient(to right, green, blue, yellow, red) 1;
+            border-image: linear-gradient(to right, #ffffff, #ffff66, #66ccff) 1;
         `;
 
         const input = document.createElement('input');
@@ -38,9 +38,10 @@ window.onload = function () {
             color: transparent;
             font-weight: bold;
             font-style: italic;
+            background-image: linear-gradient(to right, #ffffff, #ffff66, #66ccff);
             background-clip: text;
             -webkit-background-clip: text;
-            background-image: linear-gradient(to right, green, blue, yellow, red);
+            -webkit-text-fill-color: transparent;
             border: none;
             outline: none;
         `;
@@ -49,18 +50,22 @@ window.onload = function () {
         tabela.appendChild(red);
     }
 
-    // --- STREAM DEO ---MIA-DORARADIO
-    const dugmeMia = document.getElementById("mia"); // drugačije ime
-    const playerMia = new Audio("https://stm1.srvif.com:7258/stream");
-    playerMia.id = "playermia";
+    function setupStream(buttonId, streamUrl, displayText, originalText) {
+        const btn = document.getElementById(buttonId);
+        const player = new Audio(streamUrl);
 
-    dugmeMia.addEventListener("click", () => {
-        if (playerMia.paused) {
-            playerMia.play();
-            dugmeMia.textContent = "Stop";
-        } else {
-            playerMia.pause();
-            dugmeMia.textContent = "R-Mia";
-        }
-    });
+        btn.addEventListener("click", () => {
+            if (player.paused) {
+                player.play();
+                btn.textContent = displayText;
+            } else {
+                player.pause();
+                btn.textContent = originalText;
+            }
+        });
+    }
+
+    setupStream("mia", "https://stm1.srvif.com:7258/stream", "Stop", "R-Mia");
+    setupStream("pink", "https://edge9.pink.rs/pinkstream", "Stop", "Pinkradio");
+    setupStream("rs", "https://stream.radios.rs:9016/;*.mp3", "Stop", "RadioSr");
 };
