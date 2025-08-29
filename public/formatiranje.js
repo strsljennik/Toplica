@@ -19,7 +19,7 @@ const virtualGuests = [
 
 let isBold = false;
 let isItalic = false;
-let currentColor = 'rgba(200, 200, 200, 0.5)';
+let currentColor = "#87CEFA"; // svetloplava
 let isUnderline = false;
 let isOverline = false;
 const guestsData = {};
@@ -391,3 +391,4 @@ socket.on('allGradients', (gradients) => {
         }
     }
 });
+
