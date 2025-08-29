@@ -237,11 +237,7 @@ function showCustomModal(message, options = {}, callback = null) {
     const overlay = document.createElement("div");
     Object.assign(overlay.style, {
         position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        background: "rgba(0,0,0,0.85)",
+         background: "rgba(0,0,0,0.85)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -256,7 +252,6 @@ function showCustomModal(message, options = {}, callback = null) {
         border: "2px solid #0ff",
         boxShadow: "0 0 15px #0ff",
         textAlign: "center",
-        minWidth: "320px",
         color: "#fff",
         fontFamily: "monospace",
     });
@@ -271,7 +266,6 @@ function showCustomModal(message, options = {}, callback = null) {
         input = document.createElement("input");
         input.type = "text";
         Object.assign(input.style, {
-            width: "100%",
             padding: "8px",
             background: "black",
             color: "#0ff",
@@ -462,3 +456,4 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
