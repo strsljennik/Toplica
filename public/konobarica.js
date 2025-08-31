@@ -83,31 +83,62 @@ function decreaseFontSize() {
     iframe.style.display = visible ? 'none' : 'block';
     retryBtn.style.display = visible ? 'none' : 'inline-block';
   });
-
-// SLIKE ZA POZADINU 
+//SLIKE ZA POZADINU
 document.getElementById("pozadina").addEventListener("click", function() {
-    var url = prompt("Unesite URL slike:");
-    if (url) {
-        document.body.style.backgroundImage = "url('" + url + "')";
-        socket.emit("changeBackground", url); // Ovo šalje serveru
-    } else {
-        document.body.style.backgroundImage = "url('default_image_url.jpg')";
-        socket.emit("changeBackground", "default_image_url.jpg");
+    // Proveri da li vec postoji prompt
+    if (document.getElementById("backprompt")) return;
 
+    let wrapper = document.createElement("div");
+    wrapper.id = "backprompt";
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "10px";
+    wrapper.style.left = "300px";
+    wrapper.style.background = "black";
+    wrapper.style.padding = "10px";
+    wrapper.style.borderRadius = "8px";
+
+    let input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Unesi URL Pozadine";
+    input.style.padding = "5px";
+    input.style.marginRight = "10px";
+
+    let okBtn = document.createElement("button");
+    okBtn.textContent = "OK";
+    okBtn.style.background = "white";
+    okBtn.style.color = "black";
+    okBtn.style.fontWeight = "bold";
+    okBtn.style.padding = "5px 10px";
+    okBtn.style.border = "none";
+    okBtn.style.cursor = "pointer";
+    okBtn.style.boxShadow = "0 0 10px white, 0 0 20px white"; // neon efekat
+    okBtn.style.borderRadius = "4px";
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(okBtn);
+    document.body.appendChild(wrapper);
+
+    function applyBackground() {
+        let url = input.value.trim();
+        if (url) {
+            document.body.style.backgroundImage = "url('" + url + "')";
+            socket.emit("changeBackground", url);
+        } else {
+            document.body.style.backgroundImage = "url('default_image_url.jpg')";
+            socket.emit("changeBackground", "default_image_url.jpg");
+        }
+        wrapper.remove();
     }
+
+    okBtn.addEventListener("click", applyBackground);
+
+    input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            applyBackground();
+        }
+    });
 });
 
 socket.on("updateBackground", (url) => {
     document.body.style.backgroundImage = "url('" + url + "')";
-});
-
-socket.on('userCount', (online) => {
-  const total = window.totalUsers || 0;
-  document.getElementById('kon').textContent = `online - ${online} / Ukupno - ${total}`;
-});
-
-socket.on('totalUsers', (total) => {
-  window.totalUsers = total;
-  const online = io.engine.clientsCount || 0;
-  document.getElementById('kon').textContent = `online - ${online} / Ukupno - ${total}`;
 });
