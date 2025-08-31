@@ -1,16 +1,57 @@
 document.getElementById('addImage').addEventListener('click', function () {
-    const imageSource = prompt("Unesite URL slike:");
+    // Proveri da li vec postoji prompt
+    if (document.getElementById("imgprompt")) return;
 
-    if (imageSource) {
-        const position = { x: 100, y: 300 };
-        const dimensions = { width: 200, height: 200 };
+    let wrapper = document.createElement("div");
+    wrapper.id = "imgprompt";
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "30px";   // malo niže od background prompta
+    wrapper.style.left = "600px";
+    wrapper.style.background = "black";
+    wrapper.style.padding = "10px";
+    wrapper.style.borderRadius = "8px";
 
-        socket.emit('add-image', imageSource, position, dimensions);
-    } else {
-        alert('URL slike nije unet.');
+    let input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Unesi URL Slike";
+    input.style.padding = "5px";
+    input.style.marginRight = "10px";
+
+    let okBtn = document.createElement("button");
+    okBtn.textContent = "OK";
+    okBtn.style.background = "white";
+    okBtn.style.color = "black";
+    okBtn.style.fontWeight = "bold";
+    okBtn.style.padding = "5px 10px";
+    okBtn.style.border = "none";
+    okBtn.style.cursor = "pointer";
+    okBtn.style.boxShadow = "0 0 10px white, 0 0 20px white"; // neon efekat
+    okBtn.style.borderRadius = "4px";
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(okBtn);
+    document.body.appendChild(wrapper);
+
+    function applyImage() {
+        const imageSource = input.value.trim();
+        if (imageSource) {
+            const position = { x: 100, y: 300 };
+            const dimensions = { width: 200, height: 200 };
+            socket.emit('add-image', imageSource, position, dimensions);
+        } else {
+            alert('URL slike nije unet.');
+        }
+        wrapper.remove(); // zatvori prompt
     }
-});
 
+    okBtn.addEventListener("click", applyImage);
+
+    input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            applyImage();
+        }
+    });
+});
 socket.on('display-image', (data) => {
     addImageToDOM(data.imageUrl, data.position, data.dimensions);
 });
