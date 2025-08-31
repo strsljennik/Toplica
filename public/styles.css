@@ -185,7 +185,7 @@ body {
   }
 
 .guest::before, .virtual-guest::before {
-    content: "❤"; 
+    content: "🔳"; 
     margin-right: 10px;
     font-size: 15px;
 }
@@ -454,5 +454,6 @@ body {
       z-index: 999;
       display: none;
     }
+
 
 
