@@ -187,7 +187,7 @@ body {
 .guest::before, .virtual-guest::before {
     content: "☕"; 
     margin-right: 10px;
-    font-size: 15px;
+    font-size: 25px;
 }
 
 .guest.selected-overlay {
@@ -454,6 +454,7 @@ body {
       z-index: 999;
       display: none;
     }
+
 
 
 
