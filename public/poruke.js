@@ -41,19 +41,31 @@ document.addEventListener('mouseup', function () {
 document.getElementById('clearChat').addEventListener('click', function() {
     const chatWindow = document.getElementById('messageArea');
     chatWindow.innerHTML = ""; // Briše sve unutar chata
-    console.log("Chat je obrisan.");
 
     // Emituj događaj serveru za brisanje chata
     socket.emit('clear-chat'); 
 });
-
-// Slušanje na 'chat-cleared' događaj
 socket.on('chat-cleared', function() {
-    console.log('Chat je obrisan sa servera.');
     const chatWindow = document.getElementById('messageArea');
     chatWindow.innerHTML = ""; // Briše sve unutar chata
-});
 
+    const newMessage = document.createElement('div');
+    newMessage.classList.add('message');
+
+    // Stil za gradijent + bold, italic, underline
+    newMessage.style.fontWeight = 'bold';
+    newMessage.style.fontStyle = 'italic';
+    newMessage.style.textDecoration = 'underline';
+    newMessage.style.backgroundClip = 'text';
+    newMessage.style.webkitBackgroundClip = 'text';
+    newMessage.style.webkitTextFillColor = 'transparent';
+    newMessage.style.backgroundImage = 'linear-gradient(90deg, white,  yellow, red, green, purple)';
+
+    // Sadržaj poruke
+    newMessage.innerHTML = `<strong>Radio Galaksija:</strong> Chat je obrisan <span style="font-size: 0.8em; color: gray;">(${new Date().toLocaleTimeString()})</span>`;
+
+    chatWindow.prepend(newMessage);
+});
 // ZENO PLAYER NA DUGME
 document.addEventListener("DOMContentLoaded", function() {
     var audio = document.getElementById('radioStream');
