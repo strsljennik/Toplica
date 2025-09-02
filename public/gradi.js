@@ -155,37 +155,25 @@ function primeniBoju(id, boja) {
   const targetIds = paket.includes(id) ? paket : [id];
   targetIds.forEach(eid => {
     const el = document.getElementById(eid);
-    if (!el) return;
+    if (el) {
+      // Border
+      if (boja.includes("gradient")) {
+        el.style.borderImage = boja;
+        el.style.borderImageSlice = 1;
+        el.style.borderColor = "";
+      } else {
+        el.style.borderImage = "";
+        el.style.borderColor = boja;
+      }
 
-    el.style.fontWeight = "bold";
-    el.style.fontStyle = "italic";
-
-    // Tekst
-    if (boja.includes("gradient")) {
-      el.style.backgroundImage = boja;
-      el.style.webkitBackgroundClip = "text";
-      el.style.webkitTextFillColor = "transparent";
-      el.style.color = "";
-      el.style.textShadow = "";
-    } else {
-      el.style.backgroundImage = "";
+      // Tekst i neon efekat
       el.style.color = boja;
-      el.style.webkitBackgroundClip = "";
-      el.style.webkitTextFillColor = "";
-      el.style.textShadow = "";
+      el.style.fontWeight = "bold";
+      el.style.fontStyle = "italic";
+      el.style.textShadow = `0 0 1px ${boja}, 0 0 2px ${boja}`;
     }
 
-    // Border
-    if (boja.includes("gradient")) {
-      el.style.borderImage = boja;
-      el.style.borderImageSlice = 1;
-      el.style.borderColor = "";
-    } else {
-      el.style.borderImage = "";
-      el.style.borderColor = boja;
-    }
-
-    // Guest list scrollbar
+    // Scrollbar za guestList
     if (eid === "guestList") {
       document.querySelectorAll('.guest, .virtual-guest').forEach(gost => {
         gost.style.borderBottom = boja.includes("gradient")
@@ -212,62 +200,36 @@ function primeniBoju(id, boja) {
   });
 }
 
+// Socket update
 socket.on("promeniGradijent", (data) => {
   setTimeout(() => {
     const el = document.getElementById(data.id);
-    if (!el) return;
-
-    if (data.gradijent.includes("gradient")) {
-      el.style.borderImage = data.gradijent;
-      el.style.borderImageSlice = 1;
-      el.style.borderColor = "";
-      el.style.backgroundImage = data.gradijent;
-      el.style.webkitBackgroundClip = "text";
-      el.style.webkitTextFillColor = "transparent";
-      el.style.color = "";
-      el.style.textShadow = "";
-    } else {
-      el.style.borderImage = "";
-      el.style.borderColor = data.gradijent;
-      el.style.backgroundImage = "";
-      el.style.color = data.gradijent;
-      el.style.webkitBackgroundClip = "";
-      el.style.webkitTextFillColor = "";
-      el.style.textShadow = "";
+    if (el) {
+      if (data.gradijent.includes("gradient")) {
+        el.style.borderImage = data.gradijent;
+        el.style.borderImageSlice = 1;
+        el.style.borderColor = "";
+      } else {
+        el.style.borderImage = "";
+        el.style.borderColor = data.gradijent;
+      }
     }
-
-    el.style.fontWeight = "bold";
-    el.style.fontStyle = "italic";
   }, 5000);
 });
 
 socket.on("pocetnoStanje", (stanje) => {
   for (const id in stanje) {
     const el = document.getElementById(id);
-    if (!el) continue;
-
-    if (stanje[id].gradijent.includes("gradient")) {
-      el.style.borderImage = stanje[id].gradijent;
-      el.style.borderImageSlice = 1;
-      el.style.borderColor = "";
-      el.style.backgroundImage = stanje[id].gradijent;
-      el.style.webkitBackgroundClip = "text";
-      el.style.webkitTextFillColor = "transparent";
-      el.style.color = "";
-      el.style.textShadow = "";
-    } else {
-      el.style.borderImage = "";
-      el.style.borderColor = stanje[id].gradijent;
-      el.style.backgroundImage = "";
-      el.style.color = stanje[id].gradijent;
-      el.style.webkitBackgroundClip = "";
-      el.style.webkitTextFillColor = "";
-      el.style.textShadow = "";
+    if (el) {
+      if (stanje[id].gradijent.includes("gradient")) {
+        el.style.borderImage = stanje[id].gradijent;
+        el.style.borderImageSlice = 1;
+        el.style.borderColor = "";
+      } else {
+        el.style.borderImage = "";
+        el.style.borderColor = stanje[id].gradijent;
+      }
     }
-
-    el.style.fontWeight = "bold";
-    el.style.fontStyle = "italic";
   }
 });
 });
-
