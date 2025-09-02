@@ -95,6 +95,8 @@ body {
     cursor: pointer;
     font-size: 18px;
     border-radius: 5px;
+    font-weight: bold;   /* za bold */
+    font-style: italic;  /* za italic */
     transition: background-color 0.3s;
  }
 #messageArea {
@@ -454,6 +456,7 @@ body {
       z-index: 999;
       display: none;
     }
+
 
 
 
