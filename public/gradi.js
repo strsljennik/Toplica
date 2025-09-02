@@ -151,78 +151,123 @@ const paket = ["openModal", "smilesBtn", "GBtn", "sound", "boldBtn", "italicBtn"
     btn.addEventListener("click", () => prikaziPocetnuListu());
     return btn;
   }
-
 function primeniBoju(id, boja) {
   const targetIds = paket.includes(id) ? paket : [id];
   targetIds.forEach(eid => {
     const el = document.getElementById(eid);
-    if (el) {
-      if (boja.includes("gradient")) {
-        el.style.borderImage = boja;
-        el.style.borderImageSlice = 1;
-        el.style.borderColor = "";
-      } else {
-        el.style.borderImage = "";
-        el.style.borderColor = boja;
-      }
+    if (!el) return;
 
-      if (eid === "guestList") {
-        // Promena border-bottom za goste
-        document.querySelectorAll('.guest, .virtual-guest').forEach(gost => {
-          gost.style.borderBottom = boja.includes("gradient")
-            ? "1px solid transparent"
-            : `1px solid ${boja}`;
-        });
+    el.style.fontWeight = "bold";
+    el.style.fontStyle = "italic";
 
-        // Scrollbar stil
-        const styleId = 'guestList-scrollbar-style';
-        let styleTag = document.getElementById(styleId);
-        if (!styleTag) {
-          styleTag = document.createElement('style');
-          styleTag.id = styleId;
-          document.head.appendChild(styleTag);
-        }
-        styleTag.textContent = `
-          #guestList::-webkit-scrollbar-thumb {
-            background: ${boja};
-            border-radius: 5px;
-          }
-        `;
-      }
+    // Tekst
+    if (boja.includes("gradient")) {
+      el.style.backgroundImage = boja;
+      el.style.webkitBackgroundClip = "text";
+      el.style.webkitTextFillColor = "transparent";
+      el.style.color = "";
+      el.style.textShadow = "";
+    } else {
+      el.style.backgroundImage = "";
+      el.style.color = boja;
+      el.style.webkitBackgroundClip = "";
+      el.style.webkitTextFillColor = "";
+      el.style.textShadow = "";
     }
+
+    // Border
+    if (boja.includes("gradient")) {
+      el.style.borderImage = boja;
+      el.style.borderImageSlice = 1;
+      el.style.borderColor = "";
+    } else {
+      el.style.borderImage = "";
+      el.style.borderColor = boja;
+    }
+
+    // Guest list scrollbar
+    if (eid === "guestList") {
+      document.querySelectorAll('.guest, .virtual-guest').forEach(gost => {
+        gost.style.borderBottom = boja.includes("gradient")
+          ? "1px solid transparent"
+          : `1px solid ${boja}`;
+      });
+
+      const styleId = 'guestList-scrollbar-style';
+      let styleTag = document.getElementById(styleId);
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        document.head.appendChild(styleTag);
+      }
+      styleTag.textContent = `
+        #guestList::-webkit-scrollbar-thumb {
+          background: ${boja};
+          border-radius: 5px;
+        }
+      `;
+    }
+
     socket.emit("promeniGradijent", { id: eid, type: "border", gradijent: boja });
   });
 }
 
-  socket.on("promeniGradijent", (data) => {
-    setTimeout(() => {
-      const el = document.getElementById(data.id);
-      if (el) {
-        if (data.gradijent.includes("gradient")) {
-          el.style.borderImage = data.gradijent;
-          el.style.borderImageSlice = 1;
-          el.style.borderColor = "";
-        } else {
-          el.style.borderImage = "";
-          el.style.borderColor = data.gradijent;
-        }
-      }
-    }, 5000);  // 5 sekundi čekanja
-  });
+socket.on("promeniGradijent", (data) => {
+  setTimeout(() => {
+    const el = document.getElementById(data.id);
+    if (!el) return;
 
-  socket.on("pocetnoStanje", (stanje) => {
-    for (const id in stanje) {
-      const el = document.getElementById(id);
-      if (el) {
-        if (stanje[id].gradijent.includes("gradient")) {
-          el.style.borderImage = stanje[id].gradijent;
-          el.style.borderImageSlice = 1;
-          el.style.borderColor = "";
-        } else {
-          el.style.borderImage = "";
-          el.style.borderColor = stanje[id].gradijent;
-        }
-      }
+    if (data.gradijent.includes("gradient")) {
+      el.style.borderImage = data.gradijent;
+      el.style.borderImageSlice = 1;
+      el.style.borderColor = "";
+      el.style.backgroundImage = data.gradijent;
+      el.style.webkitBackgroundClip = "text";
+      el.style.webkitTextFillColor = "transparent";
+      el.style.color = "";
+      el.style.textShadow = "";
+    } else {
+      el.style.borderImage = "";
+      el.style.borderColor = data.gradijent;
+      el.style.backgroundImage = "";
+      el.style.color = data.gradijent;
+      el.style.webkitBackgroundClip = "";
+      el.style.webkitTextFillColor = "";
+      el.style.textShadow = "";
     }
-  });
+
+    el.style.fontWeight = "bold";
+    el.style.fontStyle = "italic";
+  }, 5000);
 });
+
+socket.on("pocetnoStanje", (stanje) => {
+  for (const id in stanje) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+
+    if (stanje[id].gradijent.includes("gradient")) {
+      el.style.borderImage = stanje[id].gradijent;
+      el.style.borderImageSlice = 1;
+      el.style.borderColor = "";
+      el.style.backgroundImage = stanje[id].gradijent;
+      el.style.webkitBackgroundClip = "text";
+      el.style.webkitTextFillColor = "transparent";
+      el.style.color = "";
+      el.style.textShadow = "";
+    } else {
+      el.style.borderImage = "";
+      el.style.borderColor = stanje[id].gradijent;
+      el.style.backgroundImage = "";
+      el.style.color = stanje[id].gradijent;
+      el.style.webkitBackgroundClip = "";
+      el.style.webkitTextFillColor = "";
+      el.style.textShadow = "";
+    }
+
+    el.style.fontWeight = "bold";
+    el.style.fontStyle = "italic";
+  }
+});
+});
+
