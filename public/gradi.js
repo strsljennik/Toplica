@@ -5,9 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
   gradijentTabla.style.display = "none";
   document.body.appendChild(gradijentTabla);
 
-const elementi = ["chatContainer", "toolbar", "chatInput", "guestList", "openModal", "smilesBtn", "GBtn", "sound", "boldBtn", "italicBtn", "plusBtn", "minusBtn", "linijadoleBtn", "colorBtn", "NIK"];
-const paket = ["openModal", "smilesBtn", "GBtn", "sound", "boldBtn", "italicBtn", "plusBtn", "minusBtn", "linijadoleBtn", "colorBtn", "NIK"];
-
+ const elementi = [
+  "chatContainer", "toolbar", "chatInput", "guestList", "openModal", "smilesBtn", "GBtn", "tube", "sound",
+];
+const paket = ["openModal", "smilesBtn", "GBtn", "tube", "sound"];
 
   const neonBoje = [
     "red", "yellow", "lime", "white", "blue", "gray", "pink", "purple",
@@ -151,12 +152,12 @@ const paket = ["openModal", "smilesBtn", "GBtn", "sound", "boldBtn", "italicBtn"
     btn.addEventListener("click", () => prikaziPocetnuListu());
     return btn;
   }
+
 function primeniBoju(id, boja) {
   const targetIds = paket.includes(id) ? paket : [id];
   targetIds.forEach(eid => {
     const el = document.getElementById(eid);
     if (el) {
-      // Border
       if (boja.includes("gradient")) {
         el.style.borderImage = boja;
         el.style.borderImageSlice = 1;
@@ -166,70 +167,63 @@ function primeniBoju(id, boja) {
         el.style.borderColor = boja;
       }
 
-      // Tekst i neon efekat
-      el.style.color = boja;
-      el.style.fontWeight = "bold";
-      el.style.fontStyle = "italic";
-      el.style.textShadow = `0 0 1px ${boja}, 0 0 2px ${boja}`;
-    }
+      if (eid === "guestList") {
+        // Promena border-bottom za goste
+        document.querySelectorAll('.guest, .virtual-guest').forEach(gost => {
+          gost.style.borderBottom = boja.includes("gradient")
+            ? "1px solid transparent"
+            : `1px solid ${boja}`;
+        });
 
-    // Scrollbar za guestList
-    if (eid === "guestList") {
-      document.querySelectorAll('.guest, .virtual-guest').forEach(gost => {
-        gost.style.borderBottom = boja.includes("gradient")
-          ? "1px solid transparent"
-          : `1px solid ${boja}`;
-      });
-
-      const styleId = 'guestList-scrollbar-style';
-      let styleTag = document.getElementById(styleId);
-      if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = styleId;
-        document.head.appendChild(styleTag);
-      }
-      styleTag.textContent = `
-        #guestList::-webkit-scrollbar-thumb {
-          background: ${boja};
-          border-radius: 5px;
+        // Scrollbar stil
+        const styleId = 'guestList-scrollbar-style';
+        let styleTag = document.getElementById(styleId);
+        if (!styleTag) {
+          styleTag = document.createElement('style');
+          styleTag.id = styleId;
+          document.head.appendChild(styleTag);
         }
-      `;
+        styleTag.textContent = `
+          #guestList::-webkit-scrollbar-thumb {
+            background: ${boja};
+            border-radius: 5px;
+          }
+        `;
+      }
     }
-
     socket.emit("promeniGradijent", { id: eid, type: "border", gradijent: boja });
   });
 }
 
-// Socket update
-socket.on("promeniGradijent", (data) => {
-  setTimeout(() => {
-    const el = document.getElementById(data.id);
-    if (el) {
-      if (data.gradijent.includes("gradient")) {
-        el.style.borderImage = data.gradijent;
-        el.style.borderImageSlice = 1;
-        el.style.borderColor = "";
-      } else {
-        el.style.borderImage = "";
-        el.style.borderColor = data.gradijent;
+  socket.on("promeniGradijent", (data) => {
+    setTimeout(() => {
+      const el = document.getElementById(data.id);
+      if (el) {
+        if (data.gradijent.includes("gradient")) {
+          el.style.borderImage = data.gradijent;
+          el.style.borderImageSlice = 1;
+          el.style.borderColor = "";
+        } else {
+          el.style.borderImage = "";
+          el.style.borderColor = data.gradijent;
+        }
       }
-    }
-  }, 5000);
-});
+    }, 5000);  // 5 sekundi čekanja
+  });
 
-socket.on("pocetnoStanje", (stanje) => {
-  for (const id in stanje) {
-    const el = document.getElementById(id);
-    if (el) {
-      if (stanje[id].gradijent.includes("gradient")) {
-        el.style.borderImage = stanje[id].gradijent;
-        el.style.borderImageSlice = 1;
-        el.style.borderColor = "";
-      } else {
-        el.style.borderImage = "";
-        el.style.borderColor = stanje[id].gradijent;
+  socket.on("pocetnoStanje", (stanje) => {
+    for (const id in stanje) {
+      const el = document.getElementById(id);
+      if (el) {
+        if (stanje[id].gradijent.includes("gradient")) {
+          el.style.borderImage = stanje[id].gradijent;
+          el.style.borderImageSlice = 1;
+          el.style.borderColor = "";
+        } else {
+          el.style.borderImage = "";
+          el.style.borderColor = stanje[id].gradijent;
+        }
       }
     }
-  }
-});
+  });
 });
