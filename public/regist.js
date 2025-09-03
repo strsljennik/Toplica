@@ -128,6 +128,10 @@ socket.on('userLoggedIn', (data) => {
     window.currentUser = { username: data.username };
     console.log("Prijavljeni korisnik:", currentUser);
 
+    // Ukloni ceo authContainer
+    const authContainer = document.getElementById('authContainer');
+    if (authContainer) authContainer.remove();
+
     if (data.role === 'admin') enableAdminFeatures();
     else enableGuestFeatures();
 });
@@ -148,3 +152,4 @@ function enableAdminFeatures() {
 function enableGuestFeatures() {
     console.log("Gost funkcionalnosti omogućene!");
 }
+
