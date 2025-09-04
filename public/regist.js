@@ -48,7 +48,6 @@ function showPrompt(msg, opts = {}) {
     const host = promptHost();
     host.appendChild(box);
 
-    // Animate in
     requestAnimationFrame(() => {
         box.style.opacity = '1';
         box.style.transform = 'translateY(0)';
@@ -63,6 +62,22 @@ function showPrompt(msg, opts = {}) {
     }
 
     setTimeout(remove, duration);
+}
+
+// ===== Funkcija za prikaz auth diva =====
+function showAuthContainer() {
+    const authContainer = document.getElementById('authContainer');
+    if (authContainer) {
+        authContainer.style.display = 'block';
+    }
+}
+
+// ===== Funkcija za sakrivanje auth diva =====
+function hideAuthContainer() {
+    const authContainer = document.getElementById('authContainer');
+    if (authContainer) {
+        authContainer.style.display = 'none';
+    }
 }
 
 // ===== Registracija korisnika =====
@@ -111,6 +126,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
             showPrompt('Prijava uspešna');
             socket.emit('userLoggedIn', username);
             this.reset();
+            hideAuthContainer(); // sakrij div, ne uklanjaj ga
         } else {
             showPrompt('Nevažeći podaci za prijavu');
         }
@@ -128,9 +144,8 @@ socket.on('userLoggedIn', (data) => {
     window.currentUser = { username: data.username };
     console.log("Prijavljeni korisnik:", currentUser);
 
-    // Ukloni ceo authContainer
-    const authContainer = document.getElementById('authContainer');
-    if (authContainer) authContainer.remove();
+    // Sakrij authContainer, ne uklanjaj ga
+    hideAuthContainer();
 
     if (data.role === 'admin') enableAdminFeatures();
     else enableGuestFeatures();
@@ -152,4 +167,3 @@ function enableAdminFeatures() {
 function enableGuestFeatures() {
     console.log("Gost funkcionalnosti omogućene!");
 }
-
