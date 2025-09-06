@@ -75,14 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   createFontPicker();
 });
-// BLOKIRANJE DESNOG KLIKA NA BODY osim za chatContainer
+// BLOKIRANJE DESNOG KLIKA NA BODY osim za chatContainer i osim za AUTH korisnike
 document.body.addEventListener('contextmenu', function(e) {
     const chatContainer = document.getElementById('chatContainer');
-    if (!chatContainer.contains(e.target)) {
+    if (!authorizedUsers.has(currentUser) && !chatContainer.contains(e.target)) {
         e.preventDefault();
     }
 });
-
 // BLOKIRANJE desnog klika i kopiranja samo u messageArea
 const messageArea = document.getElementById('messageArea');
 messageArea.oncontextmenu = e => false;
