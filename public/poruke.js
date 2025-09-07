@@ -1,4 +1,4 @@
-const authorizedUsers = new Set(['Radio Galaksija', 'ZI ZU', '*__X__*']);
+const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*']);
 
 const functionModal = document.getElementById('functionModal');
 let isDraggingFunc = false;
