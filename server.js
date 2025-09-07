@@ -51,7 +51,7 @@ app.get('/metrics', (req, res) => {
 });
 
 // Lista autorizovanih i banovanih korisnika
-const authorizedUsers = new Set(['Radio Galaksija', 'ZI ZU', '*__X__*']);
+const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*__X__*']);
 const bannedUsers = new Set();
 
 // Skladištenje informacija o gostima
@@ -223,4 +223,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
+
 
