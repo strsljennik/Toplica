@@ -1,7 +1,13 @@
 const bcrypt = require('bcrypt');
-const { User } = require('./mongo');  // Preporučujem da koristiš User model direktno
+const { User } = require('./mongo');
 
-// Funkcija za registraciju
+const activeUsers = {}; 
+// primer: { "Radio Galaksija": 2, "R-Galaksija": 1 }
+
+let galaksijaLocked = null; 
+// "Radio Galaksija" ili "R-Galaksija" ili null
+
+// Registracija
 async function register(req, res, io) {
     const { username, password } = req.body;
 
@@ -9,7 +15,7 @@ async function register(req, res, io) {
         return res.status(400).send('Username and password are required.');
     }
 
-    const role = username === 'Radio Galaksija' ? 'admin' : 'guest';
+    const role = (username === 'Radio Galaksija' || username === 'R-Galaksija') ? 'admin' : 'guest';
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword, role });
 
@@ -22,10 +28,10 @@ async function register(req, res, io) {
     }
 }
 
-// Funkcija za prijavu
+// Login
 async function login(req, res, io) {
     const { username, password } = req.body;
-    const socketId = req.headers['x-socket-id']; // Socket ID primljen od klijenta u zaglavlju
+    const socketId = req.headers['x-socket-id'];
 
     if (!username || !password) {
         return res.status(400).send('Username and password are required.');
@@ -34,12 +40,35 @@ async function login(req, res, io) {
     try {
         const user = await User.findOne({ username });
         if (user && await bcrypt.compare(password, user.password)) {
-            const role = user.role;
-            const socket = io.sockets.sockets.get(socketId);  // Pronalaženje socket-a po ID-u
+            
+            // Ako je Galaksija nalog
+            if (username === 'Radio Galaksija' || username === 'R-Galaksija') {
+                if (galaksijaLocked && galaksijaLocked !== username) {
+                    return res.status(403).send('Drugi Galaksija nalog je već ulogovan.');
+                }
+                galaksijaLocked = username;
+            }
 
-            // Emitovanje prijavljenom korisniku sa njegovim role podacima
+            // Uvećaj broj aktivnih sesija za tog usera
+            activeUsers[username] = (activeUsers[username] || 0) + 1;
+
+            const role = user.role;
+            const socket = io.sockets.sockets.get(socketId);
             if (socket) {
                 socket.emit('userLoggedIn', { username, role });
+
+                // Kad socket pukne ili se korisnik prebaci
+                socket.on("disconnect", () => {
+                    if (activeUsers[username]) {
+                        activeUsers[username]--;
+                        if (activeUsers[username] <= 0) {
+                            delete activeUsers[username];
+                            if (galaksijaLocked === username) {
+                                galaksijaLocked = null; // oslobodi mesto
+                            }
+                        }
+                    }
+                });
             }
 
             res.send(role === 'admin' ? 'Logged in as admin' : 'Logged in as guest');
