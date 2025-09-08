@@ -198,55 +198,53 @@ socket.on('updateGuestList', function (users) {
             }
         }
     });
-// Reorder: "Radio Galaksija" ili "R-Galaksija" na vrhu
-if (users.includes("Radio Galaksija") || users.includes("R-Galaksija")) {
-    const glavnaGalaksija = users.includes("Radio Galaksija") ? "Radio Galaksija" : "R-Galaksija";
+   // Reorder: "Radio Galaksija" na vrhu
+    if (users.includes("Radio Galaksija")) {
+        users = ["Radio Galaksija", ...users.filter(n => n !== "Radio Galaksija")];
 
-    users = [glavnaGalaksija, ...users.filter(n => n !== glavnaGalaksija)];
-
-    // Ulogovani korisnik na drugo mesto ako nije glavna Galaksija
-    if (myNickname !== glavnaGalaksija) {
-        users = users.filter(n => n !== myNickname);
-        users.splice(1, 0, myNickname);
-    }
-} else {
-    // Ako nema ni jedne Galaksije, korisnik ide na prvo mesto
-    users = users.filter(n => n !== myNickname);
-    users.unshift(myNickname);
-}
-
-// Dodaj nove goste
-users.forEach(nickname => {
-    const guestId = `guest-${nickname}`;
-    if (!guestsData[guestId]) {
-        const newGuest = document.createElement('div');
-        newGuest.className = 'guest';
-        newGuest.id = guestId;
-        newGuest.textContent = nickname;
-
-        // Dodaj boju ako je virtualni gost
-        const vg = virtualGuests.find(v => v.nickname === nickname);
-        if (vg) {
-            newGuest.style.color = vg.color;
-            guestsData[guestId] = { nickname, color: vg.color };
-        } else {
-            newGuest.style.color = '';
-            guestsData[guestId] = { nickname, color: '' };
+        // Ulogovani korisnik na drugo mesto ako nije Galaksija
+        if (myNickname !== "Radio Galaksija") {
+            users = users.filter(n => n !== myNickname);
+            users.splice(1, 0, myNickname);
         }
-
-        newGuest.setAttribute('data-guest-id', guestId);
-        guestList.appendChild(newGuest);
+    } else {
+        // Ako nema Galaksije, korisnik ide na prvo mesto
+        users = users.filter(n => n !== myNickname);
+        users.unshift(myNickname);
     }
-});
 
-// Poređaj DOM elemente po redosledu iz `users`
-users.forEach(nickname => {
-    const guestId = `guest-${nickname}`;
-    const guestElement = document.getElementById(guestId);
-    if (guestElement) {
-        guestList.appendChild(guestElement);
-    }
-});
+    // Dodaj nove goste
+    users.forEach(nickname => {
+        const guestId = `guest-${nickname}`;
+        if (!guestsData[guestId]) {
+            const newGuest = document.createElement('div');
+            newGuest.className = 'guest';
+            newGuest.id = guestId;
+            newGuest.textContent = nickname;
+
+            // Dodaj boju ako je virtualni gost
+            const vg = virtualGuests.find(v => v.nickname === nickname);
+            if (vg) {
+                newGuest.style.color = vg.color;
+                guestsData[guestId] = { nickname, color: vg.color };
+            } else {
+                newGuest.style.color = '';
+                guestsData[guestId] = { nickname, color: '' };
+            }
+
+            newGuest.setAttribute('data-guest-id', guestId);
+            guestList.appendChild(newGuest);
+        }
+    });
+
+    // Poređaj DOM elemente po redosledu iz `users`
+    users.forEach(nickname => {
+        const guestId = `guest-${nickname}`;
+        const guestElement = document.getElementById(guestId);
+        if (guestElement) {
+            guestList.appendChild(guestElement);
+        }
+    });
 });
 // COLOR PICKER - OBICNE BOJE
 document.getElementById('colorBtn').addEventListener('click', () => {
@@ -391,4 +389,5 @@ socket.on('allGradients', (gradients) => {
         }
     }
 });
+
 
