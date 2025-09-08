@@ -113,10 +113,10 @@ socket.on('chatMessage', function(data) {
     newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
     messageArea.prepend(newMessage);
 
-    // Snimi poruku ako je aktivno snimanje
-    if (snimanjeAktivno) {
-        porukeZaSnimanje.push(newMessage.outerHTML);
-    }
+      // Snimi poruku ako je aktivno snimanje
+if (window.snimanjeAktivno) {
+    porukeZaSnimanje.push(newMessage.outerHTML);
+}
 
     const isNearTop = messageArea.scrollTop < 50;
     if (isNearTop) {
@@ -156,10 +156,10 @@ socket.on('private_message', function(data) {
     newMessage.innerHTML = `<strong>${data.from}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
     messageArea.prepend(newMessage);
 
-    // Snimi poruku ako je aktivno snimanje
-    if (snimanjeAktivno) {
-        porukeZaSnimanje.push(newMessage.outerHTML);
-    }
+   // Snimi poruku ako je aktivno snimanje
+if (window.snimanjeAktivno) {
+    porukeZaSnimanje.push(newMessage.outerHTML);
+}
 
     const isNearTop = messageArea.scrollTop < 50;
     if (isNearTop) {
@@ -391,3 +391,4 @@ socket.on('allGradients', (gradients) => {
         }
     }
 });
+
