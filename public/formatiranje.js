@@ -198,122 +198,122 @@ socket.on('updateGuestList', function (users) {
             }
         }
     });
+// Reorder: "Radio Galaksija" ili "R-Galaksija" na vrhu
+if (users.includes("Radio Galaksija") || users.includes("R-Galaksija")) {
+    const glavnaGalaksija = users.includes("Radio Galaksija") ? "Radio Galaksija" : "R-Galaksija";
 
-    // Reorder: "Radio Galaksija" na vrhu
-    if (users.includes("Radio Galaksija")) {
-        users = ["Radio Galaksija", ...users.filter(n => n !== "Radio Galaksija")];
+    users = [glavnaGalaksija, ...users.filter(n => n !== glavnaGalaksija)];
 
-        // Ulogovani korisnik na drugo mesto ako nije Galaksija
-        if (myNickname !== "Radio Galaksija") {
-            users = users.filter(n => n !== myNickname);
-            users.splice(1, 0, myNickname);
-        }
-    } else {
-        // Ako nema Galaksije, korisnik ide na prvo mesto
+    // Ulogovani korisnik na drugo mesto ako nije glavna Galaksija
+    if (myNickname !== glavnaGalaksija) {
         users = users.filter(n => n !== myNickname);
-        users.unshift(myNickname);
+        users.splice(1, 0, myNickname);
     }
+} else {
+    // Ako nema ni jedne Galaksije, korisnik ide na prvo mesto
+    users = users.filter(n => n !== myNickname);
+    users.unshift(myNickname);
+}
 
-    // Dodaj nove goste
-    users.forEach(nickname => {
-        const guestId = `guest-${nickname}`;
-        if (!guestsData[guestId]) {
-            const newGuest = document.createElement('div');
-            newGuest.className = 'guest';
-            newGuest.id = guestId;
-            newGuest.textContent = nickname;
+// Dodaj nove goste
+users.forEach(nickname => {
+    const guestId = `guest-${nickname}`;
+    if (!guestsData[guestId]) {
+        const newGuest = document.createElement('div');
+        newGuest.className = 'guest';
+        newGuest.id = guestId;
+        newGuest.textContent = nickname;
 
-            // Dodaj boju ako je virtualni gost
-            const vg = virtualGuests.find(v => v.nickname === nickname);
-            if (vg) {
-                newGuest.style.color = vg.color;
-                guestsData[guestId] = { nickname, color: vg.color };
-            } else {
-                newGuest.style.color = '';
-                guestsData[guestId] = { nickname, color: '' };
-            }
-
-            newGuest.setAttribute('data-guest-id', guestId);
-            guestList.appendChild(newGuest);
+        // Dodaj boju ako je virtualni gost
+        const vg = virtualGuests.find(v => v.nickname === nickname);
+        if (vg) {
+            newGuest.style.color = vg.color;
+            guestsData[guestId] = { nickname, color: vg.color };
+        } else {
+            newGuest.style.color = '';
+            guestsData[guestId] = { nickname, color: '' };
         }
-    });
 
-    // Poređaj DOM elemente po redosledu iz `users`
-    users.forEach(nickname => {
-        const guestId = `guest-${nickname}`;
-        const guestElement = document.getElementById(guestId);
-        if (guestElement) {
-            guestList.appendChild(guestElement);
-        }
-    });
+        newGuest.setAttribute('data-guest-id', guestId);
+        guestList.appendChild(newGuest);
+    }
 });
 
-//  COLOR PICKER -OBICNE BOJE
-document.getElementById('colorBtn').addEventListener('click', function() {
+// Poređaj DOM elemente po redosledu iz `users`
+users.forEach(nickname => {
+    const guestId = `guest-${nickname}`;
+    const guestElement = document.getElementById(guestId);
+    if (guestElement) {
+        guestList.appendChild(guestElement);
+    }
+});
+});
+// COLOR PICKER - OBICNE BOJE
+document.getElementById('colorBtn').addEventListener('click', () => {
     document.getElementById('colorPicker').click();
 });
 
 document.getElementById('colorPicker').addEventListener('input', function() {
     currentColor = this.value;
-    currentGradient = null; // Resetovanje gradijenta
+    currentGradient = null; // reset gradijenta
 
-    // Uklanjanje svih gradijenata sa div-a
-    const myDivId = `guest-${myNickname}`;
-    const myDiv = document.getElementById(myDivId);
-    if (myDiv) {
-        // Ukloni sve gradijente sa div-a
-        myDiv.classList.forEach(cls => {
-            if (cls.startsWith('gradient-')) {
-                myDiv.classList.remove(cls);
-            }
-        });
-        // Ukloni gradijent i pozadinsku sliku
-        myDiv.classList.remove('use-gradient');
-        myDiv.style.backgroundImage = ''; 
-    }
+    const myDiv = document.getElementById(`guest-${myNickname}`);
+    if (!myDiv) return;
 
-    // Resetuj input stilove, očisti gradijent i postavi boju
+    // Ukloni gradijent sa teksta
+    myDiv.style.background = '';
+    myDiv.style.webkitBackgroundClip = '';
+    myDiv.style.webkitTextFillColor = '';
+
+    // Postavi novu boju teksta
+    myDiv.style.color = currentColor;
+
+    // Ukloni klase za gradijent
+    myDiv.classList.forEach(cls => {
+        if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
+    });
+    myDiv.classList.remove('use-gradient', 'gradient-user');
+
     updateInputStyle();
 
-    // Postavljanje boje teksta u div-u i emitovanje boje
-    setTimeout(() => {
-        if (myDiv) {
-            myDiv.style.color = currentColor; // Postavljanje boje teksta
-        }
-        socket.emit('colorChange', { nickname: myNickname, color: currentColor });
-    }, 300);
+    socket.emit('colorChange', { nickname: myNickname, color: currentColor });
 });
 
 // Slušanje svih boja pri povezivanju
 socket.on('allColors', (colors) => {
-    // Primena boja za sve korisnike
     for (const nickname in colors) {
-        const color = colors[nickname];
-        const myDivId = `guest-${nickname}`;
-        const myDiv = document.getElementById(myDivId);
-        if (myDiv) {
-            myDiv.style.color = color;
-        }
-    }
-});
+        const myDiv = document.getElementById(`guest-${nickname}`);
+        if (!myDiv) continue;
 
-socket.on('colorChange', (data) => {
-    const myDivId = `guest-${data.nickname}`;
-    const myDiv = document.getElementById(myDivId);
-    if (myDiv) {
-        // Ukloni sve gradijente
+        myDiv.style.background = '';
+        myDiv.style.webkitBackgroundClip = '';
+        myDiv.style.webkitTextFillColor = '';
+        myDiv.style.color = colors[nickname];
+
+        myDiv.classList.remove('use-gradient', 'gradient-user');
         myDiv.classList.forEach(cls => {
-            if (cls.startsWith('gradient-')) {
-                myDiv.classList.remove(cls);
-            }
+            if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
         });
-        myDiv.classList.remove('use-gradient');
-        myDiv.style.backgroundImage = ''; 
-
-        // Postavi boju
-        myDiv.style.color = data.color;
     }
 });
+
+// Kada neko promeni boju
+socket.on('colorChange', (data) => {
+    const myDiv = document.getElementById(`guest-${data.nickname}`);
+    if (!myDiv) return;
+
+    myDiv.style.background = '';
+    myDiv.style.webkitBackgroundClip = '';
+    myDiv.style.webkitTextFillColor = '';
+    myDiv.style.color = data.color;
+
+    myDiv.classList.remove('use-gradient', 'gradient-user');
+    myDiv.classList.forEach(cls => {
+        if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
+    });
+});
+
+
 // ZA GRADIJENTE
 document.getElementById('farbe').addEventListener('click', function () {
     const gradijentDiv = document.getElementById('gradijent');
@@ -391,4 +391,3 @@ socket.on('allGradients', (gradients) => {
         }
     }
 });
-
