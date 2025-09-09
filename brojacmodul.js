@@ -6,8 +6,6 @@ const counterSchema = new mongoose.Schema({
 
 const Counter = mongoose.model('Counter', counterSchema);
 
-let currentUsers = 0;
-
 // GLOBALNO stanje svih divova
 const divStates = {};
 
@@ -29,14 +27,16 @@ function updateDivState(data) {
 async function setupUserCounter(io) {
   io.on('connection', async (socket) => {
     try {
-      currentUsers++;
+      // 👉 Uzimamo broj trenutnih konekcija preko socket.io (pouzdano)
+      const current = io.engine.clientsCount;
 
+      // 👉 Povećavamo ukupan broj korisnika u bazi
       let counter = await Counter.findOne() || new Counter();
       counter.total++;
       await counter.save();
 
       io.emit('usersCount', {
-        current: currentUsers,
+        current: current,
         total: counter.total
       });
 
@@ -46,8 +46,9 @@ async function setupUserCounter(io) {
       });
 
       socket.on('requestUsersCount', () => {
+        const current = io.engine.clientsCount;
         socket.emit('usersCount', {
-          current: currentUsers,
+          current: current,
           total: counter.total
         });
       });
@@ -58,9 +59,9 @@ async function setupUserCounter(io) {
       });
 
       socket.on('disconnect', () => {
-        currentUsers--;
+        const current = io.engine.clientsCount;
         io.emit('usersCount', {
-          current: currentUsers,
+          current: current,
           total: counter.total
         });
       });
