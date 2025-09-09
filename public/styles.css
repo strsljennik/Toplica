@@ -185,13 +185,11 @@ body {
      font-style: italic;
      color: #87CEFA;
   }
-
 .guest::before, .virtual-guest::before {
-    content: "✔"; 
+    content: "⚽"; 
     margin-right: 10px;
     font-size: 15px;
 }
-
 .guest.selected-overlay {
     position: relative;
 }
@@ -456,11 +454,3 @@ body {
       z-index: 999;
       display: none;
     }
-
-
-
-
-
-
-
-
