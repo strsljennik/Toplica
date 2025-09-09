@@ -5,14 +5,14 @@ document.getElementById('smilesBtn').addEventListener('click', () => {
     
     // Ako je modal trenutno skriven, prikaži ga
     if (smileModal.style.display === 'none' || smileModal.style.display === '') {
-        Object.assign(smileModal.style, {
-            top: `${bottom + 5}px`,
-            left: `${left}px`,
-             zIndex: '4' ,
-            display: 'flex'
-        });
-
-        // Učitaj slike iz localStorage
+       Object.assign(smileModal.style, {
+    top: `100px`,         // ili `0px` ako želiš da bude skroz gore
+    left: `0px`,          // OVDE se fiksira uz levu ivicu ekrana
+    zIndex: '1000',
+    display: 'flex',
+    position: 'fixed'     // Za svaki slučaj ako je CSS prebrisao
+});
+  // Učitaj slike iz localStorage
         loadImagesFromLocalStorage();
     } else {
         // Ako je modal otvoren, zatvori ga
@@ -456,6 +456,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
