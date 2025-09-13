@@ -414,39 +414,50 @@ adminPicker.addEventListener('input', () => {
     const selectedColor = adminPicker.value;
     defaultColor = selectedColor;
 
-  socket.emit('updateDefaultColor', { color: defaultColor });
+    socket.emit('updateDefaultColor', { color: defaultColor });
 
     // Primeni default boju sa 3s delay kako bi svi elementi bili renderovani
     setTimeout(() => {
         document.querySelectorAll('.guest').forEach(el => {
             const nickname = el.dataset.nickname || el.id.replace('guest-', '');
             const isVirtual = virtualGuests.some(v => v.nickname === nickname);
-            if (isVirtual) {
-           return;
-            }
-            if ('userColor' in el.dataset) {
-               return;
-            }
-            el.style.color = defaultColor;
-          });
-    }, 3000);
-   adminPicker.style.display = 'none';
-   });
+            if (isVirtual) return;
+            if ('userColor' in el.dataset) return; // ne dira one koji su birali boju
 
-// Socket event za update default boje
+            el.style.color = defaultColor;
+
+            // Ako je trenutni korisnik, update currentColor i input polje
+            if (el.id === `guest-${myNickname}`) {
+                currentColor = defaultColor;
+                currentGradient = null;
+                updateInputStyle(); // osvežava input polje
+            }
+        });
+    }, 3000);
+
+    adminPicker.style.display = 'none';
+});
+
+// Socket event za update default boje od strane drugih admina
 socket.on('updateDefaultColor', (data) => {
     const newDefaultColor = data.color;
-     defaultColor = newDefaultColor;
+    defaultColor = newDefaultColor;
 
     setTimeout(() => {
         document.querySelectorAll('.guest').forEach(el => {
             const nickname = el.dataset.nickname || el.id.replace('guest-', '');
             const isVirtual = virtualGuests.some(v => v.nickname === nickname);
-            if (isVirtual) {
-                return;
-            }
+            if (isVirtual) return;
             if ('userColor' in el.dataset) return; // ne dira one koji su birali boju
+
             el.style.color = newDefaultColor;
-           });
+
+            // Ako je trenutni korisnik, update currentColor i input polje
+            if (el.id === `guest-${myNickname}`) {
+                currentColor = newDefaultColor;
+                currentGradient = null;
+                updateInputStyle(); // osvežava input polje
+            }
+        });
     }, 3000);
 });
