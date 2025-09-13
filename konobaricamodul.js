@@ -177,7 +177,7 @@ socket.broadcast.emit("promeniSirinu", data);
 });
 
    // ZA DEFAULT BOJU KORISNIKA
-  io.emit('updateDefaultColor', { color: defaultColor });
+  socket.emit('updateDefaultColor', { color: defaultColor });
    
       socket.on('updateDefaultColor', (data) => {
         defaultColor = data.color;
@@ -189,4 +189,5 @@ socket.broadcast.emit("promeniSirinu", data);
         socket.on('disconnect', () => {});
     });
 };
+
 
