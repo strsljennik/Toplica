@@ -46,7 +46,6 @@
     animation-iteration-count: infinite;
   }`
 };
-
 let allUserAnimations = {};
 let currentAnimation = null;
 let animationSpeed = 2;
@@ -64,6 +63,62 @@ popnik.style.zIndex = 1000;
 popnik.style.display = 'none';
 document.body.appendChild(popnik);
 
+// ===== Custom aniprompt =====
+const aniprompt = document.createElement('div');
+aniprompt.style.position = 'fixed';
+aniprompt.style.top = '50%';
+aniprompt.style.left = '50%';
+aniprompt.style.transform = 'translate(-50%, -50%)';
+aniprompt.style.background = '#000';
+aniprompt.style.border = '2px solid #fff'; // bele neon linije
+aniprompt.style.padding = '20px';
+aniprompt.style.zIndex = 10000;
+aniprompt.style.display = 'none';
+aniprompt.style.color = '#fff';
+aniprompt.style.fontFamily = 'monospace';
+aniprompt.style.textAlign = 'center';
+aniprompt.style.borderRadius = '10px';
+aniprompt.style.boxShadow = '0 0 10px #fff, 0 0 20px #fff';
+
+const input = document.createElement('input');
+input.type = 'password';
+input.placeholder = 'Unesi lozinku';
+input.style.padding = '10px';
+input.style.marginTop = '10px';
+input.style.border = '1px solid #fff';
+input.style.background = '#000';
+input.style.color = '#fff';
+input.style.outline = 'none';
+input.style.width = '200px';
+input.style.fontFamily = 'monospace';
+aniprompt.appendChild(input);
+
+document.body.appendChild(aniprompt);
+
+function showAniprompt(correctPassword, callback) {
+    aniprompt.style.display = 'block';
+    input.value = '';
+    input.focus();
+
+    function keyHandler(e) {
+        if (e.key === 'Enter') {
+            if (input.value === correctPassword) {
+                aniprompt.style.display = 'none';
+                input.removeEventListener('keydown', keyHandler);
+                callback(true);
+            } else {
+                input.value = '';
+                input.focus();
+                input.style.border = '1px solid red';
+                setTimeout(() => input.style.border = '1px solid #fff', 300);
+            }
+        }
+    }
+
+    input.addEventListener('keydown', keyHandler);
+}
+
+// ===== Animacije =====
 function injectAnimationStyles() {
   if (!document.getElementById('animation-styles')) {
     const style = document.createElement('style');
@@ -75,25 +130,23 @@ function injectAnimationStyles() {
 injectAnimationStyles();
 
 let popnikOpen = false;
-let isAuthorized = false;  // FLAG za uspešan unos lozinke
+let isAuthorized = false;
 
 nikBtn.addEventListener('click', () => {
   if (!isAuthorized) {
-    const password = prompt('Unesi lozinku:');
-    if (password === 'lsx') {
-      isAuthorized = true;      // Zapamti da je korisnik uneo ispravnu lozinku
-      popnik.style.display = 'block';  // otvori prozor
-      popnikOpen = true;
-    } else {
-      alert('Pogrešna lozinka');
-    }
+    showAniprompt('lsx', (success) => {
+        if (success) {
+            isAuthorized = true;
+            popnik.style.display = 'block';
+            popnikOpen = true;
+        }
+    });
   } else {
-    // Ako je već autorizovan, samo toggle prozora
     if (!popnikOpen) {
-      popnik.style.display = 'block';  // otvori prozor
+      popnik.style.display = 'block';
       popnikOpen = true;
     } else {
-      popnik.style.display = 'none';   // zatvori prozor
+      popnik.style.display = 'none';
       popnikOpen = false;
     }
   }
