@@ -50,7 +50,6 @@ const userAnimations = {
 let allUserAnimations = {};
 let currentAnimation = null;
 let animationSpeed = 2;
-let chosenColor = '#fff'; // ili neka početna boja po izboru
 
 const nikBtn = document.getElementById('nik');
 const popnik = document.createElement('div');
@@ -120,17 +119,10 @@ function showAniprompt(correctPassword, callback) {
     input.addEventListener('keydown', keyHandler);
 }
 
-
 // ===== Animacije =====
 const animationStyleEl = document.createElement('style');
 animationStyleEl.id = 'user-animation-styles';
-animationStyleEl.textContent = Object.values(userAnimations).join('\n') + `
-.gradient-letter {
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-}
-`;
+animationStyleEl.textContent = Object.values(userAnimations).join('\n');
 document.head.appendChild(animationStyleEl);
 
 let popnikOpen = false;
@@ -228,7 +220,6 @@ btnBounce.onclick = () => {
 };
 popnik.appendChild(btnBounce);
 
-
   // Slider za brzinu animacije
   const speedLabel = document.createElement('label');
   speedLabel.textContent = `Brzina animacije: ${animationSpeed}s`;
@@ -299,7 +290,7 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
       span.textContent = char;
 
       // Animacija
-      switch(animationName) {
+      switch (animationName) {
         case 'rotateLetters':
           span.classList.add('rotate-letter');
           span.style.animationIterationCount = '1';
@@ -327,18 +318,8 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
       span.style.backfaceVisibility = 'hidden';
       span.style.transformStyle = 'preserve-3d';
 
-      // Gradijent ili boja
-      if (currentGradient) {
-        span.classList.add('gradient-letter');
-        const gradientElement = document.querySelector(`.${currentGradient}`);
-        if (gradientElement) {
-          span.style.backgroundImage = getComputedStyle(gradientElement).backgroundImage;
-          span.style.webkitBackgroundClip = "text";
-          span.style.webkitTextFillColor = "transparent";
-        }
-      } else {
-        span.style.color = chosenColor || '#fff';
-      }
+      // Samo boja (nema gradijenata)
+      span.style.color = chosenColor || '#fff';
 
       userDiv.appendChild(span);
     }
