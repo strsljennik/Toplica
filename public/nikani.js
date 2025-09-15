@@ -1,4 +1,4 @@
-const userAnimations = {
+ const animations = {
   rotateLetters: `@keyframes rotateLetters {
     0% { transform: rotateY(0deg); }
     100% { transform: rotateY(360deg); }
@@ -50,7 +50,6 @@ const userAnimations = {
 let allUserAnimations = {};
 let currentAnimation = null;
 let animationSpeed = 2;
-let chosenColor = ''; // ili neka početna boja po izboru
 
 const nikBtn = document.getElementById('nik');
 const popnik = document.createElement('div');
@@ -65,161 +64,111 @@ popnik.style.zIndex = 1000;
 popnik.style.display = 'none';
 document.body.appendChild(popnik);
 
-// ===== Custom aniprompt =====
-const aniprompt = document.createElement('div');
-aniprompt.style.position = 'fixed';
-aniprompt.style.top = '50%';
-aniprompt.style.left = '50%';
-aniprompt.style.transform = 'translate(-50%, -50%)';
-aniprompt.style.background = '#000';
-aniprompt.style.border = '2px solid #fff';
-aniprompt.style.padding = '20px';
-aniprompt.style.zIndex = 10000;
-aniprompt.style.display = 'none';
-aniprompt.style.color = '#fff';
-aniprompt.style.fontFamily = 'monospace';
-aniprompt.style.textAlign = 'center';
-aniprompt.style.borderRadius = '10px';
-aniprompt.style.boxShadow = '0 0 10px #fff, 0 0 20px #fff';
-
-const input = document.createElement('input');
-input.type = 'password';
-input.placeholder = 'Unesi lozinku';
-input.style.padding = '10px';
-input.style.marginTop = '10px';
-input.style.border = '1px solid #fff';
-input.style.background = '#000';
-input.style.color = '#fff';
-input.style.outline = 'none';
-input.style.width = '200px';
-input.style.fontFamily = 'monospace';
-aniprompt.appendChild(input);
-
-document.body.appendChild(aniprompt);
-
-function showAniprompt(correctPassword, callback) {
-    aniprompt.style.display = 'block';
-    input.value = '';
-    input.focus();
-
-    function keyHandler(e) {
-        if (e.key === 'Enter') {
-            if (input.value === correctPassword) {
-                aniprompt.style.display = 'none';
-                input.removeEventListener('keydown', keyHandler);
-                callback(true);
-            } else {
-                input.value = '';
-                input.focus();
-                input.style.border = '1px solid red';
-                setTimeout(() => input.style.border = '1px solid #fff', 300);
-            }
-        }
-    }
-
-    input.addEventListener('keydown', keyHandler);
+function injectAnimationStyles() {
+  if (!document.getElementById('animation-styles')) {
+    const style = document.createElement('style');
+    style.id = 'animation-styles';
+    style.textContent = Object.values(animations).join('\n');
+    document.head.appendChild(style);
+  }
 }
-
-// ===== Animacije =====
-const animationStyleEl = document.createElement('style');
-animationStyleEl.id = 'user-animation-styles';
-animationStyleEl.textContent = Object.values(userAnimations).join('\n');
-document.head.appendChild(animationStyleEl);
+injectAnimationStyles();
 
 let popnikOpen = false;
-let isAuthorized = false;
+let isAuthorized = false;  // FLAG za uspešan unos lozinke
 
 nikBtn.addEventListener('click', () => {
   if (!isAuthorized) {
-    showAniprompt('lsx', (success) => {
-      if (success) {
-        isAuthorized = true;
-        popnik.style.display = 'block';
-        popnikOpen = true;
-      }
-    });
-  } else {
-    if (!popnikOpen) {
-      popnik.style.display = 'block';
+    const password = prompt('Unesi lozinku:');
+    if (password === 'lsx') {
+      isAuthorized = true;      // Zapamti da je korisnik uneo ispravnu lozinku
+      popnik.style.display = 'block';  // otvori prozor
       popnikOpen = true;
     } else {
-      popnik.style.display = 'none';
+      alert('Pogrešna lozinka');
+    }
+  } else {
+    // Ako je već autorizovan, samo toggle prozora
+    if (!popnikOpen) {
+      popnik.style.display = 'block';  // otvori prozor
+      popnikOpen = true;
+    } else {
+      popnik.style.display = 'none';   // zatvori prozor
       popnikOpen = false;
     }
   }
 });
+  // rotateLetters dugme
+  const btnRotate = document.createElement('button');
+  btnRotate.textContent = 'rotateLetters';
+  btnRotate.style.margin = '5px';
+  btnRotate.style.padding = '5px 12px';
+  btnRotate.style.cursor = 'pointer';
+  btnRotate.onclick = () => {
+    currentAnimation = 'rotateLetters';
+    applyAnimationToNick(myNickname, 'rotateLetters', animationSpeed);
+    socket.emit('animationChange', {
+      nickname: myNickname,
+      animation: 'rotateLetters',
+      speed: animationSpeed
+    });
+    popnik.style.display = 'none';
+  };
+  popnik.appendChild(btnRotate);
 
-// rotateLetters dugme
-const btnRotate = document.createElement('button');
-btnRotate.textContent = 'rotateLetters';
-btnRotate.style.margin = '5px';
-btnRotate.style.padding = '5px 12px';
-btnRotate.style.cursor = 'pointer';
-btnRotate.onclick = () => {
-  currentAnimation = 'rotateLetters';
-  applyAnimationToNick(myNickname, 'rotateLetters', animationSpeed);
-  socket.emit('animationChange', {
-    nickname: myNickname,
-    animation: 'rotateLetters',
-    speed: animationSpeed
-  });
-  popnik.style.display = 'none';
-};
-popnik.appendChild(btnRotate);
+  // glowBlink dugme
+  const btnGlow = document.createElement('button');
+  btnGlow.textContent = 'glowBlink';
+  btnGlow.style.margin = '5px';
+  btnGlow.style.padding = '5px 12px';
+  btnGlow.style.cursor = 'pointer';
+  btnGlow.onclick = () => {
+    currentAnimation = 'glowBlink';
+    applyAnimationToNick(myNickname, 'glowBlink', animationSpeed);
+    socket.emit('animationChange', {
+      nickname: myNickname,
+      animation: 'glowBlink',
+      speed: animationSpeed
+    });
+    popnik.style.display = 'none';
+  };
+  popnik.appendChild(btnGlow);
 
-// glowBlink dugme
-const btnGlow = document.createElement('button');
-btnGlow.textContent = 'glowBlink';
-btnGlow.style.margin = '5px';
-btnGlow.style.padding = '5px 12px';
-btnGlow.style.cursor = 'pointer';
-btnGlow.onclick = () => {
-  currentAnimation = 'glowBlink';
-  applyAnimationToNick(myNickname, 'glowBlink', animationSpeed);
-  socket.emit('animationChange', {
-    nickname: myNickname,
-    animation: 'glowBlink',
-    speed: animationSpeed
-  });
-  popnik.style.display = 'none';
-};
-popnik.appendChild(btnGlow);
+  // fadeInOut dugme
+  const btnFade = document.createElement('button');
+  btnFade.textContent = 'fadeInOut';
+  btnFade.style.margin = '5px';
+  btnFade.style.padding = '5px 12px';
+  btnFade.style.cursor = 'pointer';
+  btnFade.onclick = () => {
+    currentAnimation = 'fadeInOut';
+    applyAnimationToNick(myNickname, 'fadeInOut', animationSpeed);
+    socket.emit('animationChange', {
+      nickname: myNickname,
+      animation: 'fadeInOut',
+      speed: animationSpeed
+    });
+    popnik.style.display = 'none';
+  };
+  popnik.appendChild(btnFade);
 
-// fadeInOut dugme
-const btnFade = document.createElement('button');
-btnFade.textContent = 'fadeInOut';
-btnFade.style.margin = '5px';
-btnFade.style.padding = '5px 12px';
-btnFade.style.cursor = 'pointer';
-btnFade.onclick = () => {
-  currentAnimation = 'fadeInOut';
-  applyAnimationToNick(myNickname, 'fadeInOut', animationSpeed);
-  socket.emit('animationChange', {
-    nickname: myNickname,
-    animation: 'fadeInOut',
-    speed: animationSpeed
-  });
-  popnik.style.display = 'none';
-};
-popnik.appendChild(btnFade);
-
-// bounce dugme
-const btnBounce = document.createElement('button');
-btnBounce.textContent = 'bounce';
-btnBounce.style.margin = '5px';
-btnBounce.style.padding = '5px 12px';
-btnBounce.style.cursor = 'pointer';
-btnBounce.onclick = () => {
-  currentAnimation = 'bounce';
-  applyAnimationToNick(myNickname, 'bounce', animationSpeed);
-  socket.emit('animationChange', {
-    nickname: myNickname,
-    animation: 'bounce',
-    speed: animationSpeed
-  });
-  popnik.style.display = 'none';
-};
-popnik.appendChild(btnBounce);
+  // bounce dugme
+  const btnBounce = document.createElement('button');
+  btnBounce.textContent = 'bounce';
+  btnBounce.style.margin = '5px';
+  btnBounce.style.padding = '5px 12px';
+  btnBounce.style.cursor = 'pointer';
+  btnBounce.onclick = () => {
+    currentAnimation = 'bounce';
+    applyAnimationToNick(myNickname, 'bounce', animationSpeed);
+    socket.emit('animationChange', {
+      nickname: myNickname,
+      animation: 'bounce',
+      speed: animationSpeed
+    });
+    popnik.style.display = 'none';
+  };
+  popnik.appendChild(btnBounce);
 
   // Slider za brzinu animacije
   const speedLabel = document.createElement('label');
@@ -272,64 +221,61 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
   const userDiv = document.getElementById(`guest-${nickname}`);
   if (!userDiv) return;
 
-  // Vrati originalni tekst bez animacije
+  // Vrati originalni tekst bez animacije pre nove
   userDiv.style.animation = 'none';
   userDiv.innerHTML = userDiv.textContent || userDiv.innerText;
 
   const text = userDiv.textContent || userDiv.innerText;
+
   userDiv.innerHTML = '';
 
+  // Definiši znakove za koje ne želimo animaciju
   const problematicChars = [' ', '*', '(', ')', '-', '_', '[', ']', '{', '}', '^', '$', '#', '@', '!', '+', '=', '~', '`', '|', '\\', '/', '<', '>', ',', '.', '?', ':', ';', '"', "'"];
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
 
     if (problematicChars.includes(char)) {
+      // Ubaci običan tekst bez animacije
       userDiv.appendChild(document.createTextNode(char));
     } else {
+      // Ubaci span sa animacijom
       const span = document.createElement('span');
       span.textContent = char;
 
-      // Animacija
-      switch (animationName) {
-        case 'rotateLetters':
-          span.classList.add('rotate-letter');
-          span.style.animationIterationCount = '1';
-          break;
-        case 'glowBlink':
-          span.classList.add('glow-letter');
-          span.style.animationIterationCount = 'infinite';
-          break;
-        case 'fadeInOut':
-          span.classList.add('fade-letter');
-          span.style.animationIterationCount = 'infinite';
-          break;
-        case 'bounce':
-          span.classList.add('bounce-letter');
-          span.style.animationIterationCount = 'infinite';
-          break;
-        default:
-          span.style.animationIterationCount = 'infinite';
+      // Dodaj klasu u zavisnosti od animacije
+      if (animationName === 'rotateLetters') {
+        span.classList.add('rotate-letter');
+        span.style.animationIterationCount = '1';
+      } else if (animationName === 'glowBlink') {
+        span.classList.add('glow-letter');
+        span.style.animationIterationCount = 'infinite';
+      } else if (animationName === 'fadeInOut') {
+        span.classList.add('fade-letter');
+        span.style.animationIterationCount = 'infinite';
+      } else if (animationName === 'bounce') {
+        span.classList.add('bounce-letter');
+        span.style.animationIterationCount = 'infinite';
+      } else {
+        // fallback bez klase i animacije
+        span.style.animationIterationCount = 'infinite';
       }
 
       span.style.animationDuration = `${speed}s`;
       span.style.animationDelay = `${i * 0.1}s`;
+
       span.style.webkitFontSmoothing = 'antialiased';
       span.style.MozOsxFontSmoothing = 'grayscale';
       span.style.backfaceVisibility = 'hidden';
       span.style.transformStyle = 'preserve-3d';
 
-      // Samo boja (nema gradijenata)
-      span.style.color = chosenColor || '#fff';
-
       userDiv.appendChild(span);
     }
   }
 
-  // Ponovo pokreni rotateLetters ako je potrebno
   if (animationName === 'rotateLetters') {
-    const spans = userDiv.querySelectorAll('.rotate-letter');
     let completedSpans = 0;
+    const spans = userDiv.querySelectorAll('.rotate-letter');
     spans.forEach(span => {
       span.addEventListener('animationend', () => {
         completedSpans++;
@@ -356,7 +302,6 @@ function applyAnimationToNickWhenReady(nickname, animation, speed) {
   };
   tryApply();
 }
-
 socket.on('animationChange', data => {
   currentAnimation = data.animation;
   animationSpeed = data.speed || 2;
@@ -368,5 +313,3 @@ socket.on('currentAnimations', (allAnimations) => {
     applyAnimationToNickWhenReady(nickname, animation, speed);
   }
 });
-
-
