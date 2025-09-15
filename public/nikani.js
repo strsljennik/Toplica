@@ -1,4 +1,4 @@
- const animations = {
+const userAnimations = {
   rotateLetters: `@keyframes rotateLetters {
     0% { transform: rotateY(0deg); }
     100% { transform: rotateY(360deg); }
@@ -46,9 +46,11 @@
     animation-iteration-count: infinite;
   }`
 };
+
 let allUserAnimations = {};
 let currentAnimation = null;
 let animationSpeed = 2;
+let chosenColor = '#fff'; // ili neka početna boja po izboru
 
 const nikBtn = document.getElementById('nik');
 const popnik = document.createElement('div');
@@ -70,7 +72,7 @@ aniprompt.style.top = '50%';
 aniprompt.style.left = '50%';
 aniprompt.style.transform = 'translate(-50%, -50%)';
 aniprompt.style.background = '#000';
-aniprompt.style.border = '2px solid #fff'; // bele neon linije
+aniprompt.style.border = '2px solid #fff';
 aniprompt.style.padding = '20px';
 aniprompt.style.zIndex = 10000;
 aniprompt.style.display = 'none';
@@ -118,16 +120,18 @@ function showAniprompt(correctPassword, callback) {
     input.addEventListener('keydown', keyHandler);
 }
 
+
 // ===== Animacije =====
-function injectAnimationStyles() {
-  if (!document.getElementById('animation-styles')) {
-    const style = document.createElement('style');
-    style.id = 'animation-styles';
-    style.textContent = Object.values(animations).join('\n');
-    document.head.appendChild(style);
-  }
+const animationStyleEl = document.createElement('style');
+animationStyleEl.id = 'user-animation-styles';
+animationStyleEl.textContent = Object.values(userAnimations).join('\n') + `
+.gradient-letter {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
-injectAnimationStyles();
+`;
+document.head.appendChild(animationStyleEl);
 
 let popnikOpen = false;
 let isAuthorized = false;
@@ -135,11 +139,11 @@ let isAuthorized = false;
 nikBtn.addEventListener('click', () => {
   if (!isAuthorized) {
     showAniprompt('lsx', (success) => {
-        if (success) {
-            isAuthorized = true;
-            popnik.style.display = 'block';
-            popnikOpen = true;
-        }
+      if (success) {
+        isAuthorized = true;
+        popnik.style.display = 'block';
+        popnikOpen = true;
+      }
     });
   } else {
     if (!popnikOpen) {
@@ -151,77 +155,79 @@ nikBtn.addEventListener('click', () => {
     }
   }
 });
-  // rotateLetters dugme
-  const btnRotate = document.createElement('button');
-  btnRotate.textContent = 'rotateLetters';
-  btnRotate.style.margin = '5px';
-  btnRotate.style.padding = '5px 12px';
-  btnRotate.style.cursor = 'pointer';
-  btnRotate.onclick = () => {
-    currentAnimation = 'rotateLetters';
-    applyAnimationToNick(myNickname, 'rotateLetters', animationSpeed);
-    socket.emit('animationChange', {
-      nickname: myNickname,
-      animation: 'rotateLetters',
-      speed: animationSpeed
-    });
-    popnik.style.display = 'none';
-  };
-  popnik.appendChild(btnRotate);
 
-  // glowBlink dugme
-  const btnGlow = document.createElement('button');
-  btnGlow.textContent = 'glowBlink';
-  btnGlow.style.margin = '5px';
-  btnGlow.style.padding = '5px 12px';
-  btnGlow.style.cursor = 'pointer';
-  btnGlow.onclick = () => {
-    currentAnimation = 'glowBlink';
-    applyAnimationToNick(myNickname, 'glowBlink', animationSpeed);
-    socket.emit('animationChange', {
-      nickname: myNickname,
-      animation: 'glowBlink',
-      speed: animationSpeed
-    });
-    popnik.style.display = 'none';
-  };
-  popnik.appendChild(btnGlow);
+// rotateLetters dugme
+const btnRotate = document.createElement('button');
+btnRotate.textContent = 'rotateLetters';
+btnRotate.style.margin = '5px';
+btnRotate.style.padding = '5px 12px';
+btnRotate.style.cursor = 'pointer';
+btnRotate.onclick = () => {
+  currentAnimation = 'rotateLetters';
+  applyAnimationToNick(myNickname, 'rotateLetters', animationSpeed);
+  socket.emit('animationChange', {
+    nickname: myNickname,
+    animation: 'rotateLetters',
+    speed: animationSpeed
+  });
+  popnik.style.display = 'none';
+};
+popnik.appendChild(btnRotate);
 
-  // fadeInOut dugme
-  const btnFade = document.createElement('button');
-  btnFade.textContent = 'fadeInOut';
-  btnFade.style.margin = '5px';
-  btnFade.style.padding = '5px 12px';
-  btnFade.style.cursor = 'pointer';
-  btnFade.onclick = () => {
-    currentAnimation = 'fadeInOut';
-    applyAnimationToNick(myNickname, 'fadeInOut', animationSpeed);
-    socket.emit('animationChange', {
-      nickname: myNickname,
-      animation: 'fadeInOut',
-      speed: animationSpeed
-    });
-    popnik.style.display = 'none';
-  };
-  popnik.appendChild(btnFade);
+// glowBlink dugme
+const btnGlow = document.createElement('button');
+btnGlow.textContent = 'glowBlink';
+btnGlow.style.margin = '5px';
+btnGlow.style.padding = '5px 12px';
+btnGlow.style.cursor = 'pointer';
+btnGlow.onclick = () => {
+  currentAnimation = 'glowBlink';
+  applyAnimationToNick(myNickname, 'glowBlink', animationSpeed);
+  socket.emit('animationChange', {
+    nickname: myNickname,
+    animation: 'glowBlink',
+    speed: animationSpeed
+  });
+  popnik.style.display = 'none';
+};
+popnik.appendChild(btnGlow);
 
-  // bounce dugme
-  const btnBounce = document.createElement('button');
-  btnBounce.textContent = 'bounce';
-  btnBounce.style.margin = '5px';
-  btnBounce.style.padding = '5px 12px';
-  btnBounce.style.cursor = 'pointer';
-  btnBounce.onclick = () => {
-    currentAnimation = 'bounce';
-    applyAnimationToNick(myNickname, 'bounce', animationSpeed);
-    socket.emit('animationChange', {
-      nickname: myNickname,
-      animation: 'bounce',
-      speed: animationSpeed
-    });
-    popnik.style.display = 'none';
-  };
-  popnik.appendChild(btnBounce);
+// fadeInOut dugme
+const btnFade = document.createElement('button');
+btnFade.textContent = 'fadeInOut';
+btnFade.style.margin = '5px';
+btnFade.style.padding = '5px 12px';
+btnFade.style.cursor = 'pointer';
+btnFade.onclick = () => {
+  currentAnimation = 'fadeInOut';
+  applyAnimationToNick(myNickname, 'fadeInOut', animationSpeed);
+  socket.emit('animationChange', {
+    nickname: myNickname,
+    animation: 'fadeInOut',
+    speed: animationSpeed
+  });
+  popnik.style.display = 'none';
+};
+popnik.appendChild(btnFade);
+
+// bounce dugme
+const btnBounce = document.createElement('button');
+btnBounce.textContent = 'bounce';
+btnBounce.style.margin = '5px';
+btnBounce.style.padding = '5px 12px';
+btnBounce.style.cursor = 'pointer';
+btnBounce.onclick = () => {
+  currentAnimation = 'bounce';
+  applyAnimationToNick(myNickname, 'bounce', animationSpeed);
+  socket.emit('animationChange', {
+    nickname: myNickname,
+    animation: 'bounce',
+    speed: animationSpeed
+  });
+  popnik.style.display = 'none';
+};
+popnik.appendChild(btnBounce);
+
 
   // Slider za brzinu animacije
   const speedLabel = document.createElement('label');
@@ -274,61 +280,74 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
   const userDiv = document.getElementById(`guest-${nickname}`);
   if (!userDiv) return;
 
-  // Vrati originalni tekst bez animacije pre nove
+  // Vrati originalni tekst bez animacije
   userDiv.style.animation = 'none';
   userDiv.innerHTML = userDiv.textContent || userDiv.innerText;
 
   const text = userDiv.textContent || userDiv.innerText;
-
   userDiv.innerHTML = '';
 
-  // Definiši znakove za koje ne želimo animaciju
   const problematicChars = [' ', '*', '(', ')', '-', '_', '[', ']', '{', '}', '^', '$', '#', '@', '!', '+', '=', '~', '`', '|', '\\', '/', '<', '>', ',', '.', '?', ':', ';', '"', "'"];
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
 
     if (problematicChars.includes(char)) {
-      // Ubaci običan tekst bez animacije
       userDiv.appendChild(document.createTextNode(char));
     } else {
-      // Ubaci span sa animacijom
       const span = document.createElement('span');
       span.textContent = char;
 
-      // Dodaj klasu u zavisnosti od animacije
-      if (animationName === 'rotateLetters') {
-        span.classList.add('rotate-letter');
-        span.style.animationIterationCount = '1';
-      } else if (animationName === 'glowBlink') {
-        span.classList.add('glow-letter');
-        span.style.animationIterationCount = 'infinite';
-      } else if (animationName === 'fadeInOut') {
-        span.classList.add('fade-letter');
-        span.style.animationIterationCount = 'infinite';
-      } else if (animationName === 'bounce') {
-        span.classList.add('bounce-letter');
-        span.style.animationIterationCount = 'infinite';
-      } else {
-        // fallback bez klase i animacije
-        span.style.animationIterationCount = 'infinite';
+      // Animacija
+      switch(animationName) {
+        case 'rotateLetters':
+          span.classList.add('rotate-letter');
+          span.style.animationIterationCount = '1';
+          break;
+        case 'glowBlink':
+          span.classList.add('glow-letter');
+          span.style.animationIterationCount = 'infinite';
+          break;
+        case 'fadeInOut':
+          span.classList.add('fade-letter');
+          span.style.animationIterationCount = 'infinite';
+          break;
+        case 'bounce':
+          span.classList.add('bounce-letter');
+          span.style.animationIterationCount = 'infinite';
+          break;
+        default:
+          span.style.animationIterationCount = 'infinite';
       }
 
       span.style.animationDuration = `${speed}s`;
       span.style.animationDelay = `${i * 0.1}s`;
-
       span.style.webkitFontSmoothing = 'antialiased';
       span.style.MozOsxFontSmoothing = 'grayscale';
       span.style.backfaceVisibility = 'hidden';
       span.style.transformStyle = 'preserve-3d';
 
+      // Gradijent ili boja
+      if (currentGradient) {
+        span.classList.add('gradient-letter');
+        const gradientElement = document.querySelector(`.${currentGradient}`);
+        if (gradientElement) {
+          span.style.backgroundImage = getComputedStyle(gradientElement).backgroundImage;
+          span.style.webkitBackgroundClip = "text";
+          span.style.webkitTextFillColor = "transparent";
+        }
+      } else {
+        span.style.color = chosenColor || '#fff';
+      }
+
       userDiv.appendChild(span);
     }
   }
 
+  // Ponovo pokreni rotateLetters ako je potrebno
   if (animationName === 'rotateLetters') {
-    let completedSpans = 0;
     const spans = userDiv.querySelectorAll('.rotate-letter');
+    let completedSpans = 0;
     spans.forEach(span => {
       span.addEventListener('animationend', () => {
         completedSpans++;
@@ -355,6 +374,7 @@ function applyAnimationToNickWhenReady(nickname, animation, speed) {
   };
   tryApply();
 }
+
 socket.on('animationChange', data => {
   currentAnimation = data.animation;
   animationSpeed = data.speed || 2;
