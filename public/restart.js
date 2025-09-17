@@ -1,11 +1,10 @@
 (function () {
-  // Aktivirani tasteri
   const activeKeys = new Set();
 
-  // Kreiraj overlay
+  // Napravi overlay, ali ga sakrij
   const overlay = document.createElement('div');
   overlay.id = 'admin-overlay';
-  overlay.style.display = 'none';
+  overlay.style.display = 'none'; // ⬅️ OVO GA SAKRIVA PO DEFAULTU
   overlay.style.position = 'fixed';
   overlay.style.top = '0';
   overlay.style.left = '0';
@@ -17,9 +16,7 @@
   overlay.style.alignItems = 'center';
   overlay.style.justifyContent = 'center';
 
-  // Tabla u centru
   const panel = document.createElement('div');
-  panel.id = 'restart-panel';
   panel.style.border = '2px solid #fff';
   panel.style.padding = '30px 40px';
   panel.style.borderRadius = '10px';
@@ -38,7 +35,6 @@
   overlay.appendChild(panel);
   document.body.appendChild(overlay);
 
-  // Neon stilovi za dugmad
   const buttons = overlay.querySelectorAll('button');
   buttons.forEach(btn => {
     btn.style.padding = '10px 20px';
@@ -52,11 +48,11 @@
     btn.style.borderRadius = '5px';
   });
 
-  // Logika za detekciju tastera R + G + 1
+  // Taster kombinacija: R + G + 1
   document.addEventListener('keydown', function (e) {
     activeKeys.add(e.key.toUpperCase());
     if (activeKeys.has('R') && activeKeys.has('G') && activeKeys.has('1')) {
-      overlay.style.display = 'flex';
+      overlay.style.display = 'flex'; // ⬅️ OVDJE SE PRIKAZUJE
     }
   });
 
@@ -64,12 +60,12 @@
     activeKeys.delete(e.key.toUpperCase());
   });
 
-  // Otkazivanje
+  // Dugme "Otkaži"
   document.getElementById('cancel-restart').addEventListener('click', () => {
     overlay.style.display = 'none';
   });
 
-  // Restartovanje
+  // Dugme "Restartuj"
   document.getElementById('confirm-restart').addEventListener('click', () => {
     if (confirm('Stvarno želiš da restartuješ server?')) {
       fetch('/restart', { method: 'POST' })
