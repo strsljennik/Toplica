@@ -76,14 +76,10 @@
     overlay.style.display = 'none';
   });
 
-  // Restart dugme šalje POST zahtev i zatvara overlay
-  document.getElementById('confirm-restart').addEventListener('click', () => {
-    if (confirm('Stvarno želiš da restartuješ server?')) {
-      fetch('/restart', { method: 'POST' })
-        .then(res => res.text())
-        .then(msg => alert(msg || 'Server se restartuje...'))
-        .catch(() => alert('Greška pri restartu servera'));
-      overlay.style.display = 'none';
-    }
-  });
-})();
+document.getElementById('confirm-restart').addEventListener('click', () => {
+  fetch('/restart', { method: 'POST' })
+    .then(res => res.text())
+    .then(msg => alert(msg || 'Server se restartuje...'))
+    .catch(() => alert('Greška pri restartu servera'));
+  overlay.style.display = 'none';
+});
