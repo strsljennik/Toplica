@@ -4,7 +4,7 @@
   // Kreiraj overlay koji je po defaultu sakriven
   const overlay = document.createElement('div');
   overlay.id = 'admin-overlay';
-  overlay.style.display = 'none'; // SAMO OVO ostaje
+  overlay.style.display = 'none';
   overlay.style.position = 'fixed';
   overlay.style.top = '0';
   overlay.style.left = '0';
@@ -61,7 +61,6 @@
   // Prati pritisnute tastere
   document.addEventListener('keydown', (e) => {
     activeKeys.add(e.key.toUpperCase());
-    // Kad su svi pritisnuti, prikaži overlay
     if (activeKeys.has('R') && activeKeys.has('G') && activeKeys.has('1')) {
       overlay.style.display = 'flex';
     }
@@ -76,10 +75,12 @@
     overlay.style.display = 'none';
   });
 
-document.getElementById('confirm-restart').addEventListener('click', () => {
-  fetch('/restart', { method: 'POST' })
-    .then(res => res.text())
-    .then(msg => alert(msg || 'Server se restartuje...'))
-    .catch(() => alert('Greška pri restartu servera'));
-  overlay.style.display = 'none';
-});
+  // Restart dugme šalje POST zahtev i zatvara overlay (BEZ confirm prompta!)
+  document.getElementById('confirm-restart').addEventListener('click', () => {
+    fetch('/restart', { method: 'POST' })
+      .then(res => res.text())
+      .then(msg => alert(msg || 'Server se restartuje...'))
+      .catch(() => alert('Greška pri restartu servera'));
+    overlay.style.display = 'none';
+  });
+})();
