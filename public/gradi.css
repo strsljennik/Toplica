@@ -1,17 +1,11 @@
 #gradijent {
-  width: 300px;
-  height: calc(6 * 30px);
-  background-color: transparent;
-  position: fixed;
-  bottom: 20px;
-  right: 0px;
-  z-index: 9999;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(6, 1fr);
   gap: 0;
-  padding: 0;
-  box-sizing: border-box;
+  position: fixed;
+  bottom: 20px;
+  right: 0;
   border-radius: 10px;
   box-shadow: 0 0 10px #000;
 }
@@ -19,80 +13,138 @@
 #gradijent .gradijent-box {
   width: 100%;
   height: 100%;
-  z-index: 9999;
   cursor: pointer;
+  background-size: cover; /* omogućava sijanje gradijenta */
+  box-shadow: 0 0 10px white; /* osnovni sjaj */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  background-size: 200% 100%;
-  animation-iteration-count: infinite;
 }
 
 #gradijent .gradijent-box:hover {
   transform: scale(1.1);
-  box-shadow: 0 0 5px white;
+  box-shadow: 0 0 15px white; /* intenzivniji sjaj */
 }
 
-/* ================= Animacije shine po grupama ================= */
-@keyframes shine1 { 0% {background-position:200% 0;} 100% {background-position:-200% 0;} }
-@keyframes shine2 { 0% {background-position:0 0;} 50% {background-position:100% 0;} 100% {background-position:0 0;} }
-@keyframes shine3 { 0% {background-position:0 0;} 100% {background-position:0 200%;} }
-@keyframes shine4 { 0% {background-position:0 0;} 50% {background-position:100% 100%;} 100% {background-position:0 0;} }
-@keyframes shine5 { 0% {background-position:0 0;} 25% {background-position:100% 0;} 50% {background-position:100% 100%;} 75% {background-position:0 100%;} 100% {background-position:0 0;} }
+/* Tekst sa gradijentom i animacijom */
+.guest[class*="gradient-"] {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-size: 200%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 
-/* ================= Animacija po grupama (6s,7s… do 15s) ================= */
-#gradijent .gradijent-box.gradient-1,
-#gradijent .gradijent-box.gradient-2,
-#gradijent .gradijent-box.gradient-3,
-#gradijent .gradijent-box.gradient-4,
-#gradijent .gradijent-box.gradient-5,
-#gradijent .gradijent-box.gradient-6,
-#gradijent .gradijent-box.gradient-7,
-#gradijent .gradijent-box.gradient-8,
-#gradijent .gradijent-box.gradient-9,
-#gradijent .gradijent-box.gradient-10 { animation: shine1 6s linear infinite; }
+/* Grupe animacija po 10 gradijenata */
+/* 1-10: pomeranje X */
+.guest.gradient-1,
+.guest.gradient-2,
+.guest.gradient-3,
+.guest.gradient-4,
+.guest.gradient-5,
+.guest.gradient-6,
+.guest.gradient-7,
+.guest.gradient-8,
+.guest.gradient-9,
+.guest.gradient-10 {
+  animation: moveX 6s linear infinite;
+}
 
-#gradijent .gradijent-box.gradient-11,
-#gradijent .gradijent-box.gradient-12,
-#gradijent .gradijent-box.gradient-13,
-#gradijent .gradijent-box.gradient-14,
-#gradijent .gradijent-box.gradient-15,
-#gradijent .gradijent-box.gradient-16,
-#gradijent .gradijent-box.gradient-17,
-#gradijent .gradijent-box.gradient-18,
-#gradijent .gradijent-box.gradient-19,
-#gradijent .gradijent-box.gradient-20 { animation: shine2 7s linear infinite; }
+/* 11-20: pomeranje Y */
+.guest.gradient-11,
+.guest.gradient-12,
+.guest.gradient-13,
+.guest.gradient-14,
+.guest.gradient-15,
+.guest.gradient-16,
+.guest.gradient-17,
+.guest.gradient-18,
+.guest.gradient-19,
+.guest.gradient-20 {
+  animation: moveY 7s linear infinite;
+}
 
-#gradijent .gradijent-box.gradient-21,
-#gradijent .gradijent-box.gradient-22,
-#gradijent .gradijent-box.gradient-23,
-#gradijent .gradijent-box.gradient-24,
-#gradijent .gradijent-box.gradient-25,
-#gradijent .gradijent-box.gradient-26,
-#gradijent .gradijent-box.gradient-27,
-#gradijent .gradijent-box.gradient-28,
-#gradijent .gradijent-box.gradient-29,
-#gradijent .gradijent-box.gradient-30 { animation: shine3 8s linear infinite; }
+/* 21-30: rotacija X */
+.guest.gradient-21,
+.guest.gradient-22,
+.guest.gradient-23,
+.guest.gradient-24,
+.guest.gradient-25,
+.guest.gradient-26,
+.guest.gradient-27,
+.guest.gradient-28,
+.guest.gradient-29,
+.guest.gradient-30 {
+  animation: rotateX 8s linear infinite;
+  transform-style: preserve-3d;
+}
 
-#gradijent .gradijent-box.gradient-31,
-#gradijent .gradijent-box.gradient-32,
-#gradijent .gradijent-box.gradient-33,
-#gradijent .gradijent-box.gradient-34,
-#gradijent .gradijent-box.gradient-35,
-#gradijent .gradijent-box.gradient-36,
-#gradijent .gradijent-box.gradient-37,
-#gradijent .gradijent-box.gradient-38,
-#gradijent .gradijent-box.gradient-39,
-#gradijent .gradijent-box.gradient-40 { animation: shine4 9s linear infinite; }
+/* 31-40: rotacija Y */
+.guest.gradient-31,
+.guest.gradient-32,
+.guest.gradient-33,
+.guest.gradient-34,
+.guest.gradient-35,
+.guest.gradient-36,
+.guest.gradient-37,
+.guest.gradient-38,
+.guest.gradient-39,
+.guest.gradient-40 {
+  animation: rotateY 9s linear infinite;
+  transform-style: preserve-3d;
+}
 
-#gradijent .gradijent-box.gradient-41,
-#gradijent .gradijent-box.gradient-42,
-#gradijent .gradijent-box.gradient-43,
-#gradijent .gradijent-box.gradient-44,
-#gradijent .gradijent-box.gradient-45,
-#gradijent .gradijent-box.gradient-46,
-#gradijent .gradijent-box.gradient-47,
-#gradijent .gradijent-box.gradient-48,
-#gradijent .gradijent-box.gradient-49,
-#gradijent .gradijent-box.gradient-50 { animation: shine5 10s linear infinite; }
+/* 41-50: animacija senke / glow */
+.guest.gradient-41,
+.guest.gradient-42,
+.guest.gradient-43,
+.guest.gradient-44,
+.guest.gradient-45,
+.guest.gradient-46,
+.guest.gradient-47,
+.guest.gradient-48,
+.guest.gradient-49,
+.guest.gradient-50 {
+  animation: glow 10s linear infinite;
+}
+
+/* Animacije */
+
+/* Pomera pozadinu po X */
+@keyframes moveX {
+  0% { background-position: 0 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Pomera pozadinu po Y */
+@keyframes moveY {
+  0% { background-position: 50% 0; }
+  50% { background-position: 50% 100%; }
+  100% { background-position: 50% 0; }
+}
+
+/* Rotacija po X osi */
+@keyframes rotateX {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(180deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* Rotacija po Y osi */
+@keyframes rotateY {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(180deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+/* Glow / senka animacija */
+@keyframes glow {
+  0% { text-shadow: 0 0 5px white, 0 0 10px white; }
+  50% { text-shadow: 0 0 20px white, 0 0 30px white; }
+  100% { text-shadow: 0 0 5px white, 0 0 10px white; }
+}
+
 
 /* ================= Gradijenti (originalni kod) ================= */
 #gradijent .gradijent-box.gradient-1 {background-image: linear-gradient(45deg, #ff6347, #ffffff, #ff1493, #40e0d0);}
@@ -145,17 +197,6 @@
 #gradijent .gradijent-box.gradient-48 {background-image: linear-gradient(45deg, #ff8c00, #ff6600);}
 #gradijent .gradijent-box.gradient-49 {background-image: radial-gradient(circle, #a9a9a9, #d3d3d3);}
 #gradijent .gradijent-box.gradient-50 {background-image: linear-gradient(to right, #c0c0c0, #ffffff);}
-
-/* Tekst sa gradijentom */
-.guest[class*="gradient-"] {
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
 
 /* ========== Kontejner admin gradijenta ========== */
 #xgradixadmin {
@@ -239,4 +280,5 @@
 .grad-admin-8 { background-image: radial-gradient(circle, #ffea00, #00ff00); }
 .grad-admin-9 { background-image: linear-gradient(to right, #ff1493, #00f); }
 .grad-admin-10 { background-image: radial-gradient(circle, #00ff00, #ff6347); }
+
 
