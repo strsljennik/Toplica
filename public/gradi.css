@@ -26,37 +26,32 @@
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   background-size: 200% 100%;
+  animation: shine1 6s linear infinite; /* brže i vidljivije */
 }
 
-/* Hover efekat */
-#gradijent .gradijent-box:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px white;
+@keyframes shine1 {
+  0% { background-position: 200% 0; }
+  50% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* ===================== Svetlosni prelaz (shine overlay) ===================== */
 #gradijent .gradijent-box::before {
   content: "";
   position: absolute;
   top: 0;
-  left: -75%;
+  left: -50%;
   width: 50%;
   height: 100%;
   background: linear-gradient(
     120deg,
     rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.4) 50%,
+    rgba(255,255,255,0.5) 50%,
     rgba(255,255,255,0) 100%
   );
   transform: skewX(-25deg);
   animation: shine-light 3s linear infinite;
 }
 
-/* Animacija svetlosnog preliva */
-@keyframes shine-light {
-  0% { left: -75%; }
-  100% { left: 125%; }
-}
 
 /* ===================== Shine animacije (pozadina) ===================== */
 @keyframes shine1 { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -233,14 +228,14 @@
   background-position: center;
   /* uklonjeno: animation */
 }
-.grad-admin-1 { background-image: linear-gradient(to right, #0d47a1, #1976d2, #42a5f5); }
-.grad-admin-2 { background-image: linear-gradient(to right, #1b5e20, #388e3c, #66bb6a); }
-.grad-admin-3 { background-image: linear-gradient(to right, #4e342e, #6d4c41, #a1887f); }
-.grad-admin-4 { background-image: linear-gradient(to right, #f06292, #ec407a, #e91e63); }
-.grad-admin-5 { background-image: linear-gradient(to right, #ffb74d, #ff9800, #f57c00); }
-.grad-admin-6 { background-image: linear-gradient(to right, #ba68c8, #ab47bc, #8e24aa); }
-.grad-admin-7 { background-image: linear-gradient(to right, #1976d2, #42a5f5, #f06292); }
-.grad-admin-8 { background-image: linear-gradient(to right, #1b5e20, #66bb6a, #ffb74d, #f57c00); }
-.grad-admin-9 { background-image: linear-gradient(to right, #4e342e, #6d4c41, #ba68c8, #ab47bc, #e91e63); }
+.grad-admin-1 { background-image: linear-gradient(to right, #0d47a1, #42a5f5, #f06292); }
+.grad-admin-2 { background-image: linear-gradient(to right, #1b5e20, #66bb6a, #ffeb3b); }
+.grad-admin-3 { background-image: linear-gradient(to right, #4e342e, #a1887f, #ba68c8); }
+.grad-admin-4 { background-image: linear-gradient(to right, #f06292, #e91e63, #ffb6c1); }
+.grad-admin-5 { background-image: linear-gradient(to right, #ffb74d, #f57c00, #fff176); }
+.grad-admin-6 { background-image: linear-gradient(to right, #ab47bc, #8e24aa, #d1c4e9); }
+.grad-admin-7 { background-image: linear-gradient(to right, #1976d2, #42a5f5, #00bcd4); }
+.grad-admin-8 { background-image: linear-gradient(to right, #1b5e20, #66bb6a, #ff5722, #fdd835); }
+.grad-admin-9 { background-image: linear-gradient(to right, #4e342e, #6d4c41, #9c27b0, #e91e63); }
 .grad-admin-10 { background-image: linear-gradient(to right, #0d47a1, #42a5f5, #ff9800, #f06292, #8e24aa); }
 
