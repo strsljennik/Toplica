@@ -178,21 +178,27 @@ socket.broadcast.emit("promeniSirinu", data);
 });
 
    // ZA DEFAULT BOJU KORISNIKA
-  io.emit('updateDefaultColor', { color: defaultColor });
-   
-      socket.on('updateDefaultColor', (data) => {
-        defaultColor = data.color;
-      
- socket.broadcast.emit('updateDefaultColor', { color: defaultColor });
-   });
-    io.emit('updateDefaultGradient', { gradient: defaultGradient });
+    socket.on('updateDefaultColor', (data) => {
+    defaultColor = data.color;
+    defaultGradient = null; // resetujemo gradijent
 
-   socket.on('updateDefaultGradient', (data) => {
-        defaultGradient = data.gradient;
+    socket.broadcast.emit('updateDefaultColor', { color: defaultColor });
+});
 
-         socket.broadcast.emit('updateDefaultGradient', { gradient: defaultGradient });
-    });
+socket.on('updateDefaultGradient', (data) => {
+    defaultGradient = data.gradient;
+    defaultColor = null; // resetujemo boju
 
+    socket.broadcast.emit('updateDefaultGradient', { gradient: defaultGradient });
+});
+
+if (defaultColor) {
+    io.emit('updateDefaultColor', { color: defaultColor });
+}
+if (defaultGradient) {
+    socket.emit('updateDefaultGradient', { gradient: defaultGradient });
+}
         socket.on('disconnect', () => {});
     });
 };
+
