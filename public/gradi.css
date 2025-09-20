@@ -88,110 +88,20 @@
 #gradijent .gradijent-box.gradient-49 { background-image: radial-gradient(circle, #a9a9a9, #d3d3d3); } /* neon siva (miš) */
 #gradijent .gradijent-box.gradient-50 { background-image: linear-gradient(to right, #c0c0c0, #ffffff); } /* neon srebrna + bela */
 
-
-/* Tekst sa gradijentom */
 .guest[class*="gradient-"] {
   display: inline-block;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  background-size: 200% 100%; /* obavezno za shine/colorshift */
+  background-size: 200% 100%;
   background-repeat: no-repeat;
   background-position: center;
+  filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
+  mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
 }
 
-/* Keyframes animacija */
-@keyframes shine {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-@keyframes fade {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
-}
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-@keyframes wave {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(10deg); }
-  100% { transform: rotate(0deg); }
-}
-@keyframes colorshift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
 
-/* Raspodela animacija po grupama */
-.guest.gradient-1,
-.guest.gradient-2,
-.guest.gradient-3,
-.guest.gradient-4,
-.guest.gradient-5,
-.guest.gradient-6,
-.guest.gradient-7,
-.guest.gradient-8,
-.guest.gradient-9,
-.guest.gradient-10 {
-  animation: shine 15s linear infinite;
-}
-
-.guest.gradient-11,
-.guest.gradient-12,
-.guest.gradient-13,
-.guest.gradient-14,
-.guest.gradient-15,
-.guest.gradient-16,
-.guest.gradient-17,
-.guest.gradient-18,
-.guest.gradient-19,
-.guest.gradient-20 {
-  animation: fade 6s ease-in-out infinite;
-}
-
-.guest.gradient-21,
-.guest.gradient-22,
-.guest.gradient-23,
-.guest.gradient-24,
-.guest.gradient-25,
-.guest.gradient-26,
-.guest.gradient-27,
-.guest.gradient-28,
-.guest.gradient-29,
-.guest.gradient-30 {
-  animation: pulse 4s ease-in-out infinite;
-}
-
-.guest.gradient-31,
-.guest.gradient-32,
-.guest.gradient-33,
-.guest.gradient-34,
-.guest.gradient-35,
-.guest.gradient-36,
-.guest.gradient-37,
-.guest.gradient-38,
-.guest.gradient-39,
-.guest.gradient-40 {
-  animation: wave 3s ease-in-out infinite;
-}
-
-.guest.gradient-41,
-.guest.gradient-42,
-.guest.gradient-43,
-.guest.gradient-44,
-.guest.gradient-45,
-.guest.gradient-46,
-.guest.gradient-47,
-.guest.gradient-48,
-.guest.gradient-49,
-.guest.gradient-50 {
-  animation: colorshift 12s linear infinite;
-}
 
 /* ========== Kontejner admin gradijenta ========== */
 #xgradixadmin {
@@ -235,6 +145,8 @@
   background-size: 200%;
   background-repeat: no-repeat;
   background-position: center;
+   filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
+  mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
 }
 
 /* ========== 10 gradijenata sa lepim kombinacijama ========== */
@@ -253,4 +165,5 @@
 .grad-admin-8 { background-image: linear-gradient(to right, #1b5e20, #66bb6a, #ffb74d, #f57c00); }
 .grad-admin-9 { background-image: linear-gradient(to right, #4e342e, #6d4c41, #ba68c8, #ab47bc, #e91e63); }
 .grad-admin-10 { background-image: linear-gradient(to right, #0d47a1, #42a5f5, #ff9800, #f06292, #8e24aa); }
+
 
