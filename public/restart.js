@@ -55,14 +55,14 @@
     });
   });
 
-  document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (e) => {
+    if (!e.key) return; // sprečava grešku
     activeKeys.add(e.key.toUpperCase());
     if (activeKeys.has('R') && activeKeys.has('G') && activeKeys.has('1')) {
-      overlay.style.display = 'flex';
+        overlay.style.display = 'flex';
     }
-  });
-
-  document.addEventListener('keyup', (e) => {
+});
+ document.addEventListener('keyup', (e) => {
     activeKeys.delete(e.key.toUpperCase());
   });
 
