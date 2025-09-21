@@ -1,4 +1,4 @@
-let privilegedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*']);
+let privilegedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊', 'Dia']);
 let bannedUsers = new Set(); // Banovani korisnici
 const userSockets = new Map(); // Mapa koja čuva socket.id → username
 
@@ -72,4 +72,5 @@ function setupSocketEvents(io, guests, bannedUsers) {
 }
 
 module.exports = { setupSocketEvents };
+
 
