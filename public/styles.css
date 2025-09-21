@@ -145,6 +145,7 @@ body {
     resize: none;
     overflow: hidden;
     outline: none;
+    white-space: nowrap;
     
 }
 #guestList {
@@ -183,6 +184,7 @@ body {
      font-weight: bold;
      font-style: italic;
     color: rgb(168, 168, 168);
+    white-space: nowrap;
   }
 .guest::before, .virtual-guest::before {
     content: "🍹"; 
@@ -454,4 +456,5 @@ body {
       z-index: 999;
       display: none;
     }
+
 
