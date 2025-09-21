@@ -69,28 +69,32 @@ document.addEventListener("DOMContentLoaded", () => {
         chatContainer.style.cursor = cursor;
     });
 
-    function startDrag(event) {
-        const offsetX = event.clientX - chatContainer.offsetLeft;
-        const offsetY = event.clientY - chatContainer.offsetTop;
+   function startDrag(event) {
+    if (!authorized) return; // ← dodaj ovo
 
-        function move(event) {
-            const x = event.clientX - offsetX;
-            const y = event.clientY - offsetY;
-            chatContainer.style.left = `${x}px`;
-            chatContainer.style.top = `${y}px`;
-            socket.emit("moveChatContainer", { x, y });
-        }
+    const offsetX = event.clientX - chatContainer.offsetLeft;
+    const offsetY = event.clientY - chatContainer.offsetTop;
 
-        function stopDrag() {
-            document.removeEventListener("mousemove", move);
-            document.removeEventListener("mouseup", stopDrag);
-        }
-
-        document.addEventListener("mousemove", move);
-        document.addEventListener("mouseup", stopDrag);
+    function move(event) {
+        const x = event.clientX - offsetX;
+        const y = event.clientY - offsetY;
+        chatContainer.style.left = `${x}px`;
+        chatContainer.style.top = `${y}px`;
+        socket.emit("moveChatContainer", { x, y });
     }
 
+    function stopDrag() {
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", stopDrag);
+    }
+
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", stopDrag);
+}
+
+
     function startResize(event, direction) {
+          if (!authorized) return; 
         const startX = event.clientX;
         const startY = event.clientY;
         const startWidth = chatContainer.offsetWidth;
