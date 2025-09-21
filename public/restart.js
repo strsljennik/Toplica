@@ -62,11 +62,11 @@ document.addEventListener('keydown', (e) => {
         overlay.style.display = 'flex';
     }
 });
- document.addEventListener('keyup', (e) => {
+document.addEventListener('keyup', (e) => {
+    if (!e.key) return;
     activeKeys.delete(e.key.toUpperCase());
-  });
-
-  document.getElementById('cancel-restart').addEventListener('click', () => {
+});
+ document.getElementById('cancel-restart').addEventListener('click', () => {
     overlay.style.display = 'none';
   });
 
