@@ -75,17 +75,15 @@ socket.on('update-images', (updatedImages) => {
 });
 
 function addImageToDOM(imageUrl, position, dimensions) {
-    let existingImage = document.querySelector(`img[src="${imageUrl}"]`);
-    if (!existingImage) {
-        const newImage = document.createElement('img');
-        newImage.src = imageUrl;
-        newImage.style.width = dimensions.width + 'px';
-        newImage.style.height = dimensions.height + 'px';
-        newImage.style.position = "absolute";
-        newImage.style.left = position.x + 'px';
-        newImage.style.top = position.y + 'px';
-        newImage.style.zIndex = "3";
-        newImage.classList.add('draggable', 'resizable');
+    const newImage = document.createElement('img');
+    newImage.src = imageUrl;
+    newImage.style.width = dimensions.width + 'px';
+    newImage.style.height = dimensions.height + 'px';
+    newImage.style.position = "absolute";
+    newImage.style.left = position.x + 'px';
+    newImage.style.top = position.y + 'px';
+    newImage.style.zIndex = "3";
+    newImage.classList.add('draggable', 'resizable');
 
     const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊', 'Dia']);
 
