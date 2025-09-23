@@ -615,15 +615,6 @@ el.innerText = originalButtonText.get(key) || '';
       }
     }
   });
-
-  // VRATI GOST BORDER
-  const style = document.getElementById('remove-guest-borders');
-  if (style) style.remove();
-
-  document.querySelectorAll('.guest, .virtual-guest').forEach(el => {
-    el.style.borderBottom = '';
-  });
-
 const chatContainer = document.getElementById('chatContainer');
 if (chatContainer) {
   chatContainer.style.zIndex = '';
@@ -668,4 +659,5 @@ if (chatInput) {
 socket.on('reset-layout', () => {
   performReset();
 });
+
 
