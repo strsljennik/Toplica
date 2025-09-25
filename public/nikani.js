@@ -63,12 +63,28 @@ const animations = {
     display: inline-block;
     transform-origin: center center;
     animation-name: superCombo;
-    animation-duration: 5s;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+  }`,
+
+  guestGradientGlow: `@keyframes guestGradientGlow {
+    0% { background-position: 0% center; filter: brightness(1.5) saturate(1.5); }
+    50% { background-position: 50% center; filter: brightness(2.5) saturate(2.5); }
+    100% { background-position: 100% center; filter: brightness(1.5) saturate(1.5); }
+  }
+  .guest-gradient-anim {
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation-name: guestGradientGlow;
+    animation-duration: 2s;
     animation-iteration-count: infinite;
     animation-timing-function: ease-in-out;
   }`
 };
-
 const animationAuthorizedUsers = new Set(['Radio Galaksija','R-Galaksija','ZI ZU','*___F117___*','*__X__*','Dia💎','Dia',',,Sandra,,','_L i l i_','ViRuS_LiLi','𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊']);
 let allUserAnimations = {};
 let currentAnimation = null;
@@ -285,8 +301,24 @@ btnSuperCombo.onclick = () => {
 };
 popnik.appendChild(btnSuperCombo);
 
+const btnGuestGradient = document.createElement('button');
+btnGuestGradient.textContent = 'Sjajni Gradijent';
+btnGuestGradient.style.margin = '5px';
+btnGuestGradient.style.padding = '5px 12px';
+btnGuestGradient.style.cursor = 'pointer';
+btnGuestGradient.onclick = () => {
+    currentAnimation = 'guestGradientGlow';
+    applyAnimationToNick(myNickname, 'guestGradientGlow', animationSpeed); // primeni lokalno
+    socket.emit('animationChange', { // pošalji svima
+        nickname: myNickname,
+        animation: 'guestGradientGlow',
+        speed: animationSpeed
+    });
+    popnik.style.display = 'none';
+};
+popnik.appendChild(btnGuestGradient);
 
-  // Slider za brzinu animacije
+ // Slider za brzinu animacije
   const speedLabel = document.createElement('label');
   speedLabel.textContent = `Brzina animacije: ${animationSpeed}s`;
   speedLabel.style.display = 'block';
@@ -343,9 +375,19 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
 
     // Provera da li korisnik ima gradijent
     const isGradient = Array.from(userDiv.classList).some(cls => cls.startsWith('gradient-'));
+    const isGuestGradientAnim = userDiv.classList.contains('guest-gradient-anim');
+
+    if (isGuestGradientAnim) {
+        // Animacija sjajnog gradijenta samo za guest listu
+        userDiv.style.animationName = 'guestGradientGlow';
+        userDiv.style.animationDuration = `${speed}s`;
+        userDiv.style.animationIterationCount = 'infinite';
+        userDiv.style.animationTimingFunction = 'ease-in-out';
+        return;
+    }
 
     if (isGradient) {
-        // Animacija na ceo div
+        // Animacija na ceo div za obične gradijente, bez sjaja
         userDiv.style.animationName = animationName;
         userDiv.style.animationDuration = `${speed}s`;
         userDiv.style.animationIterationCount = 'infinite';
@@ -364,14 +406,12 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
 
     for (let i = 0; i < text.length; i++) {
         const char = text[i];
-
         if (problematicChars.includes(char)) {
             userDiv.appendChild(document.createTextNode(char));
         } else {
             const span = document.createElement('span');
             span.textContent = char;
 
-            // Dodaj klasu u zavisnosti od animacije
             if (animationName === 'rotateLetters') span.classList.add('rotate-letter');
             else if (animationName === 'glowBlink') span.classList.add('glow-letter');
             else if (animationName === 'fadeInOut') span.classList.add('fade-letter');
@@ -386,11 +426,9 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
         }
     }
 
-    // Ponovo pokreni rotateLetters ako je potrebno
     if (animationName === 'rotateLetters') {
         const spans = userDiv.querySelectorAll('.rotate-letter');
         let completedSpans = 0;
-
         spans.forEach(span => {
             span.addEventListener('animationend', () => {
                 completedSpans++;
@@ -405,7 +443,6 @@ function applyAnimationToNick(nickname, animationName, speed = animationSpeed) {
         });
     }
 }
-
 function applyAnimationToNickWhenReady(nickname, animation, speed) {
     const tryApply = () => {
         const userDiv = document.getElementById(`guest-${nickname}`);
