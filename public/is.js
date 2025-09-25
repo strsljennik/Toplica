@@ -204,18 +204,12 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-const colorPicker = document.getElementById('colorPicker');
 const gradijent = document.getElementById('gradijent');
 
-// Funkcija za sakrivanje oba pickera
-function hidePickers() {
-  if (colorPicker) colorPicker.style.display = 'none';
+  function hidePickers() {
   if (gradijent) gradijent.style.display = 'none';
 }
-
-// Funkcija za prikazivanje oba pickera
 function showPickers() {
-  if (colorPicker) colorPicker.style.display = 'inline-block';
   if (gradijent) gradijent.style.display = 'grid';
 }
 
@@ -336,5 +330,6 @@ socket.on('usersCount', data => {
   }, 3000);
 });
  });
+
 
 
