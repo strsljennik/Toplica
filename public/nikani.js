@@ -85,7 +85,7 @@ const animations = {
     animation-timing-function: ease-in-out;
   }`
 };
-const animationAuthorizedUsers = new Set(['Radio Galaksija','R-Galaksija','ZI ZU','*___F117___*','*__X__*','Dia💎','Dia',',,Sandra,,','_L i l i_','ViRuS_LiLi','𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊']);
+const animationAuthorizedUsers = new Set(['Radio Galaksija','R-Galaksija','ZI ZU','*___F117___*','*__X__*','Dia💎','Dia', 'Najlepsa Ciganka',',,Sandra,,','_L i l i_','ViRuS_LiLi','𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊']);
 let allUserAnimations = {};
 let currentAnimation = null;
 let animationSpeed = 2;
@@ -466,3 +466,4 @@ socket.on('currentAnimations', (allAnimations) => {
     applyAnimationToNickWhenReady(nickname, animation, speed);
   }
 });
+
