@@ -103,7 +103,7 @@ body {
     position: absolute;
     top: 100px;
     left: 5px;
-    right: 170px;
+    right: 180px;
     bottom: 0px;
     padding: 10px;
     display: flex;
@@ -169,7 +169,7 @@ body {
     top: 55px;
     right: 0;
     bottom: 0;
-    width: 165px;
+    width: 175px;
     overflow-y: auto;
     border: 2px solid white;
     background-color: black;
@@ -473,3 +473,4 @@ body {
       z-index: 999;
       display: none;
     }
+
