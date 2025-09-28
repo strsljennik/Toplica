@@ -79,7 +79,7 @@ startVirtualGuests(io, guests);
 io.on('connection', (socket) => {
     // Generisanje jedinstvenog broja za gosta
     const uniqueNumber = generateUniqueNumber();
-    const nickname = `G-${uniqueNumber}`; // Nadimak korisnika
+    const nickname = `Gost-${uniqueNumber}`; // Nadimak korisnika
     guests[socket.id] = nickname; // Dodajemo korisnika u guest list
  socket.emit('setNickname', nickname);
     socket.emit('yourNickname', nickname);
@@ -229,6 +229,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
+
 
 
 
