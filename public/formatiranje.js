@@ -97,18 +97,22 @@ socket.on('chatMessage', function(data) {
     newMessage.style.textDecoration = (data.underline ? 'underline ' : '') + (data.overline ? 'overline' : '');
 
     // Boja ili gradijent
-    if (data.color) {
+     if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
         newMessage.style.webkitBackgroundClip = '';
         newMessage.style.webkitTextFillColor = '';
         newMessage.style.color = data.color;
-    } else if (data.gradient) {
+ } else if (data.gradient || window.defaultAdminGradient) {
+    const gradClass = data.gradient || window.defaultAdminGradient;
+    const gradElement = document.querySelector(`.${gradClass}`);
+    if (gradElement) {
         newMessage.style.backgroundClip = 'text';
         newMessage.style.webkitBackgroundClip = 'text';
         newMessage.style.webkitTextFillColor = 'transparent';
-        newMessage.style.backgroundImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
+        newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
     }
+}
 
    // Dodavanje sadržaja poruke
     newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
@@ -508,13 +512,17 @@ gradBtn.addEventListener('click', () => {
                 box.onclick = function () {
                     const selectedGrad = this.classList[1]; // npr. "grad-admin-3"
 
-                    // Emitujemo svim klijentima
+                    // Emitujemo svim klijentima i postavljamo globalni admin gradijent
                     socket.emit('updateDefaultGradient', { gradient: selectedGrad });
+                    window.defaultAdminGradient = selectedGrad;
+
+                    const clickedBox = this; // referenca na kliknuti box
 
                     // Primeni posle 3s delay
                     setTimeout(() => {
                         document.querySelectorAll('.guest').forEach(el => {
-                            const isVirtual = virtualGuests.some(v => v.nickname === (el.dataset.nickname || el.id.replace('guest-', '')));
+                            const nickname = el.dataset.nickname || el.id.replace('guest-', '');
+                            const isVirtual = virtualGuests.some(v => v.nickname === nickname);
                             if (isVirtual) return;
                             if ('userColor' in el.dataset || 'userGradient' in el.dataset) return;
 
@@ -526,7 +534,7 @@ gradBtn.addEventListener('click', () => {
 
                             // Dodaj novi admin gradijent
                             el.classList.add(selectedGrad, 'use-gradient');
-                            el.style.backgroundImage = getComputedStyle(this).backgroundImage;
+                            el.style.backgroundImage = getComputedStyle(clickedBox).backgroundImage;
 
                             // Ako postoji adminColor, ostavi style.color netaknut
                             if (!('adminColor' in el.dataset)) {
@@ -553,10 +561,12 @@ gradBtn.addEventListener('click', () => {
 // Socket event za update default gradijenta od strane drugih admina
 socket.on('updateDefaultGradient', (data) => {
     const newGrad = data.gradient;
+    window.defaultAdminGradient = newGrad;
 
     setTimeout(() => {
         document.querySelectorAll('.guest').forEach(el => {
-            const isVirtual = virtualGuests.some(v => v.nickname === (el.dataset.nickname || el.id.replace('guest-', '')));
+            const nickname = el.dataset.nickname || el.id.replace('guest-', '');
+            const isVirtual = virtualGuests.some(v => v.nickname === nickname);
             if (isVirtual) return;
             if ('userColor' in el.dataset || 'userGradient' in el.dataset) return;
 
@@ -568,7 +578,8 @@ socket.on('updateDefaultGradient', (data) => {
 
             // Dodaj novi admin gradijent
             el.classList.add(newGrad, 'use-gradient');
-            el.style.backgroundImage = getComputedStyle(document.querySelector(`.${newGrad}`)).backgroundImage;
+            const gradElem = document.querySelector(`.${newGrad}`);
+            if (gradElem) el.style.backgroundImage = getComputedStyle(gradElem).backgroundImage;
 
             // Ako postoji adminColor, ostavi style.color netaknut
             if (!('adminColor' in el.dataset)) {
@@ -584,4 +595,3 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
-
