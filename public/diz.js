@@ -31,11 +31,15 @@ const allDraggables = [
   'GBtn',
   'boldBtn',
   'italicBtn',
+  'plusBtn',
+  'minusBtn',
+  'linijadoleBtn',
   'colorBtn',
   '#messageArea',
   '#guestList',
   '#chatInput'
 ];
+
 let editMode = false;
 
 function setupInteract(el) {
@@ -609,6 +613,7 @@ if (chatInput) {
 socket.on('reset-layout', () => {
   performReset();
 });
+
 
 
 
