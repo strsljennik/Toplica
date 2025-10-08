@@ -14,7 +14,8 @@ document.getElementById('smilesBtn').addEventListener('click', () => {
             width: '90vw',              // širina 90% ekrana
             maxHeight: '80vh',          // visina 80% ekrana
             overflowY: 'auto',
-            flexWrap: 'wrap'
+            overflowX: 'auto',
+             flexWrap: 'wrap'
         });
 
         // Učitaj slike iz localStorage
@@ -474,6 +475,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
