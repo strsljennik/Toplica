@@ -3,13 +3,18 @@ document.getElementById('smilesBtn').addEventListener('click', () => {
     const { bottom, left } = document.getElementById('smilesBtn').getBoundingClientRect();
     
     // Ako je modal trenutno skriven, prikaži ga
-    if (smileModal.style.display === 'none' || smileModal.style.display === '') {
+     if (smileModal.style.display === 'none' || smileModal.style.display === '') {
         Object.assign(smileModal.style, {
-            top: `100px`,         // ili `0px` ako želiš da bude skroz gore
-            left: `0px`,          // fiksira uz levu ivicu ekrana
+            top: `10px`,                // bliže vrhu ekrana
+            left: `50%`,                // centrirano horizontalno
+            transform: `translateX(-50%)`,
             zIndex: '1000',
             display: 'flex',
-            position: 'fixed'     // za svaki slučaj ako je CSS prebrisao
+            position: 'fixed',
+            width: '90vw',              // širina 90% ekrana
+            maxHeight: '80vh',          // visina 80% ekrana
+            overflowY: 'auto',
+            flexWrap: 'wrap'
         });
 
         // Učitaj slike iz localStorage
@@ -469,6 +474,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
