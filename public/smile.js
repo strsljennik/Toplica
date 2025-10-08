@@ -1,24 +1,40 @@
-// Funkcija za otvaranje/zaključavanje modalnog prozora sa smajlovima
 document.getElementById('smilesBtn').addEventListener('click', () => {
     const smileModal = document.getElementById('smileModal');
     const { bottom, left } = document.getElementById('smilesBtn').getBoundingClientRect();
     
     // Ako je modal trenutno skriven, prikaži ga
     if (smileModal.style.display === 'none' || smileModal.style.display === '') {
-       Object.assign(smileModal.style, {
-    top: `100px`,         // ili `0px` ako želiš da bude skroz gore
-    left: `0px`,          // OVDE se fiksira uz levu ivicu ekrana
-    zIndex: '1000',
-    display: 'flex',
-    position: 'fixed'     // Za svaki slučaj ako je CSS prebrisao
-});
-  // Učitaj slike iz localStorage
+        Object.assign(smileModal.style, {
+            top: `100px`,         // ili `0px` ako želiš da bude skroz gore
+            left: `0px`,          // fiksira uz levu ivicu ekrana
+            zIndex: '1000',
+            display: 'flex',
+            position: 'fixed'     // za svaki slučaj ako je CSS prebrisao
+        });
+
+        // Učitaj slike iz localStorage
         loadImagesFromLocalStorage();
+
+        // ✅ Dodaj CSS ograničenje veličine slika (ako već nije dodato)
+        if (!document.getElementById('smileModalStyle')) {
+            const style = document.createElement('style');
+            style.id = 'smileModalStyle'; // da ne dodaš duplikate
+            style.textContent = `
+                #smileModal img {
+                    max-width: 100px;
+                    max-height: 100px;
+                    object-fit: contain;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
     } else {
         // Ako je modal otvoren, zatvori ga
         closeSmileModal();
     }
 });
+
 // Funkcija za učitavanje slika iz localStorage
 const loadImagesFromLocalStorage = () => {
     const smileContainer = document.getElementById('smileContainer');
@@ -453,6 +469,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
