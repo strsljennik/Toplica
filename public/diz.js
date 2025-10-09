@@ -31,9 +31,6 @@ const allDraggables = [
   'GBtn',
   'boldBtn',
   'italicBtn',
-  'plusBtn',
-  'minusBtn',
-  'linijadoleBtn',
   'colorBtn',
   '#messageArea',
   '#guestList',
@@ -334,10 +331,10 @@ function applyEditModeStyles() {
   if (guestList) guestList.style.borderBottom = 'none';
 
   // Spusti dugmice ispod background-a
-  ['openModal', 'sound', 'smilesBtn', 'GBtn'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.zIndex = '1000';
-  });
+ ['openModal','NIK','sound','smilesBtn','GBtn','boldBtn','italicBtn','colorBtn','messageArea','guestList','chatInput'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.style.zIndex = '1000';
+});
 }
 // Funkcija za renderovanje layouta
 function renderLayout(data) {
@@ -521,10 +518,7 @@ function performReset() {
     'GBtn',
     'boldBtn',
     'italicBtn',
-    'plusBtn',
-    'minusBtn',
-    'linijadoleBtn',
-    'colorBtn',
+     'colorBtn',
   'messageArea',
   'guestList',
   'chatInput'
@@ -613,6 +607,7 @@ if (chatInput) {
 socket.on('reset-layout', () => {
   performReset();
 });
+
 
 
 
