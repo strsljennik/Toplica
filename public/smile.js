@@ -253,32 +253,37 @@ let lastAnimTime = 0;
 let animInProgress = false;
 
 // === Custom modal (za unos i obaveštenja) ===
-function showCustomModal(message, options = {}, callback = null) {
+function showCustomModal(message, options = {}, callback = null, autoClose = false) {
     const overlay = document.createElement("div");
     Object.assign(overlay.style, {
         position: "fixed",
-         background: "rgba(0,0,0,0.85)",
+        background: "rgba(0,0,0,0.85)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 10000,
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
     });
-
-    const box = document.createElement("div");
-    Object.assign(box.style, {
-        background: "black",
-        position: "fixed",
-        top: "300px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        padding: "20px",
-        borderRadius: "12px",
-        border: "2px solid #0ff",
-        boxShadow: "0 0 15px #0ff",
-        textAlign: "center",
-        color: "#fff",
-        fontFamily: "monospace",
-    });
+const box = document.createElement("div");
+Object.assign(box.style, {
+    background: "black",
+    padding: "20px",
+    borderRadius: "12px",
+    border: "2px solid #0ff",
+    boxShadow: "0 0 15px #0ff",
+    textAlign: "center",
+    color: "#fff",
+    fontFamily: "monospace",
+    position: "fixed",        // mora fixed da bi top/left radili u odnosu na viewport
+    top: "100px",
+    left: "50%",
+    transform: "translateX(-50%)", // da bude centriran horizontalno
+    minWidth: "300px",
+    maxWidth: "90vw",
+});
 
     const label = document.createElement("div");
     label.textContent = message;
@@ -302,10 +307,29 @@ function showCustomModal(message, options = {}, callback = null) {
         box.appendChild(input);
     }
 
+    // Dodajemo X dugme za zatvaranje
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "X";
+    Object.assign(closeBtn.style, {
+        position: "absolute",
+        top: "8px",
+        right: "8px",
+        background: "red",
+        border: "none",
+        color: "white",
+        fontWeight: "bold",
+        cursor: "pointer",
+        padding: "4px 8px",
+        borderRadius: "6px",
+        fontSize: "16px",
+    });
+    closeBtn.onclick = () => close(null);
+    box.appendChild(closeBtn);
+
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-   const close = (val = null) => {
+    const close = (val = null) => {
         if (document.body.contains(overlay)) {
             document.body.removeChild(overlay);
         }
@@ -321,25 +345,15 @@ function showCustomModal(message, options = {}, callback = null) {
                 close(null);
             }
         }
-        if (e.key === "Escape") {
-            document.removeEventListener("keydown", handler);
-            close(null);
-        }
-    });
-
-    // === AUTO CLOSE nakon 5 sekundi
-    if (autoClose) {
-        setTimeout(() => close(null), 5000);
-    }
-
-    // klik van box-a zatvara modal
-    overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) {
-            close(null);
-        }
     });
 
     if (input) input.focus();
+
+    if (autoClose) {
+        setTimeout(() => {
+            close(null);
+        }, 5000);
+    }
 }
 
 // === Trigger animacije ===
@@ -498,5 +512,6 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
