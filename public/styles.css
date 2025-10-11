@@ -115,13 +115,7 @@ body {
     white-space: normal;
     position: relative;
      z-index: 1;
-    filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
-    mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
-}
-.message img {
-    filter: none !important;
-    mix-blend-mode: normal !important;
-}
+   }
 #messageArea::-webkit-scrollbar {
   width: 10px;
 }
@@ -150,9 +144,7 @@ body {
     overflow: hidden;
     outline: none;
     white-space: nowrap;
-    filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
-    mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
-}
+  }
 #guestList {
     position: absolute;
     top: 55px;
@@ -193,9 +185,7 @@ body {
     color: rgb(168, 168, 168);
     white-space: nowrap;
     box-sizing: border-box; /* Dodaj ovo da padding ne probije visinu */
-    filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
-    mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
-}
+ }
 
 .guest::before, .virtual-guest::before {
     content: "🍹"; 
@@ -467,6 +457,7 @@ body {
       z-index: 999;
       display: none;
     }
+
 
 
 
