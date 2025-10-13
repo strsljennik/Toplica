@@ -8,8 +8,8 @@ module.exports = (io) => {
 let fullLayoutData = null;   // BEZ MASKE 
 let chatLayoutData = null;
  const sirinaStanje = {};
-let defaultColor = null;      
-let defaultGradient = null; 
+ let defaultColor = {};
+let defaultGradient = {};
   
    // **Šema i model za banovane IP adrese**
     const baniraniSchema = new mongoose.Schema({
@@ -156,50 +156,34 @@ socket.on("promeniGradijent", (data) => {
 
 socket.broadcast.emit("promeniSirinu", data);
   });
-
-   if (chatLayoutData) {
-    socket.emit('chat-layout-update', chatLayoutData);
-  }
-
-  // Kad klijent pošalje novi layout
-  socket.on('chat-layout-update', (data) => {
-    chatLayoutData = data;
-    socket.broadcast.emit('chat-layout-update', data);
-  });
-
-  // Reset layout
-  socket.on('reset-layout', () => {
-    chatLayoutData = null;
-    io.emit('reset-layout');
-  });
-      socket.on('imageAnimation', (data) => {
+    socket.on('imageAnimation', (data) => {
     socket.broadcast.emit('imageAnimation', data); // ili io.emit ako hoćeš da svi vide
 });
 
-   // ZA DEFAULT BOJU KORISNIKA
-    socket.on('updateDefaultColor', (data) => {
-    defaultColor = data.color;
-    defaultGradient = null; // resetujemo gradijent
+  // Kad admin promeni default boju
+socket.on('updateDefaultColor', (data) => {
+    defaultColor.value = data.color;
+    defaultGradient.value = null; // resetujemo gradijent
 
-    socket.broadcast.emit('updateDefaultColor', { color: defaultColor });
+    socket.broadcast.emit('updateDefaultColor', { color: defaultColor.value });
 });
 
+// Kad admin promeni default gradijent
 socket.on('updateDefaultGradient', (data) => {
-    defaultGradient = data.gradient;
-    defaultColor = null; // resetujemo boju
+    defaultGradient.value = data.gradient;
+    defaultColor.value = null; // resetujemo boju
 
-    socket.broadcast.emit('updateDefaultGradient', { gradient: defaultGradient });
+    socket.broadcast.emit('updateDefaultGradient', { gradient: defaultGradient.value });
 });
 
-if (defaultColor) {
-    io.emit('updateDefaultColor', { color: defaultColor });
+// Kad se novi klijent poveže, odmah mu pošalji aktivni default
+if (defaultColor.value) {
+    io.emit('updateDefaultColor', { color: defaultColor.value });
 }
-if (defaultGradient) {
-    io.emit('updateDefaultGradient', { gradient: defaultGradient });
+if (defaultGradient.value) {
+    io.emit('updateDefaultGradient', { gradient: defaultGradient.value });
 }
+
         socket.on('disconnect', () => {});
     });
 };
-
-
-
