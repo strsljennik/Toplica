@@ -95,9 +95,7 @@
   background-size: 200% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
-  mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
- }
+  }
 /* ========== Kontejner admin gradijenta ========== */
 #xgradixadmin {
   width: 300px; /* Širina kontejnera */
@@ -140,9 +138,7 @@
   background-size: 200%;
   background-repeat: no-repeat;
   background-position: center;
-    filter: brightness(2) saturate(2); /* pojačava intenzitet boja */
-    mix-blend-mode: screen;           /* omogućava da boje svetle "iznutra" */
-  }
+   }
 
 .grad-admin-1  { background-image: linear-gradient(45deg, #1e90ff, #00ff00, #708090); }
 .grad-admin-2  { background-image: radial-gradient(circle, #4682b4, #c0c0c0, #adff2f, #1e90ff); }
@@ -154,3 +150,4 @@
 .grad-admin-8  { background-image: radial-gradient(circle, #87ceeb, #808000, #708090); }
 .grad-admin-9  { background-image: linear-gradient(60deg, #4169e1, #9acd32, #d3d3d3); }
 .grad-admin-10 { background-image: radial-gradient(circle, #00bfff, #ffff00, #2f4f4f); }
+
