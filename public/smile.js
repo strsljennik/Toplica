@@ -130,9 +130,9 @@ const allItems = [
     ...['☕', '🖤', '💛', '💚','👀'].map(e => ({ type: 'emoji', content: e })),
     ...[
         
-        'xjanagrudi.avif','xjana.avif','xbikini.avif','xsg.avif', 'xasv.avifs', 'jaitea.avifs', 'tresnja.avifs',
-         'slika10.avifs', 'slika11.avifs','slika12.avifs','slika13.avifs','dia1.gif', 'strumf.avifs', 'gal.avifs',
-          'nov6.gif','slika1.avifs', 'slika3.avifs', 'bub.gif', 'ok.gif', 'vestica.webp', 'luster.webp',
+        'xjanagrudi.avif','xjana.avif','xbikini.avif','xsg.avif', 'xasv.avifs', 'jaitea.avifs','xjeni.avif', 
+        'slika10.avifs', 'slika11.avifs','slika12.avifs','slika13.avifs','dia1.gif', 'strumf.avifs', 'tresnja.avifs',
+        'nov6.gif','slika1.avifs', 'slika3.avifs', 'bub.gif', 'ok.gif', 'vestica.webp', 'luster.webp','gal.avifs',
          'slika6.avifs', 'slika7.avifs', 'nag1.webp', 'ily1.gif', 'ily2.gif', 'beba.gif',  'mesa.webp', 
         'uzivam.gif', 'stik10.png', 'dance.gif', 'dance1.gif', 'jerry3.avifs', 'jerry.webp', 'himen.webp',
         'rg.gif', 'x.gif', 'x1.gif', 'kiss.gif', 'kiss1.gif', 'jerry2.avifs', 'srce3.gif', 'srce2.gif', 
@@ -511,6 +511,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
