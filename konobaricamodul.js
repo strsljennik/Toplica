@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 module.exports = (io) => {
-  let chatContainerState = { x: 300, y: 100, width: 900, height: 550 };
+  let chatContainerState = { x: 400, y: 100, width: 800, height: 550 };
   const blockedIPs = new Set(); // Lokalna lista blokiranih IP adresa
   const stanje = {}; //  BORDERI ELEMENATA 
   let allUserAnimations = {}; 
@@ -184,6 +184,24 @@ if (defaultGradient.value) {
     io.emit('updateDefaultGradient', { gradient: defaultGradient.value });
 }
 
+    socket.on('ban-user', (banId) => {
+  bannedIds.add(banId);
+    io.emit('user-banned', banId);
+ });
+
+socket.on('unban-user', (banId) => {
+     bannedIds.delete(banId);
+    io.emit('user-unbanned', banId);
+ });
+
+ socket.on('connection', (socket) => {
+    const clientBanId = socket.handshake.query.banid;
+    if (bannedIds.has(clientBanId)) {
+       socket.emit('user-banned', clientBanId);
+   }
+ });
+
         socket.on('disconnect', () => {});
     });
 };
+
