@@ -171,7 +171,6 @@ if (window.snimanjeAktivno) {
         messageArea.scrollTop = 0;
     }
 });
-
 // Kada nov gost dođe
 socket.on('newGuest', function (nickname) {
     const guestId = `guest-${nickname}`;
@@ -181,13 +180,21 @@ socket.on('newGuest', function (nickname) {
     newGuest.id = guestId;
     newGuest.textContent = nickname;
 
+    // Dodeli jedinstveni ban ID
+    const banId = crypto.randomUUID();
+    newGuest.dataset.banid = banId;
+
+    // Ako korisnik nema svoj banId u localStorage, sačuvaj mu ga
+    if (!localStorage.getItem('banid')) {
+        localStorage.setItem('banid', banId);
+    }
+
     if (!guestsData[guestId]) {
         guestsData[guestId] = { nickname, color: '' };
     }
 
     guestList.appendChild(newGuest);
 });
-
 // Ažuriranje liste gostiju bez resetovanja stilova
 socket.on('updateGuestList', function (users) {
     const guestList = document.getElementById('guestList');
@@ -595,3 +602,4 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
