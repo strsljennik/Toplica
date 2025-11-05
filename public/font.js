@@ -82,7 +82,9 @@ document.body.addEventListener('contextmenu', function(e) {
         e.preventDefault();
     }
 });
+
 // BLOKIRANJE desnog klika i kopiranja samo u messageArea
 const messageArea = document.getElementById('messageArea');
 messageArea.oncontextmenu = e => false;
 messageArea.oncopy = e => false;
+
