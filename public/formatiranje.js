@@ -83,7 +83,7 @@ socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
     const myName = currentUser ? currentUser : myNickname;
-    let text = data.text.replace(/#n/g, myName);
+    let text = replaceTextEmoji(data.text).replace(/#n/g, myName);
     if (lastMessages[data.nickname] === text) return;
     lastMessages[data.nickname] = text;
 
@@ -133,7 +133,7 @@ socket.on('private_message', function(data) {
     if (!myNickname) return;
 
     const myName = currentUser ? currentUser : myNickname;
-    let text = data.message.replace(/#n/g, myName);
+    let text = replaceTextEmoji(data.text).replace(/#n/g, myName);
     if (lastMessages[data.from] === text) return;
     lastMessages[data.from] = text;
 
@@ -593,5 +593,6 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
