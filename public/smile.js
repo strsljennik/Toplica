@@ -74,7 +74,7 @@ const addSmile = (smile) => {
     const chatInput = document.getElementById('chatInput');
     if (chatInput) {
         chatInput.value += smile;
-        closeSmileModal();
+        
     }
 };
 
@@ -83,7 +83,7 @@ const addImageToChat = (imgSrc) => {
     const chatInput = document.getElementById('chatInput');
     if (chatInput) {
         chatInput.value += ` <img src="${imgSrc}" alt="emoji"> `;
-        closeSmileModal();
+    
     }
 };
 
@@ -511,6 +511,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
