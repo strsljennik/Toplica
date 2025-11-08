@@ -58,6 +58,7 @@ app.post('/restart', (req, res) => {
 // Lista autorizovanih i banovanih korisnika
 const authorizedUsers = new Set(['Radio Galaksija','ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', 'Dia']);
 const animationAuthorizedUsers = new Set(['Radio Galaksija','ZI ZU','*___F117___*','*__X__*','Dia💎','Dia','Najlepsa Ciganka', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊']);
+const bannedUsers = new Set();
 // Skladištenje informacija o gostima
 const guests = {};
 const guestsData = {};
@@ -66,7 +67,7 @@ const userColors = {}; // Ovdje čuvamo boje korisnika
 const sviAvatari = {};
 const userGradients = {};
 // Dodavanje socket događaja iz banmodula
-setupSocketEvents(io, guests, authorizedUsers);
+setupSocketEvents(io, guests, bannedUsers); // Dodavanje guests i bannedUsers u banmodul
 privatmodul(io, guests);
 let currentBackground = "";
 let textElements = [];
@@ -226,3 +227,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
+
