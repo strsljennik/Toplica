@@ -1,85 +1,103 @@
-// --- Dinamički CSS za crvenu traku ---
-(function insertBanCss() {
-    if (!document.getElementById('ban-css-marker')) {
-        const style = document.createElement('style');
-        style.id = 'ban-css-marker';
-        style.textContent = `
-            .guest.banned { position: relative; opacity: 0.6; }
-            .guest.banned::after {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 0;
-                width: 100%;
-                height: 3px;
-                background-color: red;
-                transform: translateY(-50%);
-                pointer-events: none;
+document.addEventListener("DOMContentLoaded", () => {
+  const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', 'Dia']);
+    let hasBanPrivilege = false;
+    let isBanned = false; // Praćenje statusa banovanja
+
+    const guestList = document.getElementById("guestList");
+    const chatContainer = document.getElementById("chatContainer"); // Referenca na chat
+
+    if (!guestList) {
+        console.error("Element sa id='guestList' nije pronađen.");
+        return;
+    }
+
+    // Prijava korisnika
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-socket-id': socket.id  
+            },
+            body: JSON.stringify({ username, password })
+        })
+        .then(response => {
+            if (response.ok) {
+                socket.emit('userLoggedIn', username);
+                this.reset();
+
+                // Provera da li je korisnik privilegovan
+                if (authorizedUsers.has(username)) {
+                    hasBanPrivilege = true; 
+                }
             }
-        `;
-        document.head.appendChild(style);
-    }
-})();
+        });
 
-// --- Ban/unban eventi sa servera ---
-socket.on('userBanned', nickname => {
-    const guestEl = document.getElementById(`guest-${nickname}`);
-    if (guestEl) guestEl.classList.add('banned');
-});
+            // Dvoklik na korisnike
+    guestList.addEventListener("dblclick", (event) => {
+    const target = event.target;
+    if (!target.classList.contains("guest")) return;
 
-socket.on('userUnbanned', nickname => {
-    const guestEl = document.getElementById(`guest-${nickname}`);
-    if (guestEl) guestEl.classList.remove('banned');
-});
+    const nickname = target.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '');
 
-// --- Event za lokalnog korisnika ---
-socket.on('youAreBanned', () => {
-    localStorage.setItem('banned', '1'); // samo za identifikaciju
-    chatInput.disabled = true;
-    messageArea.style.display = 'none';
-});
-
-// --- Dvoklik na korisnike za ban/unban ---
-guestList.addEventListener("dblclick", event => {
-    const guestEl = event.target.closest('.guest');
-    if (!guestEl) return;
-
-    const nickname = guestEl.textContent.trim();
-    if (!authorizedUsers.has(myNickname)) return;
-
-    if (myNickname === '*__X__*' || !authorizedUsers.has(nickname)) {
-        socket.emit('banUser', nickname);
+    // Samo *__X__* može banovati sve
+    if (hasBanPrivilege && username === '*__X__*') {
+        const action = target.classList.toggle("banned") ? "banUser" : "unbanUser";
+        target.style.backgroundColor = action === "banUser" ? "red" : "";
+        target.textContent = `${nickname}${action === "banUser" ? " (B)" : ""}`;
+        socket.emit(action, nickname);
+    } else if (hasBanPrivilege && !authorizedUsers.has(nickname)) {
+        // Ostali privilegovani ne mogu banovati autorizovane
+        const action = target.classList.toggle("banned") ? "banUser" : "unbanUser";
+        target.style.backgroundColor = action === "banUser" ? "red" : "";
+        target.textContent = `${nickname}${action === "banUser" ? " (B)" : ""}`;
+        socket.emit(action, nickname);
     }
 });
 
-// --- Dodavanje ili ažuriranje gostiju ---
-function addGuestIfNotExist(nickname) {
-    if (!document.getElementById(`guest-${nickname}`)) {
-        const guestEl = document.createElement('div');
-        guestEl.id = `guest-${nickname}`;
-        guestEl.className = 'guest';
-        guestEl.textContent = nickname;
-        guestList.appendChild(guestEl);
+        // Slušanje događaja za banovanje
+        socket.on("userBanned", (nickname) => {
+            const elements = document.querySelectorAll('.guest');
+            elements.forEach((el) => {
+                if (el.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '') === nickname) {
+                    el.classList.add("banned");
+                    el.style.backgroundColor = "red";
+                    if (!el.textContent.includes(" (B)")) {
+                        el.textContent += " (B)";
+                    }
+                }
+            });
 
-        // Ako je trenutno banovan lokalno (samo za identifikaciju)
-        if (localStorage.getItem('banned') && nickname === myNickname) {
-            guestEl.classList.add('banned');
-            socket.emit('userStillBanned', myNickname);
-        }
-    }
-}
+            if (nickname === socket.id) {
+                isBanned = true;
+                document.getElementById('chat-input').disabled = true;
+                chatContainer.style.display = 'none';
+            }
+        });
 
-// --- Server šalje listu gostiju ---
-socket.on('updateGuestList', (users) => {
-    guestList.innerHTML = '';
-    users.forEach(nick => addGuestIfNotExist(nick));
-});
+        // Slušanje događaja za odbanovanje
+        socket.on("userUnbanned", (nickname) => {
+            const elements = document.querySelectorAll('.guest');
+            elements.forEach((el) => {
+                if (el.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '') === nickname) {
+                    el.classList.remove("banned");
+                    el.style.backgroundColor = "";
+                    el.textContent = el.textContent.replace(" (B)", "");
+                }
+            });
 
-// --- Slanje poruka ---
-chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && chatInput.value.trim()) {
-        const msg = chatInput.value.trim();
-        socket.emit('chatMessage', msg);
-        chatInput.value = '';
-    }
-});
+                   if (nickname === socket.id) {
+                isBanned = false;
+                document.getElementById('chat-input').disabled = false;
+                chatContainer.style.display = 'block';
+            }
+        }); 
+    }); 
+}); 
+
+
