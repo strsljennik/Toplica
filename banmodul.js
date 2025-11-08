@@ -1,48 +1,76 @@
-const bannedUsers = new Set();
+let privilegedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', 'Dia']);
+const userSockets = new Map(); // Mapa koja čuva socket.id → username
 
-function setupSocketEvents(io, guests, authorizedUsers) {
-
+function setupSocketEvents(io, guests, bannedUsers) {
     io.on('connection', (socket) => {
-        const nickname = guests[socket.id] || 'Nepoznat korisnik';
+        // Provera da li je korisnik banovan
+        if (bannedUsers.has(socket.id)) {
+            socket.emit('banned', 'Banovani ste sa servera.');
+            socket.disconnect(true);
+            return;
+        }
 
-        // --- Ban / unban ---
-        socket.on('banUser', (targetNickname) => {
-            const username = guests[socket.id] || 'Nepoznat korisnik';
+        // Kada se korisnik prijavi
+        socket.on('userLoggedIn', (username) => {
+            userSockets.set(socket.id, username); // Sačuvaj socket ID i username
 
-            if (!authorizedUsers.has(username)) return;
-            if (targetNickname === '*__X__*') return;
-
-            if (bannedUsers.has(targetNickname)) {
-                bannedUsers.delete(targetNickname);
-                io.emit('userUnbanned', targetNickname);
-            } else {
-                bannedUsers.add(targetNickname);
-                io.emit('userBanned', targetNickname);
-
-                // Obavesti banovanog korisnika da postavi localStorage
-                for (const [sockId, nick] of Object.entries(guests)) {
-                    if (nick === targetNickname) {
-                        io.to(sockId).emit('youAreBanned');
-                    }
-                }
+            if (privilegedUsers.has(username)) {
+                socket.emit('adminAccess', "Pristup odobren.");
             }
         });
 
-        // --- Kada se korisnik reconnectuje ili ima kolačić / localStorage ---
-        socket.on('userStillBanned', nickname => {
-            if (!bannedUsers.has(nickname)) bannedUsers.add(nickname);
+        // Banovanje korisnika
+        socket.on('banUser', (nickname) => {
+            const username = userSockets.get(socket.id); // Dobavi username iz mape
+
+            if (!privilegedUsers.has(username)) {
+                socket.emit('error', "Nemate prava za banovanje.");
+                return;
+            }
+
+            // Pronađi socket.id na osnovu nadimka iz `guests` objekta
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
+
+            if (!targetSocketId) {
+                socket.emit('error', "Korisnik nije pronađen.");
+                return;
+            }
+
+            bannedUsers.add(targetSocketId);
+            io.to(targetSocketId).emit('banned', "Banovani ste sa servera.");
+            const targetSocket = io.sockets.sockets.get(targetSocketId);
+            if (targetSocket) targetSocket.disconnect(true);
+
             io.emit('userBanned', nickname);
         });
 
-        // --- Chat poruke ---
-        socket.on('chatMessage', (msg) => {
-            const nickname = guests[socket.id] || 'Nepoznat korisnik';
-            if (bannedUsers.has(nickname)) return;
-            io.emit('chatMessage', nickname, msg);
+        // Odbanovanje korisnika
+        socket.on('unbanUser', (nickname) => {
+            const username = userSockets.get(socket.id);
+
+            if (!privilegedUsers.has(username)) {
+                socket.emit('error', "Nemate prava za odbanovanje.");
+                return;
+            }
+
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
+
+            if (targetSocketId) {
+                bannedUsers.delete(targetSocketId);
+                io.emit('userUnbanned', nickname);
+            }
         });
 
-        // --- Napomena: disconnect se NE dodaje u ovom modulu ---
+        // Diskonekcija korisnika
+        socket.on('disconnect', () => {
+            const username = userSockets.get(socket.id);
+            userSockets.delete(socket.id);
+            bannedUsers.delete(socket.id);
+        });
     });
 }
 
-module.exports = { setupSocketEvents, bannedUsers };
+module.exports = { setupSocketEvents };
+
+
+
