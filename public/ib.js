@@ -15,25 +15,25 @@ const textEmojiMap = {
   ':-)': '🙂',
   ':-(': '🙁',
   ':-D': '😄',
+   ':x': '😎',
 
    '#0': 'Za Inci Biserku Od *__X__*😎',
   '#1': 'Dragi gosti vase primedbe mozete prijaviti upravi Galaksije na broj +511 545 856 957 565 956 354 785 968 652 624',
- '#2x': '❤🧡💛💚💙💜🤎🖤💖💗💓🤍',
- '#3x': '💋💋💋💋💋💋💋',
- '#4x': '#n jasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  '#5x': 'opaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa #n',
-  '#6x': 'ajmo romalen te kela em te gilava',
-  '#7x': 'hey sefe koj ti je vrag??????????',
-  '#8x': 'svega ovoga ne bi bilo da je pera otiso pravo u policiju',
-  '#9x': 'Musketari Galaksije - svi za jednog jedan za sve',
-  '#10x': 'Ko je vas poznavao ni pakao mu nece tesko pasti',
+ '#2': '❤🧡💛💚💙💜🤎🖤💖💗💓🤍',
+ '#3': '💋💋💋💋💋💋💋',
+ '#4': '#n jasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  '#5': 'opaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa #n',
+  '#6': 'ajmo romalen te kela em te gilava',
+  '#7': 'hey sefe koj ti je vrag??????????',
+  '#8': 'svega ovoga ne bi bilo da je pera otiso pravo u policiju',
+  '#9': 'Musketari Galaksije - svi za jednog jedan za sve',
+  '#10': 'Ko je vas poznavao ni pakao mu nece tesko pasti',
 
   '#iva': '🎶🎶🎶🎶🎵🎶🎶🎵',
   '#dia': '💎💎💎💎💎💎💎💎💎💎💎💎💎💎',
   '#x': 'Pesma za sve goste u Galaksiji od cika X-a ',
   '#g': () => new Date().toLocaleTimeString(),
-  ':x': '😎',
-  '#u': () => `Online: ${document.getElementById('current-users')?.textContent.replace(/\D/g,'')||0}, Ukupno: ${document.getElementById('total-users')?.textContent.replace(/\D/g,'')||0}`,
+   '#u': () => `Online: ${document.getElementById('current-users')?.textContent.replace(/\D/g,'')||0}, Ukupno: ${document.getElementById('total-users')?.textContent.replace(/\D/g,'')||0}`,
   '#dg': '#n Dobro Dosli, Sa Vama Je Dj Dia ',
   '#ha': 'Hulija❤️Ates'
 };
@@ -378,5 +378,6 @@ function replaceTextEmoji(msg){
 
   return msg;
 }
+
 
 
