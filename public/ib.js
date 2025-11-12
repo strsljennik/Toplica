@@ -28,10 +28,10 @@ const textEmojiMap = {
   '#8': 'svega ovoga ne bi bilo da je Pera otišao pravo u policiju',
   '#9': 'Musketari Galaksije - svi za jednog, jedan za sve',
   '#a': 'Ko je vas poznavao, ni pakao mu neće teško pasti',
-  '#a1': 'Prevari me jednom – sram te bilo, prevari me dva puta – sram mene bilo.',
-  '#a3': 'Biti potpuno iskren prema sebi je dobra vežba.',
-  '#a4': 'Ne trčite za ženama da se ne sudarite sa onima koji od njih beže.',
-  '#a5': 'Prodavačica je bila toliko lepa da je bilo smešno njeno pitanje: "Šta želite?"',
+  'a1': 'Prevari me jednom – sram te bilo, prevari me dva puta – sram mene bilo.',
+  'a2': 'Biti potpuno iskren prema sebi je dobra vežba.',
+  'a3': 'Ne trčite za ženama da se ne sudarite sa onima koji od njih beže.',
+  'a4': 'Prodavačica je bila toliko lepa da je bilo smešno njeno pitanje: "Šta želite?"',
 
   '#iva': '🎶🎶🎶🎶🎵🎶🎶🎵',
   '#dia': '💎💎💎💎💎💎💎💎💎💎💎💎💎💎',
@@ -382,6 +382,7 @@ function replaceTextEmoji(msg){
 
   return msg;
 }
+
 
 
 
