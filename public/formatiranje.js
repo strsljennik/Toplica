@@ -114,9 +114,13 @@ socket.on('chatMessage', function(data) {
     }
 }
 
+   // AVATAR U PORUCI
+  let chatAvatar = avatars[data.nickname + '_chat'] || avatars[data.nickname];
+let avatarHTML = chatAvatar ? `<img src="${chatAvatar}" class="inline-avatar">` : '';
+
    // Dodavanje sadržaja poruke
-    newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
-    messageArea.prepend(newMessage);
+newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text} <span style="font-size: 0.8em; color: gray;">(${data.time})</span> ${avatarHTML}`;
+ messageArea.prepend(newMessage);
     
       // Snimi poruku ako je aktivno snimanje
 if (window.snimanjeAktivno) {
@@ -593,6 +597,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
