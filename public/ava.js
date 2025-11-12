@@ -164,4 +164,3 @@ document.getElementById('sl').addEventListener('click', () => {
 // Registracija korisnika sa početnim avatarom
 socket.emit('register', { username: 'mojUsername', avatar: 'putanja/slike.webp' });
 
-
