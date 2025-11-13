@@ -149,25 +149,29 @@ document.getElementById('sl').addEventListener('click', () => {
     socket.emit('avatarChange', { username, avatar: '' });
   });
   avatarDiv.appendChild(clearBtn);
+ // --- Dugme za chat avatar SAMO za auth korisnike ---
+if (authorizedUsers.has(username)) {
+  const chatToggle = document.createElement('button');
+  chatToggle.id = 'avatar-chat-toggle';
+  chatToggle.textContent = showAvatarInChat
+    ? 'Avatar u porukama: UKLJUČEN'
+    : 'Avatar u porukama: ISKLJUČEN';
+  chatToggle.style.display = 'block';
+  chatToggle.style.marginTop = '10px';
 
-  // --- Dugme za chat avatar SAMO za auth korisnike ---
-  if (authorizedUsers.has(username)) {
-    const chatToggle = document.createElement('button');
-    chatToggle.id = 'avatar-chat-toggle';
+  chatToggle.addEventListener('click', () => {
+    showAvatarInChat = !showAvatarInChat; // toggle stanje
     chatToggle.textContent = showAvatarInChat
       ? 'Avatar u porukama: UKLJUČEN'
       : 'Avatar u porukama: ISKLJUČEN';
-    chatToggle.style.display = 'block';
-    chatToggle.style.marginTop = '10px';
+    saveAvatarsToStorage();
 
-    chatToggle.addEventListener('click', () => {
-      showAvatarInChat = !showAvatarInChat; // toggle stanje
-      chatToggle.textContent = showAvatarInChat
-        ? 'Avatar u porukama: UKLJUČEN'
-        : 'Avatar u porukama: ISKLJUČEN';
-      saveAvatarsToStorage();
-    });
+    // Emitujemo trenutni avatar za chat, svi ga vide u porukama
+    const avatarSrc = showAvatarInChat ? avatars[username] || '' : '';
+    socket.emit('avatarChange', { username, avatar: avatarSrc });
+  });
 
-    avatarDiv.appendChild(chatToggle);
-  }
+  avatarDiv.appendChild(chatToggle);
+}
 });
+
