@@ -1,4 +1,3 @@
-
 // --- CSS direktno iz JS ---
 const style = document.createElement('style');
 style.textContent = `
@@ -42,18 +41,17 @@ document.head.appendChild(style);
 
 // --- Globalni objekti ---
 let avatars = {};
-let showAvatarInChat = sessionStorage.getItem('showAvatarInChat') === '1';
-
+let showAvatarInChat = localStorage.getItem('showAvatarInChat') === '1' ? true : false;
 
 // --- Storage funkcije ---
 function loadAvatarsFromStorage() {
-  const stored = sessionStorage.getItem('avatars');
+  const stored = localStorage.getItem('avatars');
   avatars = stored ? JSON.parse(stored) : {};
 }
 
 function saveAvatarsToStorage() {
-  sessionStorage.setItem('avatars', JSON.stringify(avatars));
-  sessionStorage.setItem('showAvatarInChat', showAvatarInChat ? '1' : '0');
+  localStorage.setItem('avatars', JSON.stringify(avatars));
+  localStorage.setItem('showAvatarInChat', showAvatarInChat ? '1' : '0');
 }
 
 function createAvatarImg(src) {
@@ -119,7 +117,7 @@ document.getElementById('sl').addEventListener('click', () => {
   // Očisti prethodni sadržaj
   avatarDiv.innerHTML = '';
 
-  // Dodaj slike avatara
+  // Dodaj slike avatara za guestlist
   for (let i = 1; i <= 20; i++) {
     const img = document.createElement('img');
     img.src = `nik/sl${i}.webp`;
@@ -135,15 +133,11 @@ document.getElementById('sl').addEventListener('click', () => {
       }
 
       socket.emit('avatarChange', { username, avatar: img.src });
-
-      if (showAvatarInChat && authorizedUsers.has(window.currentUser)) {
-        socket.emit('chatAvatarChange', { username, avatar: img.src });
-      }
     });
     avatarDiv.appendChild(img);
   }
 
-  // Dugme za brisanje avatara
+  // Dugme za brisanje avatara za guestlist
   const clearBtn = document.createElement('button');
   clearBtn.id = 'clear-avatar';
   clearBtn.textContent = 'Obriši Avatar';
@@ -153,27 +147,25 @@ document.getElementById('sl').addEventListener('click', () => {
     delete avatars[username];
     saveAvatarsToStorage();
     socket.emit('avatarChange', { username, avatar: '' });
-    if (showAvatarInChat && authorizedUsers.has(window.currentUser)) {
-      socket.emit('chatAvatarChange', { username, avatar: '' });
-    }
   });
   avatarDiv.appendChild(clearBtn);
 
-  // Dugme za chat avatar samo za autorizovane korisnike
+  // --- Dugme za chat avatar SAMO za auth korisnike ---
   if (authorizedUsers.has(username)) {
     const chatToggle = document.createElement('button');
     chatToggle.id = 'avatar-chat-toggle';
-    chatToggle.textContent = showAvatarInChat ? 'Avatar u porukama: UKLJUČEN' : 'Avatar u porukama: ISKLJUČEN';
+    chatToggle.textContent = showAvatarInChat
+      ? 'Avatar u porukama: UKLJUČEN'
+      : 'Avatar u porukama: ISKLJUČEN';
     chatToggle.style.display = 'block';
     chatToggle.style.marginTop = '10px';
 
     chatToggle.addEventListener('click', () => {
-      showAvatarInChat = !showAvatarInChat;
-      chatToggle.textContent = showAvatarInChat ? 'Avatar u porukama: UKLJUČEN' : 'Avatar u porukama: ISKLJUČEN';
+      showAvatarInChat = !showAvatarInChat; // toggle stanje
+      chatToggle.textContent = showAvatarInChat
+        ? 'Avatar u porukama: UKLJUČEN'
+        : 'Avatar u porukama: ISKLJUČEN';
       saveAvatarsToStorage();
-
-      const avatarSrc = showAvatarInChat ? avatars[username] || '' : '';
-      socket.emit('chatAvatarChange', { username, avatar: avatarSrc });
     });
 
     avatarDiv.appendChild(chatToggle);
