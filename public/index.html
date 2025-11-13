@@ -1,21 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr-Latn-RS">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta name="description" content="Radio-Chat flatcast+xat, 24/7, Romani muzika, DJ-*__X__*, Srbija,Makedonija,Prokuplje,Nis,Kragujevac,Beograd,Leskovac,Skoplje,Ohrid,Sarajevo">
-   <title>Radio Galaksija</title>   <!-- tedikavtumenpkkl0402 -->
-     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-   <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="styles.css"> <!-- Povezivanje CSS datoteke -->
-    <link rel="stylesheet" href="dj.css"> <!-- Povezivanje dj.css sa index.html -->
-    <link rel="stylesheet" href="gradi.css"> <!-- Povezivanje gradi.css sa index.html -->
+    <meta name="description" content="Radio-Chat flatcast+xat, 24/7, Romani muzika, DJ-*__X__*, Srbija, Makedonija, Prokuplje, Nis, Kragujevac, Beograd, Leskovac, Skoplje, Ohrid, Sarajevo">
+    
+    <title>Radio Prokuplje Galaksija</title> <!-- tedikavtumenpkkl0402 -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dj.css">
+    <link rel="stylesheet" href="gradi.css">
+    <script src="/socket.io/socket.io.js"></script>
+
    
 
-    <script>
-        window.socket = io(); // Inicializacija socket-a
-    </script>
+    <!-- Geo/meta podaci za lokacije -->
+    <meta name="geo.region" content="RS">
+    <meta name="geo.placename" content="Prokuplje">
+    <meta name="geo.position" content="43.2256;21.7781">
+    <meta name="ICBM" content="43.2256,21.7781">
 
+    <meta name="geo.placename" content="Niš">
+    <meta name="geo.position" content="43.3217;21.8958">
+    <meta name="ICBM" content="43.3217,21.8958">
+
+    <meta name="geo.placename" content="Beograd">
+    <meta name="geo.position" content="44.8176;20.4569">
+    <meta name="ICBM" content="44.8176,20.4569">
+
+    <meta name="geo.placename" content="Nemačka">
+    <meta name="geo.position" content="51.1657;10.4515">
+    <meta name="ICBM" content="51.1657,10.4515">
+
+    <meta name="geo.placename" content="Bosna">
+    <meta name="geo.position" content="43.9159;17.6791">
+    <meta name="ICBM" content="43.9159,17.6791">
+
+    <meta name="geo.placename" content="Makedonija">
+    <meta name="geo.position" content="41.6086;21.7453">
+    <meta name="ICBM" content="41.6086,21.7453">
+
+    <!-- Inicijalizacija Socket.io -->
+    <script>
+        window.socket = io();
+    </script>
 </head>
 <body>
        <div id="authContainer" style="display: none;">
