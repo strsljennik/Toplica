@@ -108,10 +108,10 @@ const kodovi = {
   '#8': 'svega ovoga ne bi bilo da je Pera otišao pravo u policiju',
   '#9': 'Musketari Galaksije - svi za jednog, jedan za sve',
   '#a': 'Ko je vas poznavao, ni pakao mu neće teško pasti',
-  '#a1': 'Prevari me jednom – sram te bilo, prevari me dva puta – sram mene bilo.',
-  '#a3': 'Biti potpuno iskren prema sebi je dobra vežba.',
-  '#a4': 'Ne trčite za ženama da se ne sudarite sa onima koji od njih beže.',
-  '#a5': 'Prodavačica je bila toliko lepa da je bilo smešno njeno pitanje: "Šta želite?"',
+  'a1': 'Prevari me jednom – sram te bilo, prevari me dva puta – sram mene bilo.',
+  'a2': 'Biti potpuno iskren prema sebi je dobra vežba.',
+  'a3': 'Ne trčite za ženama da se ne sudarite sa onima koji od njih beže.',
+  'a4': 'Prodavačica je bila toliko lepa da je bilo smešno njeno pitanje: "Šta želite?"',
   '#iva': '🎶🎶🎶🎶🎵🎶🎶🎵',
   '#dia': '💎💎💎💎💎💎💎💎💎💎💎💎💎💎',
   '#x': 'Pesma za sve goste u Galaksiji od cika X-a ',
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tabla.style.position = 'fixed';
       tabla.style.top = '100px';
       tabla.style.left = '100px';
-      tabla.style.width = '800px';
+      tabla.style.width = '400px';
       tabla.style.height = '800px';
       tabla.style.backgroundColor = '#000';
       tabla.style.color = '#fff';
@@ -171,3 +171,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
