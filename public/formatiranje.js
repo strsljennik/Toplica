@@ -161,8 +161,8 @@ socket.on('private_message', function(data) {
         newMessage.style.backgroundImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
     }
 
-    newMessage.innerHTML = `<strong>${data.from}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
-    messageArea.prepend(newMessage);
+ newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span> ${avatarHTML}`;
+ messageArea.prepend(newMessage);
 
    // Snimi poruku ako je aktivno snimanje
 if (window.snimanjeAktivno) {
@@ -596,5 +596,6 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
