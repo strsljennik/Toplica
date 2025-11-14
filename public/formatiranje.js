@@ -83,7 +83,18 @@ socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
     const myName = currentUser ? currentUser : myNickname;
-    let text = replaceTextEmoji(data.text).replace(/#n/g, myName);
+
+    let raw = data.text.trim();
+
+    // Ako poruka počinje <img ...> – NE SME da ide kroz replaceTextEmoji!
+    let isImageTag = raw.startsWith('<img');
+
+    // Obradi samo tekstualne poruke
+    let text = isImageTag
+        ? raw
+        : replaceTextEmoji(raw).replace(/#n/g, myName);
+
+    // Prevencija duplih poruka
     if (lastMessages[data.nickname] === text) return;
     lastMessages[data.nickname] = text;
 
@@ -94,35 +105,44 @@ socket.on('chatMessage', function(data) {
     // Stilovi za font
     newMessage.style.fontWeight = data.bold ? 'bold' : 'normal';
     newMessage.style.fontStyle = data.italic ? 'italic' : 'normal';
-    newMessage.style.textDecoration = (data.underline ? 'underline ' : '') + (data.overline ? 'overline' : '');
+    newMessage.style.textDecoration = 
+        (data.underline ? 'underline ' : '') +
+        (data.overline ? 'overline' : '');
 
     // Boja ili gradijent
-     if (data.color) {
+    if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
         newMessage.style.webkitBackgroundClip = '';
         newMessage.style.webkitTextFillColor = '';
         newMessage.style.color = data.color;
- } else if (data.gradient || window.defaultAdminGradient) {
-    const gradClass = data.gradient || window.defaultAdminGradient;
-    const gradElement = document.querySelector(`.${gradClass}`);
-    if (gradElement) {
-        newMessage.style.backgroundClip = 'text';
-        newMessage.style.webkitBackgroundClip = 'text';
-        newMessage.style.webkitTextFillColor = 'transparent';
-        newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
+    } else if (data.gradient || window.defaultAdminGradient) {
+        const gradClass = data.gradient || window.defaultAdminGradient;
+        const gradElement = document.querySelector(`.${gradClass}`);
+        if (gradElement) {
+            newMessage.style.backgroundClip = 'text';
+            newMessage.style.webkitBackgroundClip = 'text';
+            newMessage.style.webkitTextFillColor = 'transparent';
+            newMessage.style.backgroundImage = 
+                getComputedStyle(gradElement).backgroundImage;
+        }
     }
-}
 
-   // Dodavanje sadržaja poruke
-    newMessage.innerHTML = `<strong>${data.nickname}:</strong> ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')} <span style="font-size: 0.8em; color: gray;">(${data.time})</span>`;
+    // Render poruke (HTML ostaje netaknut!)
+    newMessage.innerHTML = `
+        <strong>${data.nickname}:</strong> 
+        ${isImageTag ? raw : text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
+        <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
+    `;
+
     messageArea.prepend(newMessage);
-    
-      // Snimi poruku ako je aktivno snimanje
-if (window.snimanjeAktivno) {
-    porukeZaSnimanje.push(newMessage.outerHTML);
-}
 
+    // Snimanje poruke ako je aktivno
+    if (window.snimanjeAktivno) {
+        porukeZaSnimanje.push(newMessage.outerHTML);
+    }
+
+    // Pomeri skrol ako je korisnik na početku
     const isNearTop = messageArea.scrollTop < 50;
     if (isNearTop) {
         messageArea.scrollTop = 0;
@@ -593,6 +613,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
