@@ -101,45 +101,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    chatInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            let message = chatInput.value;
+ chatInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        let message = chatInput.value;
 
-            if (isPrivateChatEnabled && selectedGuest) {
-                // Emisija privatne poruke
-                const recipient = selectedGuest.textContent;
-                const time = new Date().toLocaleTimeString();
-
-                socket.emit('private_message', {
-                    to: recipient,
-                    message,
-                    time,
-                    bold: isBold,
-                    italic: isItalic,
-                    color: currentColor,
-                    gradient: currentGradient,
-                    underline: isUnderline,
-                    overline: isOverline
-                });
-
-                chatInput.value = `---->>> ${recipient} : `;
-            } else {
-                // Emisija obične poruke
-                socket.emit('chatMessage', {
-                    text: message,
-                    bold: isBold,
-                    italic: isItalic,
-                    color: currentColor,
-                    gradient: currentGradient,
-                    underline: isUnderline,
-                    overline: isOverline
-                });
-
-                chatInput.value = ''; // Resetuje unos samo za obične poruke
-            }
+        // Avatar šaljemo samo za autorizovane korisnike
+        let avatarToSend = null;
+        if (authorizedUsers.has(currentUser)) {
+            const username = currentUser.username || currentUser; // string nick
+            avatarToSend = avatars[username] || null;
         }
-    });
+
+        if (isPrivateChatEnabled && selectedGuest) {
+            const recipient = selectedGuest.textContent;
+            const time = new Date().toLocaleTimeString();
+
+            socket.emit('private_message', {
+                to: recipient,
+                message,
+                time,
+                bold: isBold,
+                italic: isItalic,
+                color: currentColor,
+                gradient: currentGradient,
+                underline: isUnderline,
+                overline: isOverline,
+                avatar: avatarToSend
+            });
+
+            chatInput.value = `---->>> ${recipient} : `;
+        } else {
+            socket.emit('chatMessage', {
+                text: message,
+                bold: isBold,
+                italic: isItalic,
+                color: currentColor,
+                gradient: currentGradient,
+                underline: isUnderline,
+                overline: isOverline,
+                avatar: avatarToSend
+            });
+
+            chatInput.value = '';
+        }
+    }
+});
 });
 
 document.addEventListener("DOMContentLoaded", function() {
