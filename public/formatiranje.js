@@ -77,24 +77,18 @@ function updateInputStyle() {
     }
 }
 
-let lastMessages = {}; // Objekt koji prati poslednju poruku svakog korisnika
+let lastMessages = {};
 
 socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
     const myName = currentUser ? currentUser : myNickname;
-
     let raw = data.text.trim();
-
-    // Ako poruka počinje <img ...> – NE SME da ide kroz replaceTextEmoji!
     let isImageTag = raw.startsWith('<img');
-
-    // Obradi samo tekstualne poruke
     let text = isImageTag
         ? raw
         : replaceTextEmoji(raw).replace(/#n/g, myName);
 
-    // Prevencija duplih poruka
     if (lastMessages[data.nickname] === text) return;
     lastMessages[data.nickname] = text;
 
@@ -102,14 +96,12 @@ socket.on('chatMessage', function(data) {
     const newMessage = document.createElement('div');
     newMessage.classList.add('message');
 
-    // Stilovi za font
     newMessage.style.fontWeight = data.bold ? 'bold' : 'normal';
     newMessage.style.fontStyle = data.italic ? 'italic' : 'normal';
-    newMessage.style.textDecoration = 
+    newMessage.style.textDecoration =
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
-    // Boja ili gradijent
     if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
@@ -123,28 +115,34 @@ socket.on('chatMessage', function(data) {
             newMessage.style.backgroundClip = 'text';
             newMessage.style.webkitBackgroundClip = 'text';
             newMessage.style.webkitTextFillColor = 'transparent';
-            newMessage.style.backgroundImage = 
-                getComputedStyle(gradElement).backgroundImage;
+            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
         }
     }
 
-    // Render poruke (HTML ostaje netaknut!)
     newMessage.innerHTML = `
         <strong>${data.nickname}:</strong> 
         ${isImageTag ? raw : text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
 
+    // Dodavanje avatara samo za autorizovane korisnike
+if (authorizedUsers.has(data.nickname) && data.avatar) {
+    const img = document.createElement('img');
+    img.src = data.avatar;
+    img.className = 'inline-avatar';
+    img.style.marginLeft = '5px';
+    img.style.verticalAlign = 'middle';
+    newMessage.appendChild(img);
+}
+
+
     messageArea.prepend(newMessage);
 
-    // Snimanje poruke ako je aktivno
     if (window.snimanjeAktivno) {
         porukeZaSnimanje.push(newMessage.outerHTML);
     }
 
-    // Pomeri skrol ako je korisnik na početku
-    const isNearTop = messageArea.scrollTop < 50;
-    if (isNearTop) {
+    if (messageArea.scrollTop < 50) {
         messageArea.scrollTop = 0;
     }
 });
@@ -613,7 +611,6 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
-
 
 
 
