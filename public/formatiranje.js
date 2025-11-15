@@ -77,6 +77,57 @@ function updateInputStyle() {
 
 let lastMessages = {};
 
+function applyAnimationToMessageName(strongElement, nickname) {
+    if (!strongElement) return;
+    if (!animationAuthorizedUsers.has(nickname)) return;
+
+    const animData = allUserAnimations[nickname];
+    if (!animData || !animData.animation) return;
+
+    const animationName = animData.animation;
+    const speed = animData.speed || 2;
+
+    // Uzmemo tekst imena (bez : )
+    const originalName = strongElement.textContent.replace(':', '').trim();
+
+    // Očistimo ime
+    strongElement.innerHTML = '';
+
+    const problematicChars = [
+        ' ', '*', '(', ')', '-', '_', '[', ']', '{', '}', '^', '$', '#', '@',
+        '!', '+', '=', '~', '`', '|', '\\', '/', '<', '>', ',', '.', '?', ':', ';', '"', "'"
+    ];
+
+    for (let i = 0; i < originalName.length; i++) {
+        const char = originalName[i];
+
+        if (problematicChars.includes(char)) {
+            strongElement.appendChild(document.createTextNode(char));
+            continue;
+        }
+
+        const span = document.createElement('span');
+        span.textContent = char;
+
+        // postojeće klase — iste kao u glavnom animacija fajlu
+        if (animationName === 'rotateLetters') span.classList.add('rotate-letter');
+        else if (animationName === 'glowBlink') span.classList.add('glow-letter');
+        else if (animationName === 'fadeInOut') span.classList.add('fade-letter');
+        else if (animationName === 'bounce') span.classList.add('bounce-letter');
+        else if (animationName === 'superCombo') span.classList.add('superCombo-letter');
+
+        span.style.animationDuration = `${speed}s`;
+        span.style.animationIterationCount = 'infinite';
+        span.style.animationDelay = `${i * 0.1}s`;
+
+        strongElement.appendChild(span);
+    }
+
+    // vratimo ":" iza animiranog imena
+    strongElement.innerHTML += ': ';
+}
+
+
 socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
@@ -122,6 +173,11 @@ socket.on('chatMessage', function(data) {
         ${isImageTag ? raw : text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
+
+// Animacija imena u poruci — samo za autorizovane korisnike
+const strongName = newMessage.querySelector('strong');
+applyAnimationToMessageName(strongName, data.nickname);
+
 
     // Dodavanje avatara samo za autorizovane korisnike
 if (authorizedUsers.has(data.nickname) && data.avatar) {
@@ -609,7 +665,6 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
-
 
 
 
