@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', 'Dia']);
+  const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', ' Dia💎', 'Dia']);
     let hasBanPrivilege = false;
     let isBanned = false; // Praćenje statusa banovanja
 
@@ -99,4 +99,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }); 
     }); 
 }); 
+
 
