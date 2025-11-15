@@ -456,14 +456,36 @@ function applyAnimationToNickWhenReady(nickname, animation, speed) {
 }
 
 socket.on('animationChange', data => {
+  // Sačuvaj animaciju u lokalnoj mapi (koristi se kasnije za poruke)
+  if (data && typeof data.nickname === 'string') {
+    if (data.animation) {
+      allUserAnimations[data.nickname] = {
+        animation: data.animation,
+        speed: data.speed || 2
+      };
+    } else {
+      // Ako server šalje null/false -> ukloni zapis
+      delete allUserAnimations[data.nickname];
+    }
+  }
+
+  // Postojeći behavior (ne menja se)
   currentAnimation = data.animation;
   animationSpeed = data.speed || 2;
   applyAnimationToNickWhenReady(data.nickname, data.animation, animationSpeed);
 });
-
 socket.on('currentAnimations', (allAnimations) => {
-  for (const [nickname, { animation, speed }] of Object.entries(allAnimations)) {
+  // Sačuvaj celu mapu lokalno, ako je u ispravnom formatu
+  if (allAnimations && typeof allAnimations === 'object') {
+    allUserAnimations = allAnimations;
+  } else {
+    allUserAnimations = {};
+  }
+
+  // Primeni animacije u guest listi kao i pre
+  for (const [nickname, info] of Object.entries(allUserAnimations)) {
+    const animation = info && info.animation ? info.animation : null;
+    const speed = info && info.speed ? info.speed : 2;
     applyAnimationToNickWhenReady(nickname, animation, speed);
   }
 });
-
