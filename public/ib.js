@@ -363,27 +363,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 6. Funkcija koja kombinuje emoji + prevod oba smera
 function replaceTextEmoji(msg){
-  // Emoji zamena
+  // 1️⃣ Emoji + svi simboli iz textEmojiMap koji ne zavise od granica reči
   for(const key in textEmojiMap){
-    msg = msg.replaceAll(key, textEmojiMap[key]);
+    // Ako je kod “dug” i može biti deo reči (#0, a4...), zamenjujemo sa granicom reči
+    if(/^#|\w\d+$/.test(key)){  // lični kodovi
+      const regex = new RegExp(`(^|\\s)${key}($|\\s)`, 'g');
+      msg = msg.replace(regex, `$1${textEmojiMap[key]}$2`);
+    } else {
+      // ostali (emoji, simboli, Unicode) - mogu unutar reči
+      msg = msg.replaceAll(key, textEmojiMap[key]);
+    }
   }
 
-  // TS prevod
+  // 2️⃣ TS prevod
   if(tsTranslateActive){
     msg = msg.replace(turSrRegex, match => turSrMap[match]);
   }
 
-  // ST prevod
+  // 3️⃣ ST prevod
   if(stTranslateActive){
     msg = msg.replace(srTurRegex, match => srTurMap[match]);
   }
 
   return msg;
 }
-
-
-
-
-
