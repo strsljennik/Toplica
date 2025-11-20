@@ -138,7 +138,7 @@ const allItems = [
         'rg.gif', 'x1.gif', 'kiss.gif', 'kiss1.gif', 'jerry2.avifs', 'srce3.gif', 'srce2.gif',  'box.avifs',
         'patak1.avifs', 'patak2.avifs', 'jerry1.avifs', 'nov17.gif', 'nov18.gif', 'nov20.gif',
            'kiss2.gif','nov3.gif', 'nov4.gif','nov19.gif','crveni.webp','iva.avif','iva.avifs',
-        'nov7.gif', 'nov8.gif', 'nov9.gif', 'nov10.gif', 'nov11.gif', 'nov12.gif', 
+        'nov7.gif', 'nov8.gif', 'nov9.gif', 'nov10.gif', 'nov11.gif', 'nov12.gif', 'sl.webp',
         'nov13.gif', 'nov15.gif', 'nov16.gif','nov21.gif','dia.gif','tg.avifs','bye.webp', 
         'tre.avifs','tre1.avifs','tre2.avifs','tre.webp','ruza.avif'
       
@@ -511,3 +511,4 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
