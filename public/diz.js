@@ -449,9 +449,7 @@ document.getElementById('load').addEventListener('click', () => {
 
 // Socket on za ažuriranje layouta sa servera
 socket.on('chat-layout-update', data => {
-  setTimeout(() => {
-    renderLayout(data);
-  }, 5000);
+  renderLayout(data);
 });
 document.getElementById('reset').addEventListener('click', () => {
   socket.emit('reset-layout');      // emit svima
@@ -636,3 +634,4 @@ function setupInteract(el) {
     }
   });
 }
+
