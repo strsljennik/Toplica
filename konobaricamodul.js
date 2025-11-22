@@ -6,7 +6,6 @@ module.exports = (io) => {
   const stanje = {}; //  BORDERI ELEMENATA 
   let allUserAnimations = {}; 
 let fullLayoutData = null;   // BEZ MASKE 
-  let chatLayoutData = null; //  ZA CHATMASKE
  const sirinaStanje = {};
  let defaultColor = {};
 let defaultGradient = {};
@@ -183,25 +182,10 @@ if (defaultColor.value) {
 if (defaultGradient.value) {
     io.emit('updateDefaultGradient', { gradient: defaultGradient.value });
 }
-
-  if (chatLayoutData) {
-    socket.emit('chat-layout-load', chatLayoutData);
-  }
-
-  // Kad klijent pošalje novi layout
-  socket.on('chat-layout-load', data => {
-    chatLayoutData = data;
-    socket.broadcast.emit('chat-layout-load', data);
-  });
-
-  // Reset layout
-  socket.on('chat-layout-reset', () => {
-    chatLayoutData = null;
-    socket.broadcast.emit('chat-layout-reset');
-  });
   socket.on('disconnect', () => {});
     });
 };
+
 
 
 
