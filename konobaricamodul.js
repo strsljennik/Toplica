@@ -182,9 +182,10 @@ if (defaultColor.value) {
 if (defaultGradient.value) {
     io.emit('updateDefaultGradient', { gradient: defaultGradient.value });
 }
-  socket.on('disconnect', () => {});
+
     });
 };
+
 
 
 
