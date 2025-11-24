@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 const { connectDB } = require('./mongo');
 const { register, login } = require('./prijava');
 const { setupSocketEvents } = require('./banmodul'); // Uvoz funkcije iz banmodula
-const konobaricaModul = require('./konobaricamodul'); // Uvoz konobaricamodul.js
+const konobaricamodul = require('./konobaricamodul'); // Uvoz konobaricamodul.js
 const slikemodul = require('./slikemodul');
 const pingService = require('./ping');
 const privatmodul = require('./privatmodul'); // Podesi putanju ako je u drugom folderu
@@ -26,7 +26,7 @@ const io = socketIo(server, {
 });
 
 connectDB(); // Povezivanje na bazu podataka
-konobaricaModul(io);
+konobaricamodul(io);
 slikemodul.setSocket(io);
 setupUserCounter(io);
 
@@ -54,6 +54,7 @@ app.post('/restart', (req, res) => {
   res.send('Restartujem...');
   setTimeout(() => process.exit(0), 1000);
 });
+
 // Lista autorizovanih i banovanih korisnika
 const authorizedUsers = new Set(['Radio Galaksija','ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka','Dia💎', 'Dia']);
 const animationAuthorizedUsers = new Set(['Radio Galaksija','ZI ZU','*___F117___*','*__X__*','Dia💎','Dia','Najlepsa Ciganka', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊']);
@@ -67,10 +68,12 @@ const sviAvatari = {};
 const userGradients = {};
 // Dodavanje socket događaja iz banmodula
 setupSocketEvents(io, guests, bannedUsers); // Dodavanje guests i bannedUsers u banmodul
-privatmodul(io, guests);
 let currentBackground = "";
 let textElements = [];
 startVirtualGuests(io, guests);
+const allGlitters = {};
+privatmodul(io, guests, sviAvatari, allGlitters);
+
 
 // Socket.io događaji
 io.on('connection', (socket) => {
@@ -131,7 +134,8 @@ socket.on('chatMessage', (msgData) => {
         overline: msgData.overline,
         nickname: nickname,
         gradient: userGradients[nickname] || null,
-        time: time,
+  glitter: msgData.glitter || allGlitters[nickname] || null, // <-- dodaj glitter
+          time: time,
        avatar: msgData.avatar || null
     };
     io.emit('chatMessage', messageToSend);
@@ -215,7 +219,15 @@ socket.on('avatarChange', (data) => {
 socket.on('toggleVirtualGuests', enabled => {
   toggleVirtualGuests(io, guests, enabled);
 });
+  socket.emit('allGlitters', allGlitters);
 
+    // Kada korisnik promeni glitter
+    socket.on('glitterChange', (data) => {
+        allGlitters[data.nickname] = data.glitter;
+        // Emituj svim ostalim korisnicima
+        io.emit('glitterChange', data);
+
+    });
    // Obrada diskonekcije korisnika
     socket.on('disconnect', () => {
         console.log(`${guests[socket.id]} se odjavio. IP adresa korisnika: ${ipAddress}`);
@@ -228,8 +240,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
-
-
-
-
-
