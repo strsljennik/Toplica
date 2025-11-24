@@ -318,21 +318,6 @@ btnGuestGradient.onclick = () => {
 };
 popnik.appendChild(btnGuestGradient);
 
-// glitter dugme
-const btnGlitter = document.createElement('button');
-btnGlitter.textContent = 'Glitter';
-btnGlitter.style.margin = '5px';
-btnGlitter.style.padding = '5px 12px';
-btnGlitter.style.cursor = 'pointer';
-btnGlitter.onclick = () => {
-    if (!glitterTable) createGlitterTable(); // kreira tablu ako ne postoji
-    glitterTable.style.left = '0px';  // pozicija u gornjem levom uglu
-    glitterTable.style.top = '0px';
-    glitterTable.style.display = glitterTable.style.display === 'none' ? 'block' : 'none';
-    popnik.style.display = 'none'; // sakrij popup meni dugmića
-};
-popnik.appendChild(btnGlitter);
-
  // Slider za brzinu animacije
   const speedLabel = document.createElement('label');
   speedLabel.textContent = `Brzina animacije: ${animationSpeed}s`;
@@ -504,4 +489,5 @@ socket.on('currentAnimations', (allAnimations) => {
     applyAnimationToNickWhenReady(nickname, animation, speed);
   }
 });
+
 
