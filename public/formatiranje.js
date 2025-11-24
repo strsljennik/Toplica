@@ -454,7 +454,7 @@ socket.on('updateGuestList', function (users) {
         }
     });
 });
-// COLOR PICKER - OBICNE BOJE
+
 // COLOR PICKER - OBICNE BOJE
 document.getElementById('colorBtn').addEventListener('click', () => {
     document.getElementById('colorPicker').click();
@@ -824,4 +824,5 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
