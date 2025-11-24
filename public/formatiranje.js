@@ -61,30 +61,13 @@ function updateInputStyle() {
     inputField.style.fontStyle = isItalic ? 'italic' : 'normal';
     inputField.style.textDecoration = (isUnderline ? 'underline ' : '') + (isOverline ? 'overline' : '');
 
-    // --- DODATO: Glitter stil ---
-    if (currentGlitter) {
-        inputField.style.backgroundImage = `url('/glit/${currentGlitter}')`;
-        inputField.style.backgroundSize = 'cover';
-        inputField.style.filter = 'brightness(1.5) contrast(1.5)';
-
-        inputField.style.color = 'transparent';
-        inputField.style.webkitTextFillColor = 'transparent';
-        inputField.style.backgroundClip = 'text';
-        inputField.style.webkitBackgroundClip = 'text';
-        return; // PREKIDA DALJI KOD
-    }
-
-    // --- Gradient ---
     if (currentGradient) {
         inputField.style.backgroundClip = 'text';
         inputField.style.webkitBackgroundClip = 'text';
-        inputField.style.color = 'transparent';
+        inputField.style.color = 'transparent'; // važno za rad na FireFox
         inputField.style.webkitTextFillColor = 'transparent';
-        inputField.style.backgroundImage = getComputedStyle(
-            document.querySelector(`.${currentGradient}`)
-        ).backgroundImage;
+        inputField.style.backgroundImage = getComputedStyle(document.querySelector(`.${currentGradient}`)).backgroundImage;
     } else {
-        // --- Obična boja ---
         inputField.style.backgroundImage = '';
         inputField.style.backgroundClip = '';
         inputField.style.webkitBackgroundClip = '';
@@ -149,7 +132,7 @@ function applyAnimationToMessageName(strongElement, nickname) {
 socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
-    const myName = currentUser || myNickname;
+    const myName = currentUser ? currentUser : myNickname;
     let raw = data.text.trim();
     let isImageTag = raw.startsWith('<img');
     let text = isImageTag
@@ -163,42 +146,30 @@ socket.on('chatMessage', function(data) {
     const newMessage = document.createElement('div');
     newMessage.classList.add('message');
 
-    // Stilovi fonta
     newMessage.style.fontWeight = data.bold ? 'bold' : 'normal';
     newMessage.style.fontStyle = data.italic ? 'italic' : 'normal';
     newMessage.style.textDecoration =
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
-    // --- Glitter ---
-    if (data.glitter) {
-        newMessage.style.backgroundImage = `url('/glit/${data.glitter}')`;
-        newMessage.style.backgroundSize = 'cover';
-        newMessage.style.filter = 'brightness(1.5) contrast(1.5)';
-        newMessage.style.color = 'transparent';
-        newMessage.style.backgroundClip = 'text';
-        newMessage.style.webkitBackgroundClip = 'text';
-        newMessage.style.webkitTextFillColor = 'transparent';
-    }
-    // --- Gradient ---
-    else if (data.gradient || window.defaultAdminGradient) {
-        const gradClass = data.gradient || window.defaultAdminGradient;
-        const gradElement = document.querySelector(`.${gradClass}`);
-        if (gradElement) {
-            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-            newMessage.style.backgroundClip = 'text';
-            newMessage.style.webkitBackgroundClip = 'text';
-            newMessage.style.webkitTextFillColor = 'transparent';
-            newMessage.style.color = 'transparent';
-        }
-    }
-    // --- Obična boja ---
-    else if (data.color) {
-        newMessage.style.color = data.color;
+    // Postavljanje boje ili gradijenta
+    if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
         newMessage.style.webkitBackgroundClip = '';
         newMessage.style.webkitTextFillColor = '';
+        newMessage.style.color = data.color;
+    } else if (data.gradient || window.defaultAdminGradient) {
+        const gradClass = data.gradient || window.defaultAdminGradient;
+        const gradElement = document.querySelector(`.${gradClass}`);
+        if (gradElement) {
+            // Gradijent + animacija
+            newMessage.style.backgroundClip = 'text';
+            newMessage.style.webkitBackgroundClip = 'text';
+            newMessage.style.webkitTextFillColor = 'transparent';
+            newMessage.style.color = 'transparent';
+            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
+        }
     }
 
     newMessage.innerHTML = `
@@ -207,38 +178,31 @@ socket.on('chatMessage', function(data) {
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
 
-    const strongName = newMessage.querySelector('strong');
+ const strongName = newMessage.querySelector('strong');
 
-    // Animacije korisnika
-    const userAnim = allUserAnimations[data.nickname];
-    if (userAnim && userAnim.animation) {
-        strongName.style.animationName = userAnim.animation;
-        strongName.style.animationDuration = `${userAnim.speed || 1}s`;
-        strongName.style.animationIterationCount = 'infinite';
-        strongName.style.animationTimingFunction = 'ease-in-out';
-        strongName.style.display = 'inline-block';
+// Provera animacije korisnika
+const userAnim = allUserAnimations[data.nickname];
+if (userAnim && userAnim.animation) {
+    strongName.style.animationName = userAnim.animation;
+    strongName.style.animationDuration = `${userAnim.speed || 1}s`;
+    strongName.style.animationIterationCount = 'infinite';
+    strongName.style.animationTimingFunction = 'ease-in-out';
+    strongName.style.display = 'inline-block';
 
-        // Ako je glitter ili gradijent, primeni isto na ime
-        if (data.glitter) {
-            strongName.style.backgroundImage = `url('/glit/${data.glitter}')`;
+    // Ako je gradijent, primeni background clip
+    if (data.gradient || window.defaultAdminGradient) {
+        const gradClass = data.gradient || window.defaultAdminGradient;
+        const gradElement = document.querySelector(`.${gradClass}`);
+        if (gradElement) {
+            strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
             strongName.style.backgroundClip = 'text';
             strongName.style.webkitBackgroundClip = 'text';
             strongName.style.webkitTextFillColor = 'transparent';
             strongName.style.color = 'transparent';
-        } else if (data.gradient || window.defaultAdminGradient) {
-            const gradClass = data.gradient || window.defaultAdminGradient;
-            const gradElement = document.querySelector(`.${gradClass}`);
-            if (gradElement) {
-                strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-                strongName.style.backgroundClip = 'text';
-                strongName.style.webkitBackgroundClip = 'text';
-                strongName.style.webkitTextFillColor = 'transparent';
-                strongName.style.color = 'transparent';
-            }
         }
     }
+}
 
-    // Avatar ako postoji
     if (authorizedUsers.has(data.nickname) && data.avatar) {
         const img = document.createElement('img');
         img.src = data.avatar;
@@ -262,7 +226,7 @@ socket.on('chatMessage', function(data) {
 socket.on('private_message', function(data) {
     if (!myNickname) return;
 
-    const myName = currentUser || myNickname;
+    const myName = currentUser ? currentUser : myNickname;
     let raw = data.message.trim();
     let isImageTag = raw.startsWith('<img');
     let text = isImageTag
@@ -284,76 +248,59 @@ socket.on('private_message', function(data) {
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
-    // --- Glitter ---
-    if (data.glitter) {
-        newMessage.style.backgroundImage = `url('/glit/${data.glitter}')`;
-        newMessage.style.backgroundSize = 'cover';
-        newMessage.style.filter = 'brightness(1.5) contrast(1.5)';
-        newMessage.style.color = 'transparent';
-        newMessage.style.backgroundClip = 'text';
-        newMessage.style.webkitBackgroundClip = 'text';
-        newMessage.style.webkitTextFillColor = 'transparent';
-    }
-    // --- Gradient ---
-    else if (data.gradient || window.defaultAdminGradient) {
-        const gradClass = data.gradient || window.defaultAdminGradient;
-        const gradElement = document.querySelector(`.${gradClass}`);
-        if (gradElement) {
-            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-            newMessage.style.backgroundClip = 'text';
-            newMessage.style.webkitBackgroundClip = 'text';
-            newMessage.style.webkitTextFillColor = 'transparent';
-            newMessage.style.color = 'transparent';
-        }
-    }
-    // --- Obična boja ---
-    else if (data.color) {
-        newMessage.style.color = data.color;
+    // Boja ili gradijent
+    if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
         newMessage.style.webkitBackgroundClip = '';
         newMessage.style.webkitTextFillColor = '';
+        newMessage.style.color = data.color;
+    } else if (data.gradient || window.defaultAdminGradient) {
+        const gradClass = data.gradient || window.defaultAdminGradient;
+        const gradElement = document.querySelector(`.${gradClass}`);
+        if (gradElement) {
+            newMessage.style.backgroundClip = 'text';
+            newMessage.style.webkitBackgroundClip = 'text';
+            newMessage.style.webkitTextFillColor = 'transparent';
+            newMessage.style.color = 'transparent';
+            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
+        }
     }
 
-    // InnerHTML sa strong za ime
+    // Kreiramo innerHTML sa strong za ime
     newMessage.innerHTML = `
         <strong>${data.from}:</strong> 
         ${isImageTag ? raw : text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
 
+    // Animacija imena na ceo strong element (kao u chatMessage)
     const strongName = newMessage.querySelector('strong');
+    if (strongName) {
+        const userAnim = allUserAnimations[data.from];
+        if (userAnim && userAnim.animation) {
+            strongName.style.animationName = userAnim.animation;
+            strongName.style.animationDuration = `${userAnim.speed || 1}s`;
+            strongName.style.animationIterationCount = 'infinite';
+            strongName.style.animationTimingFunction = 'ease-in-out';
+            strongName.style.display = 'inline-block';
 
-    // Animacija korisnika
-    const userAnim = allUserAnimations[data.from];
-    if (strongName && userAnim && userAnim.animation) {
-        strongName.style.animationName = userAnim.animation;
-        strongName.style.animationDuration = `${userAnim.speed || 1}s`;
-        strongName.style.animationIterationCount = 'infinite';
-        strongName.style.animationTimingFunction = 'ease-in-out';
-        strongName.style.display = 'inline-block';
-
-        // Glitter ili gradijent za ime
-        if (data.glitter) {
-            strongName.style.backgroundImage = `url('/glit/${data.glitter}')`;
-            strongName.style.backgroundClip = 'text';
-            strongName.style.webkitBackgroundClip = 'text';
-            strongName.style.webkitTextFillColor = 'transparent';
-            strongName.style.color = 'transparent';
-        } else if (data.gradient || window.defaultAdminGradient) {
-            const gradClass = data.gradient || window.defaultAdminGradient;
-            const gradElement = document.querySelector(`.${gradClass}`);
-            if (gradElement) {
-                strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-                strongName.style.backgroundClip = 'text';
-                strongName.style.webkitBackgroundClip = 'text';
-                strongName.style.webkitTextFillColor = 'transparent';
-                strongName.style.color = 'transparent';
+            // Ako postoji gradijent, primeni background clip
+            if (data.gradient || window.defaultAdminGradient) {
+                const gradClass = data.gradient || window.defaultAdminGradient;
+                const gradElement = document.querySelector(`.${gradClass}`);
+                if (gradElement) {
+                    strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
+                    strongName.style.backgroundClip = 'text';
+                    strongName.style.webkitBackgroundClip = 'text';
+                    strongName.style.webkitTextFillColor = 'transparent';
+                    strongName.style.color = 'transparent';
+                }
             }
         }
     }
 
-    // Avatar ako postoji
+    // Dodavanje avatara ako postoji
     if (authorizedUsers.has(data.from) && data.avatar) {
         const img = document.createElement('img');
         img.src = data.avatar;
@@ -366,7 +313,7 @@ socket.on('private_message', function(data) {
     // Dodavanje poruke u chat
     messageArea.prepend(newMessage);
 
-    // Snimanje poruke
+    // Snimanje poruke ako je aktivno snimanje
     if (window.snimanjeAktivno) {
         porukeZaSnimanje.push(newMessage.outerHTML);
     }
@@ -376,6 +323,7 @@ socket.on('private_message', function(data) {
         messageArea.scrollTop = 0;
     }
 });
+
 // Kada nov gost dođe
 socket.on('newGuest', function (nickname) {
     const guestId = `guest-${nickname}`;
@@ -454,30 +402,25 @@ socket.on('updateGuestList', function (users) {
         }
     });
 });
-
 // COLOR PICKER - OBICNE BOJE
 document.getElementById('colorBtn').addEventListener('click', () => {
     document.getElementById('colorPicker').click();
 });
 
 document.getElementById('colorPicker').addEventListener('input', function() {
-    // Postavljamo novu boju i resetujemo prethodni glitter i gradient
     currentColor = this.value;
-    currentGradient = null;
-    currentGlitter = null;
+    currentGradient = null; // reset gradijenta
 
     const myDiv = document.getElementById(`guest-${myNickname}`);
     if (!myDiv) return;
 
-    // Ukloni prethodni gradijent sa teksta (user i admin)
+    // Ukloni gradijent sa teksta (user i admin)
     myDiv.classList.forEach(cls => {
         if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
             myDiv.classList.remove(cls);
         }
     });
     myDiv.classList.remove('use-gradient', 'gradient-user');
-
-    // Resetuj background i stilove povezane sa gradientom/glitterom
     myDiv.style.background = '';
     myDiv.style.backgroundImage = '';
     myDiv.style.webkitBackgroundClip = '';
@@ -486,10 +429,9 @@ document.getElementById('colorPicker').addEventListener('input', function() {
     // Postavi novu boju teksta
     myDiv.style.color = currentColor;
 
-    // Obeleži korisnika da je sam birao boju
+    // **Obeleži korisnika da je sam birao boju**
     myDiv.dataset.userColor = currentColor;
 
-    // Ažuriraj input polje
     updateInputStyle();
 
     // Emit preko socket-a
@@ -508,6 +450,7 @@ socket.on('allColors', (colors) => {
         myDiv.style.webkitTextFillColor = '';
         myDiv.style.color = colors[nickname];
 
+        // **Održavamo podatak da je korisnik birao svoju boju**
         myDiv.dataset.userColor = colors[nickname];
 
         myDiv.classList.remove('use-gradient', 'gradient-user');
@@ -530,6 +473,7 @@ socket.on('colorChange', (data) => {
     myDiv.style.webkitTextFillColor = '';
     myDiv.style.color = data.color;
 
+    // **Označavamo da je korisnik birao boju**
     myDiv.dataset.userColor = data.color;
 
     myDiv.classList.remove('use-gradient', 'gradient-user');
@@ -539,7 +483,6 @@ socket.on('colorChange', (data) => {
         }
     });
 });
-
 // ZA GRADIJENTE
 document.getElementById('farbe').addEventListener('click', function () {
     const gradijentDiv = document.getElementById('gradijent');
@@ -551,38 +494,32 @@ document.getElementById('farbe').addEventListener('click', function () {
             const boxes = document.querySelectorAll('.gradijent-box');
             boxes.forEach(box => {
                 box.onclick = function () {
-                    // Resetovanje boje i glittera, postavljanje novog gradijenta
                     currentGradient = this.classList[1];
-                    currentColor = '';
-                    currentGlitter = null;
+                    currentColor = ''; // Resetuj boju kada izabereš gradijent
 
-                    const myDiv = document.getElementById(`guest-${myNickname}`);
+                    const myDivId = `guest-${myNickname}`;
+                    const myDiv = document.getElementById(myDivId);
                     if (myDiv) {
-                        // Uklanjanje prethodnih gradijenata i boja
+                        // Uklanjanje stare boje i gradijenata
                         myDiv.classList.forEach(cls => {
-                            if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
+                            if (cls.startsWith('gradient-')) {
+                                myDiv.classList.remove(cls);
+                            }
                         });
                         myDiv.classList.remove('use-gradient', 'gradient-user');
                         myDiv.style.color = '';
                         myDiv.style.backgroundImage = '';
-                        myDiv.style.backgroundClip = '';
-                        myDiv.style.webkitBackgroundClip = '';
-                        myDiv.style.webkitTextFillColor = '';
 
                         // Dodavanje novog gradijenta
                         myDiv.classList.add(currentGradient, 'use-gradient', 'gradient-user');
-                        const bgImage = getComputedStyle(this).backgroundImage;
-                        myDiv.style.backgroundImage = bgImage;
+                        myDiv.style.backgroundImage = getComputedStyle(this).backgroundImage;
 
-                        myDiv.style.backgroundClip = 'text';
-                        myDiv.style.webkitBackgroundClip = 'text';
-                        myDiv.style.webkitTextFillColor = 'transparent';
-                        myDiv.style.color = 'transparent';
-
+                        // **Dodato kao kod userColor**
                         myDiv.dataset.userGradient = currentGradient;
                     }
 
                     updateInputStyle();
+
                     socket.emit('gradientChange', { nickname: myNickname, gradient: currentGradient });
                 };
             });
@@ -590,9 +527,9 @@ document.getElementById('farbe').addEventListener('click', function () {
     }
 });
 
-// Primena gradijenta od servera (drugi korisnici)
 socket.on('gradientChange', function (data) {
-    const myDiv = document.getElementById(`guest-${data.nickname}`);
+    const myDivId = `guest-${data.nickname}`;
+    const myDiv = document.getElementById(myDivId);
     if (myDiv) {
         myDiv.classList.forEach(cls => {
             if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
@@ -600,42 +537,27 @@ socket.on('gradientChange', function (data) {
         myDiv.classList.remove('use-gradient', 'gradient-user');
         myDiv.style.color = '';
         myDiv.style.backgroundImage = '';
-        myDiv.style.backgroundClip = '';
-        myDiv.style.webkitBackgroundClip = '';
-        myDiv.style.webkitTextFillColor = '';
 
         myDiv.classList.add(data.gradient, 'use-gradient', 'gradient-user');
-        const bgImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
-        myDiv.style.backgroundImage = bgImage;
+        myDiv.style.backgroundImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
 
-        myDiv.style.backgroundClip = 'text';
-        myDiv.style.webkitBackgroundClip = 'text';
-        myDiv.style.webkitTextFillColor = 'transparent';
-        myDiv.style.color = 'transparent';
-
+        // **Dodato kao kod userColor**
         myDiv.dataset.userGradient = data.gradient;
     }
 });
-
 // Slušanje svih gradijenata pri povezivanju novih korisnika
 socket.on('allGradients', (gradients) => {
     for (const nickname in gradients) {
         const div = document.getElementById(`guest-${nickname}`);
         if (div) {
             div.classList.add(gradients[nickname], 'use-gradient', 'gradient-user');
-            const bgImage = getComputedStyle(document.querySelector(`.${gradients[nickname]}`)).backgroundImage;
-            div.style.backgroundImage = bgImage;
+            div.style.backgroundImage = getComputedStyle(document.querySelector(`.${gradients[nickname]}`)).backgroundImage;
 
-            div.style.backgroundClip = 'text';
-            div.style.webkitBackgroundClip = 'text';
-            div.style.webkitTextFillColor = 'transparent';
-            div.style.color = 'transparent';
-
+            // **Dodato kao kod userColor**
             div.dataset.userGradient = gradients[nickname];
         }
     }
 });
-
 // ZA ADMINA - DEFAULT COLOR
 const applyBtn = document.getElementById('applyDefaultColor');
 const adminPicker = document.getElementById('adminColorPicker');
