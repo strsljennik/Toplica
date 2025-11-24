@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 italic: isItalic,
                 color: currentColor,
                 gradient: currentGradient,
-                glitter: currentGlitter, // <-- dodaj ovo
                 underline: isUnderline,
                 overline: isOverline,
                 avatar: avatarToSend
@@ -139,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 italic: isItalic,
                 color: currentColor,
                 gradient: currentGradient,
-                glitter: currentGlitter, // <-- dodaj ovo
                 underline: isUnderline,
                 overline: isOverline,
                 avatar: avatarToSend
