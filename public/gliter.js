@@ -1,45 +1,46 @@
 let currentGlitter = null;
-const glitterBtn = document.getElementById('glit');
 let glitterTable = null;
+
 const glitterImages = [
     'g1.gif', 'g2.gif', 'g3.gif', 'g4.gif', 'g5.gif',
     'g6.gif', 'g7.gif', 'g8.gif', 'g9.gif', 'g10.gif',
-    'g11.gif', 'g12.gif'
+    'g11.gif', 'g12.gif','g13.gif','g14.gif','g15.gif','g16.gif'
 ];
 
-
-// Kreiraj tablu za glitter
 function createGlitterTable() {
     glitterTable = document.createElement('div');
     glitterTable.id = 'glitterTable';
-    glitterTable.style.position = 'absolute';
-    glitterTable.style.background = '#222';
+    glitterTable.style.position = 'fixed';   // fiksno u viewport-u
+    glitterTable.style.left = '0';           // 0 sa leve strane
+    glitterTable.style.bottom = '0';         // 0 od dna ekrana
+    glitterTable.style.background = 'black';
     glitterTable.style.padding = '10px';
     glitterTable.style.display = 'none';
     glitterTable.style.border = '1px solid #444';
     glitterTable.style.borderRadius = '8px';
     glitterTable.style.zIndex = '1000';
-
+    
     glitterImages.forEach(img => {
         const glitterImg = document.createElement('img');
         glitterImg.src = `/glit/${img}`;
         glitterImg.style.width = '50px';
         glitterImg.style.height = '50px';
-        glitterImg.style.margin = '5px';
+        glitterImg.style.margin = '';
         glitterImg.style.cursor = 'pointer';
 
-       glitterImg.addEventListener('click', () => {
-    applyGlitter(myNickname, img);
+        // ✔️ Klik na glitter sliku
+        glitterImg.addEventListener('click', () => {
+            applyGlitter(myNickname, img);
 
-    currentGradient = null;
-    currentColor = '';
-    currentGlitter = img;   // VAŽNO ZA INPUT
-    updateInputStyle();     // AŽURIRAJ INPUT
+            currentGradient = null;
+            currentColor = '';
+            currentGlitter = img;   
+            updateInputStyle();    
 
-    socket.emit('glitterChange', { nickname: myNickname, glitter: img });
-    glitterTable.style.display = 'none';
-});
+            socket.emit('glitterChange', { nickname: myNickname, glitter: img });
 
+            glitterTable.style.display = 'none';
+        });
 
         glitterTable.appendChild(glitterImg);
     });
@@ -47,7 +48,8 @@ function createGlitterTable() {
     document.body.appendChild(glitterTable);
 }
 
-// Primeni glitter na tekst korisnika
+
+// ✔️ Primeni glitter na username
 function applyGlitter(nickname, glitterImg) {
     const guestDiv = document.getElementById(`guest-${nickname}`);
     if (!guestDiv) return;
@@ -64,16 +66,8 @@ function applyGlitter(nickname, glitterImg) {
     guestDiv.dataset.userGlitter = glitterImg;
 }
 
-// Otvori/zatvori tablu
-glitterBtn.addEventListener('click', () => {
-    if (!glitterTable) createGlitterTable();
 
-    glitterTable.style.left = '0px';
-    glitterTable.style.top = '0px';
-    glitterTable.style.display = glitterTable.style.display === 'none' ? 'block' : 'none';
-});
-
-
+// ✔️ Socket: učitaj sve glittere
 socket.on('allGlitters', (glitters) => {
     savedGlitters = glitters;
     for (const nickname in glitters) {
@@ -81,6 +75,8 @@ socket.on('allGlitters', (glitters) => {
     }
 });
 
+
+// ✔️ Socket: promene uživo
 socket.on('glitterChange', (data) => {
     applyGlitter(data.nickname, data.glitter);
 });
