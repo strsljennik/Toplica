@@ -134,7 +134,7 @@ socket.on('chatMessage', (msgData) => {
         overline: msgData.overline,
         nickname: nickname,
         gradient: userGradients[nickname] || null,
-  glitter: msgData.glitter || allGlitters[nickname] || null, // <-- dodaj glitter
+        glitter: msgData.glitter,
           time: time,
        avatar: msgData.avatar || null
     };
@@ -240,3 +240,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
+
