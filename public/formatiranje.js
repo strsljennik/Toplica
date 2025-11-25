@@ -191,8 +191,8 @@ socket.on('chatMessage', function(data) {
     });
 
     // --- GLITTER ---
-    if (data.glitter) {
-        [strongName, textSpan].forEach(el => {
+  if (data.glitter && data.nickname === myNickname) {
+            [strongName, textSpan].forEach(el => {
             el.style.backgroundImage = `url('/glit/${data.glitter}')`;
             el.style.backgroundSize = 'cover';
             el.style.filter = 'brightness(1.5) contrast(1.5)';
@@ -804,4 +804,5 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
