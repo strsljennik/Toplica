@@ -140,7 +140,7 @@ const allItems = [
            'kiss2.gif','nov3.gif', 'nov4.gif','nov19.gif','crveni.webp','sl.webp',
         'nov7.gif', 'nov8.gif', 'nov9.gif', 'nov10.gif', 'nov11.gif', 'nov12.gif', 
         'nov13.gif', 'nov15.gif', 'nov16.gif','nov21.gif','dia.gif','tg.avifs', 
-        'tre.avifs','tre1.avifs','tre2.avifs','tre.webp','ruza.avif','bye.webp'
+        'tre.avifs','tre1.avifs','tre2.avifs','tre.webp','ruza.avif','bye.webp','pare.avif'
       
 ].map(img => ({ type: 'image', content: img }))
 ];
@@ -511,5 +511,6 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
