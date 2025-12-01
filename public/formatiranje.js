@@ -1,8 +1,10 @@
 let myNickname = ''; // biće postavljen od servera
 
+socket.off('yourNickname');
 socket.on('yourNickname', function(nick) {
     myNickname = nick;
 });
+
 const virtualGuests = [
   { nickname: 'Bala Hatun', color: 'deepskyblue' },
   { nickname: 'Halime', color: 'purple' },
@@ -138,6 +140,7 @@ socket.on('chatMessage', function(data) {
         ? raw
         : replaceTextEmoji(raw).replace(/#n/g, myName);
 
+    // Čuvamo samo poslednju poruku po korisniku
     if (lastMessages[data.nickname] === text) return;
     lastMessages[data.nickname] = text;
 
@@ -151,7 +154,6 @@ socket.on('chatMessage', function(data) {
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
-    // Postavljanje boje ili gradijenta
     if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
@@ -162,7 +164,6 @@ socket.on('chatMessage', function(data) {
         const gradClass = data.gradient || window.defaultAdminGradient;
         const gradElement = document.querySelector(`.${gradClass}`);
         if (gradElement) {
-            // Gradijent + animacija
             newMessage.style.backgroundClip = 'text';
             newMessage.style.webkitBackgroundClip = 'text';
             newMessage.style.webkitTextFillColor = 'transparent';
@@ -177,30 +178,27 @@ socket.on('chatMessage', function(data) {
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
 
- const strongName = newMessage.querySelector('strong');
+    const strongName = newMessage.querySelector('strong');
+    const userAnim = allUserAnimations[data.nickname];
+    if (userAnim && userAnim.animation) {
+        strongName.style.animationName = userAnim.animation;
+        strongName.style.animationDuration = `${userAnim.speed || 1}s`;
+        strongName.style.animationIterationCount = 'infinite';
+        strongName.style.animationTimingFunction = 'ease-in-out';
+        strongName.style.display = 'inline-block';
 
-// Provera animacije korisnika
-const userAnim = allUserAnimations[data.nickname];
-if (userAnim && userAnim.animation) {
-    strongName.style.animationName = userAnim.animation;
-    strongName.style.animationDuration = `${userAnim.speed || 1}s`;
-    strongName.style.animationIterationCount = 'infinite';
-    strongName.style.animationTimingFunction = 'ease-in-out';
-    strongName.style.display = 'inline-block';
-
-    // Ako je gradijent, primeni background clip
-    if (data.gradient || window.defaultAdminGradient) {
-        const gradClass = data.gradient || window.defaultAdminGradient;
-        const gradElement = document.querySelector(`.${gradClass}`);
-        if (gradElement) {
-            strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-            strongName.style.backgroundClip = 'text';
-            strongName.style.webkitBackgroundClip = 'text';
-            strongName.style.webkitTextFillColor = 'transparent';
-            strongName.style.color = 'transparent';
+        if (data.gradient || window.defaultAdminGradient) {
+            const gradClass = data.gradient || window.defaultAdminGradient;
+            const gradElement = document.querySelector(`.${gradClass}`);
+            if (gradElement) {
+                strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
+                strongName.style.backgroundClip = 'text';
+                strongName.style.webkitBackgroundClip = 'text';
+                strongName.style.webkitTextFillColor = 'transparent';
+                strongName.style.color = 'transparent';
+            }
         }
     }
-}
 
     if (authorizedUsers.has(data.nickname) && data.avatar) {
         const img = document.createElement('img');
@@ -213,6 +211,11 @@ if (userAnim && userAnim.animation) {
 
     messageArea.prepend(newMessage);
 
+    // Održavanje limita od 100 poruka u DOM-u
+    while (messageArea.children.length > 100) {
+        messageArea.removeChild(messageArea.lastChild);
+    }
+
     if (window.snimanjeAktivno) {
         porukeZaSnimanje.push(newMessage.outerHTML);
     }
@@ -221,6 +224,7 @@ if (userAnim && userAnim.animation) {
         messageArea.scrollTop = 0;
     }
 });
+
 
 socket.on('private_message', function(data) {
     if (!myNickname) return;
@@ -738,5 +742,6 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
