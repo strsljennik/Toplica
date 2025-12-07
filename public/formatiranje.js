@@ -134,11 +134,10 @@ socket.on('chatMessage', function(data) {
     if (!myNickname) return;
 
     const myName = currentUser ? currentUser : myNickname;
+
+    // Prvo zamena #n sa imenom korisnika, pa zamena emoji i kodova iz mape
     let raw = data.text.trim();
-    let isImageTag = raw.startsWith('<img');
-    let text = isImageTag
-        ? raw
-        : replaceTextEmoji(raw).replace(/#n/g, myName);
+    let text = replaceTextEmoji(raw).replace(/#n/g, myName);
 
     // Čuvamo samo poslednju poruku po korisniku
     if (lastMessages[data.nickname] === text) return;
@@ -148,12 +147,14 @@ socket.on('chatMessage', function(data) {
     const newMessage = document.createElement('div');
     newMessage.classList.add('message');
 
+    // Stilovi fonta
     newMessage.style.fontWeight = data.bold ? 'bold' : 'normal';
     newMessage.style.fontStyle = data.italic ? 'italic' : 'normal';
     newMessage.style.textDecoration =
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
+    // Boja ili gradijent
     if (data.color) {
         newMessage.style.backgroundImage = '';
         newMessage.style.backgroundClip = '';
@@ -172,12 +173,14 @@ socket.on('chatMessage', function(data) {
         }
     }
 
+    // Dodavanje sadržaja poruke
     newMessage.innerHTML = `
         <strong>${data.nickname}:</strong> 
-        ${isImageTag ? raw : text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
+        ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
         <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
     `;
 
+    // Animacija imena korisnika
     const strongName = newMessage.querySelector('strong');
     const userAnim = allUserAnimations[data.nickname];
     if (userAnim && userAnim.animation) {
@@ -200,6 +203,7 @@ socket.on('chatMessage', function(data) {
         }
     }
 
+    // Avatar za autorizovane korisnike
     if (authorizedUsers.has(data.nickname) && data.avatar) {
         const img = document.createElement('img');
         img.src = data.avatar;
@@ -209,6 +213,7 @@ socket.on('chatMessage', function(data) {
         newMessage.appendChild(img);
     }
 
+    // Dodavanje poruke na početak chata
     messageArea.prepend(newMessage);
 
     // Održavanje limita od 100 poruka u DOM-u
@@ -216,16 +221,16 @@ socket.on('chatMessage', function(data) {
         messageArea.removeChild(messageArea.lastChild);
     }
 
+    // Snimanje poruka ako je aktivno
     if (window.snimanjeAktivno) {
         porukeZaSnimanje.push(newMessage.outerHTML);
     }
 
+    // Scroll na vrh ako korisnik gleda gore
     if (messageArea.scrollTop < 50) {
         messageArea.scrollTop = 0;
     }
 });
-
-
 socket.on('private_message', function(data) {
     if (!myNickname) return;
 
@@ -742,6 +747,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
