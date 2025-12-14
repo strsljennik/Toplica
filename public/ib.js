@@ -31,6 +31,10 @@ const textEmojiMap = {
   'a2': 'Biti potpuno iskren prema sebi je dobra vežba.',
   'a3': 'Ne trčite za ženama da se ne sudarite sa onima koji od njih beže.',
   'a4': 'Prodavačica je bila toliko lepa da je bilo smešno njeno pitanje: "Šta želite?"',
+  'a5': 'Toliko sam pametan da ni sam ne razumem sta govorim"',
+  'a6': 'Dan bez smeha je izgubljen dan"',
+   'a7': 'Ponekad razgovaram sam sa sobom jer mi je potrebno misljenje strucnjaka"',
+
 
   '#iva': '🎶🎶🎶🎶🎵🎶🎶🎵',
   '#dia': '💎💎💎💎💎💎💎💎💎💎💎💎💎💎',
@@ -62,4 +66,5 @@ function replaceTextEmoji(html) {
 
     return parts.join('');
 }
+
 
