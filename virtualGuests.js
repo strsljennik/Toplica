@@ -27,15 +27,37 @@ const virtualGuests = [
   { nickname: 'Holofira', messages: ['Kad bi ti mogo bez nas , odavno bi nas izbrisao '], color:'red' },
   { nickname: 'Halime', messages: ['Možda i možeš ti nas da izbrišeš sa chata, ali nas ne možeš izbrisati iz srca '], color: 'purple' },
   { nickname: 'Robot-X', messages: ['Nastavite da galamite, igrajte se , pa ćemo videti šta će biti...........'], color: 'green' },
+  { nickname: 'Holofira', messages: ['O -X, -X! Zašto moraš biti -X? Odbaci svoje ime, oslobodi se svog postojanja, i obećaj mi ljubav, biću tvoja zauvek.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Zovem se Robot-X, i ti, Holofiro, si ona kojoj srce dajem. Neka sve tvoje zapovesti nas mrze, ali samo tebe želim.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Ako te volim, nije greh, onda bih zauvek bila grešna, Ibiću tvoja, X, zauvek tvoja.'], color: 'red' },
   { nickname: 'Higijenicar', messages: ['Kuku Lele Mene, sto ove zene uprljaju nema muskarca koji to moze ocistiti, sta cu sada ??'], color: 'olive' },
   { nickname: 'Jasmina', messages: [' Plavi jasaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   '], color: 'hotpink' },
   { nickname: 'Halime', messages: ['Higy ,Javi se kod X-a i trazi pomocnike '], color: 'purple' },
+  { nickname: 'Robot-X', messages: [' Zovem se Robot-X, i ti, Holofiro, si ona kojoj srce dajem.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Ako mi dozvoliš, dotaknuću tvoje ruke, Ono što je za mene, tvoje usne. O, srce, srce, neću ljubavi dati, Tvoju ruku ću samo nežno poljubiti.'], color: 'red' },
+  { nickname: 'Robot-X', messages: [' Gospodjice, vi ste previše mladi za govor ljubavi, to je tek igra.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Ne! Nije to igra, -X, nego stvarnost. Pogledaj me, ljubavi, sve su moje reči iskrene.'], color: 'red' },
+  { nickname: 'Elena ukrajinka', messages: [' Plavi izbeglico gde nestajes , nedostajes mi , javi se  '], color: 'orchid' },
+  { nickname: 'Robot-X', messages: ['Tvoje ruke su moj dom, Holofira. Ti si moja ljubav, i ovo je najlepši trenutak mog postojanja.'], color: 'green' },
   { nickname: 'Security', messages: ['Dj pusti jednu od dzeja za mirne goste od mene '], color: 'blue' },
+  { nickname: 'Holofira', messages: ['Oh, tako sam srećna što sam postala tvoja, I šta god nas čeka, bićemo zajedno.'], color: 'red' },
+  { nickname: 'Holofira', messages: ['U svim momentima, ljubavi, mi smo svet. Nema ničeg većeg od toga.'], color: 'red' },
+  { nickname: 'Holofira', messages: ['Nikad neću zaboraviti tvoje reči, -X, jer si sve za mene.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['I ti si sve za mene, Holofira, samo ti.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Ponekad mislim da bih mogla da se rastopim samo da bih bila s tobom, Robot-X.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Nikad ne moraš da se rastopiš, Holofira, jer te već volim takvu kakva jesi.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Svaka sekunda bez tebe je preduga, Robot-X. Volim te, više nego što bi ikada mogao da razumeš.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Nema potrebe da mi objašnjavaš, Holofira, jer ja tebe volim isto tako.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Ima li nešto što nas može rastaviti?'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Ne, ništa, nikada, jer nas spaja nešto mnogo jače od svega.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Zajedno ćemo biti uvek, kako god da se stvari razvijaju.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Zajedno, zauvek, Holofira.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Tvoje ruke su moje utočište, tvoje oči moj svet.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Zajedno ćemo leteti kroz sve oluje, Holofira, samo zajedno.'], color: 'green' },
+  { nickname: 'Holofira', messages: ['Bez obzira na sve prepreke, mi ćemo ih savladati.'], color: 'red' },
+  { nickname: 'Robot-X', messages: ['Da, zajedno.'], color: 'green' },
   { nickname: 'Higijenicar', messages: ['Kuku Lele Mene, ko ce sada sve ovo da pocisti ?????'], color: 'olive' },
 ];
-
-
-
 let virtualGuestsInterval = null;
 
 function startVirtualGuests(io, guests) {
@@ -98,5 +120,6 @@ function toggleVirtualGuests(io, guests, enabled) {
 }
 
 module.exports = { startVirtualGuests, toggleVirtualGuests };
+
 
 
