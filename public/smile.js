@@ -134,8 +134,8 @@ const allItems = [
         'xjanagrudi.avif','xjana.avif','xbikini.avif','xsg.avif', 'xasv.avifs', 'jaitea.avifs','xjeni.avif', 
         'slika11.avifs','slika13.avifs','dia1.gif', 'strumf.avifs', 'mesa.webp','mesa1.webp', 'glava.png',
         'nov6.gif','slika1.avifs', 'slika3.avifs', 'bub.gif', 'ok.gif','luster.webp','gal.avifs',
-         'slika6.avifs', 'slika7.avifs', 'nag1.webp', 'ily1.gif','beba.gif','uzivam.gif', 
-         'jerry3.avifs', 'jerry.webp', 'himen.webp', 'himen1.webp','macgal.avif', 
+         'slika6.avifs', 'slika7.avifs', 'nag1.webp', 'ily1.gif','beba.gif','uzivam.gif', 'bo.avif', 
+         'jerry3.avifs', 'jerry.webp', 'himen.webp', 'himen1.webp','macgal.avif', 'zabe.avif', 'pist.gif',
         'rg.gif', 'x1.gif', 'kiss.gif', 'kiss1.gif', 'jerry2.avifs', 'srce3.gif', 'srce2.gif',  'box.avifs',
         'patak1.avifs', 'patak2.avifs', 'jerry1.avifs', 'nov17.gif', 'nov18.gif', 'nov20.gif','vestresnja.gif',
            'kiss2.gif','nov3.gif', 'nov4.gif','nov19.gif','crveni.webp','diakiss.avif',
@@ -512,6 +512,7 @@ document.getElementById('smileContainer').addEventListener('contextmenu', (e) =>
 socket.on('imageAnimation', (data) => {
     triggerImageAnimation(data.src, data.code, data.nickname, data.text, data.color, data.gradient, true);
 });
+
 
 
 
