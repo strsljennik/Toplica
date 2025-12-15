@@ -53,17 +53,19 @@ function applyGlitter(nickname, glitterImg, isCurrentUser = false) {
     const guestDiv = document.getElementById(`guest-${nickname}`);
     if (!guestDiv) return;
 
-    // Resetuj prethodne stilove
-    guestDiv.style.color = '';
-    guestDiv.style.background = `url('/glit/${glitterImg}')`;
-    guestDiv.style.backgroundSize = 'cover';
-    guestDiv.style.filter = 'brightness(1.5) contrast(1.5)';
-    guestDiv.style.backgroundClip = 'text';
-    guestDiv.style.webkitBackgroundClip = 'text';
-    guestDiv.style.webkitTextFillColor = 'transparent';
+    // Ne overrideuj boju ili gradijent
+    if (!guestDiv.dataset.userColor && !guestDiv.dataset.userGradient) {
+        guestDiv.style.color = '';
+        guestDiv.style.background = `url('/glit/${glitterImg}')`;
+        guestDiv.style.backgroundSize = 'cover';
+        guestDiv.style.filter = 'brightness(1.5) contrast(1.5)';
+        guestDiv.style.backgroundClip = 'text';
+        guestDiv.style.webkitBackgroundClip = 'text';
+        guestDiv.style.webkitTextFillColor = 'transparent';
+    }
+
     guestDiv.dataset.userGlitter = glitterImg;
 
-    // Samo trenutni korisnik menja input
     if (isCurrentUser) {
         currentGlitter = glitterImg;
         updateInputStyle();
@@ -81,3 +83,4 @@ socket.on('allGlitters', (glitters) => {
 socket.on('glitterChange', (data) => {
     applyGlitter(data.nickname, data.glitter, false);
 });
+
