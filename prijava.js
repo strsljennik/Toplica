@@ -1,67 +1,70 @@
 const bcrypt = require('bcrypt');
-const { User } = require('./mongo');  // Tvoj User model
+const { User } = require('./mongo');
 
-// Čuva trenutno prijavljene korisnike
-const activeUsers = new Set();
+// username -> socketId
+const activeUsers = new Map();
 
-// Funkcija za registraciju
+// REGISTRACIJA
 async function register(req, res) {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).send('Username and password are required.');
+        return res.status(400).send('Username and password are required');
     }
 
     const role = username === 'Radio Galaksija' ? 'admin' : 'guest';
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, role });
 
     try {
+        const user = new User({ username, password: hashedPassword, role });
         await user.save();
         res.status(201).send('User registered');
     } catch (err) {
-        console.error('Greška prilikom registracije:', err);
-        res.status(400).send('Error registering user');
+        res.status(400).send('User already exists');
     }
 }
 
-// Funkcija za prijavu
+// LOGIN
 async function login(req, res, io) {
     const { username, password } = req.body;
-    const socketId = req.headers['x-socket-id']; // Socket ID od klijenta
+    const socketId = req.headers['x-socket-id'];
 
-    if (!username || !password) {
-        return res.status(400).send('Username and password are required.');
+    if (!username || !password || !socketId) {
+        return res.status(400).send('Missing data');
     }
 
-    // Sprečava login ako je username već aktivan
-    if (activeUsers.has(username)) {
+    // dozvoli login samo ako je isti socket
+    if (activeUsers.has(username) && activeUsers.get(username) !== socketId) {
         return res.status(400).send('User already logged in');
     }
 
     try {
         const user = await User.findOne({ username });
-        if (user && await bcrypt.compare(password, user.password)) {
-            activeUsers.add(username); // Dodaj u trenutno aktivne
-            const role = user.role;
-            const socket = io.sockets.sockets.get(socketId);
+        if (!user) return res.status(400).send('Invalid credentials');
 
-            if (socket) {
-                socket.emit('userLoggedIn', { username, role });
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) return res.status(400).send('Invalid credentials');
 
-                // Kada korisnik diskonektuje, ukloni ga iz activeUsers
-                socket.on('disconnect', () => activeUsers.delete(username));
-            }
+        activeUsers.set(username, socketId);
 
-            res.send(role === 'admin' ? 'Logged in as admin' : 'Logged in as guest');
-        } else {
-            res.status(400).send('Invalid credentials');
+        const socket = io.sockets.sockets.get(socketId);
+        if (socket) {
+            socket.emit('userLoggedIn', {
+                username,
+                role: user.role
+            });
+
+            socket.on('disconnect', () => {
+                if (activeUsers.get(username) === socketId) {
+                    activeUsers.delete(username);
+                }
+            });
         }
+
+        res.send(`Logged in as ${user.role}`);
     } catch (err) {
-        console.error('Greška prilikom logovanja:', err);
         res.status(500).send('Server error');
     }
 }
 
 module.exports = { register, login };
-
