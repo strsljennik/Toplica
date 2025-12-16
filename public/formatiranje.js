@@ -14,6 +14,7 @@ const virtualGuests = [
   { nickname: 'Higijenicar', color: 'olive' },
   { nickname: 'Jasmina', color: 'hotpink' },
   { nickname: 'Elena ukrajinka', color: 'orchid' },
+  { nickname: 'Miki', color: 'lightgreen' },
   { nickname: 'Beti Makedonka', color: 'mediumvioletred' }
 ];
 
@@ -794,6 +795,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
