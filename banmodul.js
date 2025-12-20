@@ -18,7 +18,7 @@ function setupSocketEvents(io, guests, bannedUsers, authorizedUsers) {
 
         socket.on('banUser', (targetNickname) => {
             const username = userSockets.get(socket.id);
-            if (!authorizedUsers.has(username)) return;
+            if (!authorizedUsers || !authorizedUsers.has(username)) return; // Zaštita
             if (targetNickname === '*__X__*') return;
 
             if (bannedUsers.has(targetNickname)) {
