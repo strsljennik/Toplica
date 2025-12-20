@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-let dbConnection = null;
+
 
 // Konekcija sa MongoDB bazom koristeći .env fajl za URI
 const uri = process.env.MONGODB_URI;
@@ -71,4 +71,5 @@ ensureAdminExists();
 
 // Exportujemo konekciju i model korisnika
 module.exports = { connectDB, User };
+
 
