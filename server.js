@@ -73,6 +73,8 @@ let textElements = [];
 startVirtualGuests(io, guests);
 const allGlitters = {};
 privatmodul(io, guests, sviAvatari, allGlitters);
+setupSocketEvents(io, guests, bannedUsers, authorizedUsers);
+
 
 
 // Socket.io događaji
@@ -240,6 +242,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server je pokrenut na portu ${PORT}`);
 });
+
 
 
 
