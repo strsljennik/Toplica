@@ -1,12 +1,14 @@
-const { getDB } = require('./mongo'); // funkcija koja vraća connected DB
+const { getDB } = require('./mongo'); // pretpostavljam da imaš getDB funkciju koja vraća povezanu DB
 const userSockets = new Map(); // socket.id → username
 
+// Provera da li je korisnik banovan u bazi
 async function isBanned(clientId) {
     const db = getDB();
     const ban = await db.collection('fronban').findOne({ clientId });
     return !!ban;
 }
 
+// Upis banovanog korisnika u bazu
 async function banClient(clientId) {
     const db = getDB();
     await db.collection('fronban').updateOne(
@@ -16,6 +18,7 @@ async function banClient(clientId) {
     );
 }
 
+// Brisanje bana iz baze
 async function unbanClient(clientId) {
     const db = getDB();
     await db.collection('fronban').deleteOne({ clientId });
@@ -25,11 +28,10 @@ function setupSocketEvents(io, guests, authorizedUsers) {
     io.on('connection', async (socket) => {
         const nickname = guests[socket.id];
 
-        // kada se front pošalje init sa clientId
+        // Kada se front inicijalizuje, šalje svoj clientId
         socket.on('init', async clientId => {
-            // proveri u bazi da li je banovan
             if (await isBanned(clientId)) {
-                socket.emit('userBanned', clientId);
+                socket.emit('userBanned', clientId); // katancic na frontu
             }
         });
 
@@ -40,7 +42,7 @@ function setupSocketEvents(io, guests, authorizedUsers) {
             io.emit('updateGuestList', Object.values(guests));
         });
 
-        // Ban/unban funkcija (samo autorizovani)
+        // Ban/unban (samo autorizovani)
         socket.on('banUser', async (targetClientId) => {
             const username = userSockets.get(socket.id);
             if (!authorizedUsers || !authorizedUsers.has(username)) return;
@@ -56,11 +58,11 @@ function setupSocketEvents(io, guests, authorizedUsers) {
 
         // Chat blokada za banovane
         socket.on('chatMessage', async (msg) => {
-            const clientId = socket.handshake.query.clientId; // ili iz init
+            const clientId = socket.handshake.query.clientId; // ili iz init event-a
             if (await isBanned(clientId)) return;
             io.emit('chatMessage', guests[socket.id], msg);
         });
     });
 }
 
-module.exports = { setupSocketEvents };
+module.exports = { setupSocketEvents, isBanned, banClient, unbanClient };
