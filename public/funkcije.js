@@ -1,31 +1,36 @@
+// ================== PERSISTENT CLIENT ID ==================
+let clientId = localStorage.getItem('clientId');
+if (!clientId) {
+    clientId = 'client-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('clientId', clientId);
+}
+
 // ================== BAN STATE ==================
 const bannedSet = new Set();
 
+// ================== SOCKET INIT ==================
+socket.emit('init', clientId); // šalje serveru svoj persistent ID
+
 // ================== SOCKET EVENTS ==================
-socket.on('userBanned', nickname => {
-    bannedSet.add(nickname);
-
-    const el = document.getElementById(`guest-${nickname}`);
-    if (el) el.textContent = renderNickname(nickname);
-
-    if (nickname === myNickname) {
+socket.on('userBanned', bannedClientId => {
+    // Ako je event za nas
+    if (bannedClientId === clientId) {
         chatInput.disabled = true;
         messageArea.style.display = 'none';
         localStorage.setItem('banned', '1');
     }
+    bannedSet.add(bannedClientId);
+    updateGuestListUI();
 });
 
-socket.on('userUnbanned', nickname => {
-    bannedSet.delete(nickname);
-
-    const el = document.getElementById(`guest-${nickname}`);
-    if (el) el.textContent = renderNickname(nickname);
-
-    if (nickname === myNickname) {
+socket.on('userUnbanned', unbannedClientId => {
+    bannedSet.delete(unbannedClientId);
+    if (unbannedClientId === clientId) {
         chatInput.disabled = false;
         messageArea.style.display = 'block';
         localStorage.removeItem('banned');
     }
+    updateGuestListUI();
 });
 
 // ================== DOUBLE CLICK BAN / UNBAN ==================
@@ -33,13 +38,39 @@ guestList.addEventListener('dblclick', e => {
     const guestEl = e.target.closest('.guest');
     if (!guestEl) return;
 
-    const nickname = guestEl.dataset.nick;
+    const targetId = guestEl.dataset.clientId;
     if (!authorizedUsers.has(myNickname)) return;
 
-    if (myNickname === '*__X__*' || !authorizedUsers.has(nickname)) {
-        socket.emit('banUser', nickname);
-    }
+    socket.emit('banUser', targetId);
 });
+
+// ================== RENDER ==================
+function renderNickname(nickname, clientId) {
+    return bannedSet.has(clientId)
+        ? `${nickname} 🔒`
+        : nickname;
+}
+
+// ================== GUEST LIST ==================
+function addGuest(nickname, clientId) {
+    const guestEl = document.createElement('div');
+    guestEl.className = 'guest';
+    guestEl.id = `guest-${clientId}`;
+    guestEl.dataset.nick = nickname;
+    guestEl.dataset.clientId = clientId;
+    guestEl.textContent = renderNickname(nickname, clientId);
+
+    guestList.appendChild(guestEl);
+}
+
+// ================== UPDATE LIST ==================
+function updateGuestListUI() {
+    const allGuests = Array.from(guestList.children);
+    allGuests.forEach(el => {
+        const clientId = el.dataset.clientId;
+        el.textContent = renderNickname(el.dataset.nick, clientId);
+    });
+}
 
 // ================== SELF BAN STATE ==================
 if (localStorage.getItem('banned')) {
@@ -47,25 +78,8 @@ if (localStorage.getItem('banned')) {
     messageArea.style.display = 'none';
 }
 
-// ================== RENDER ==================
-function renderNickname(nickname) {
-    return bannedSet.has(nickname)
-        ? `${nickname} 🔒`
-        : nickname;
-}
-
-// ================== GUEST LIST ==================
-function addGuest(nickname) {
-    const guestEl = document.createElement('div');
-    guestEl.className = 'guest';
-    guestEl.id = `guest-${nickname}`;
-    guestEl.dataset.nick = nickname;
-    guestEl.textContent = renderNickname(nickname);
-
-    guestList.appendChild(guestEl);
-}
-
+// ================== UPDATE GUEST LIST FROM SERVER ==================
 socket.on('updateGuestList', users => {
     guestList.innerHTML = '';
-    users.forEach(addGuest);
+    users.forEach(u => addGuest(u.nickname, u.clientId));
 });
