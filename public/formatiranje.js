@@ -372,7 +372,7 @@ socket.on('private_message', function(data) {
     }
 });
 // ================== GUESTS ==================
-socket.on('newGuest', function (nickname) {
+socket.on('newGuest', function (nickname, token) {
     const guestId = `guest-${nickname}`;
     const guestList = document.getElementById('guestList');
 
@@ -381,40 +381,42 @@ socket.on('newGuest', function (nickname) {
         newGuest.classList.add('guest');
         newGuest.id = guestId;
         newGuest.dataset.nick = nickname;
+        newGuest.dataset.token = token;
+
         // Prikaz ban stanja
-        newGuest.textContent = bannedSet.has(nickname) ? `${nickname} 🔒` : nickname;
+        newGuest.textContent = bannedSet.has(token) ? `${nickname} 🔒` : nickname;
 
         guestsData[guestId] = { nickname, color: '' };
         guestList.appendChild(newGuest);
     }
 });
 
-// Ažuriranje liste gostiju
+// ================== UPDATE GUEST LIST ==================
 socket.on('updateGuestList', function (users) {
     const guestList = document.getElementById('guestList');
 
     // Ukloni goste koji više nisu u listi
     Array.from(guestList.children).forEach(guestEl => {
-        if (!users.includes(guestEl.dataset.nick)) {
+        if (!users.some(u => u.nickname === guestEl.dataset.nick)) {
             delete guestsData[`guest-${guestEl.dataset.nick}`];
             guestList.removeChild(guestEl);
         }
     });
 
     // Reorder: "Radio Galaksija" na vrhu
-    if (users.includes("Radio Galaksija")) {
-        users = ["Radio Galaksija", ...users.filter(n => n !== "Radio Galaksija")];
+    if (users.find(u => u.nickname === "Radio Galaksija")) {
+        users = [{nickname: "Radio Galaksija", token: null}, ...users.filter(u => u.nickname !== "Radio Galaksija")];
         if (myNickname !== "Radio Galaksija") {
-            users = users.filter(n => n !== myNickname);
-            users.splice(1, 0, myNickname);
+            users = users.filter(u => u.nickname !== myNickname);
+            users.splice(1, 0, {nickname: myNickname, token: myToken});
         }
     } else {
-        users = users.filter(n => n !== myNickname);
-        users.unshift(myNickname);
+        users = users.filter(u => u.nickname !== myNickname);
+        users.unshift({nickname: myNickname, token: myToken});
     }
 
     // Dodaj ili update goste
-    users.forEach(nickname => {
+    users.forEach(({nickname, token}) => {
         const guestId = `guest-${nickname}`;
         let guestElement = document.getElementById(guestId);
 
@@ -423,11 +425,12 @@ socket.on('updateGuestList', function (users) {
             guestElement.className = 'guest';
             guestElement.id = guestId;
             guestElement.dataset.nick = nickname;
+            guestElement.dataset.token = token;
             guestList.appendChild(guestElement);
         }
 
         // Prikaz nadimka i ban stanja
-        guestElement.textContent = bannedSet.has(nickname) ? `${nickname} 🔒` : nickname;
+        guestElement.textContent = bannedSet.has(token) ? `${nickname} 🔒` : nickname;
 
         // Ako je virtualni gost, dodaj boju
         const vg = virtualGuests.find(v => v.nickname === nickname);
@@ -439,18 +442,15 @@ socket.on('updateGuestList', function (users) {
             guestsData[guestId] = { nickname, color: '' };
         }
     });
-});
-
 
     // Poređaj DOM elemente po redosledu iz `users`
-    users.forEach(nickname => {
+    users.forEach(({nickname}) => {
         const guestId = `guest-${nickname}`;
         const guestElement = document.getElementById(guestId);
-        if (guestElement) {
-            guestList.appendChild(guestElement);
-        }
+        if (guestElement) guestList.appendChild(guestElement);
     });
 });
+
 // COLOR PICKER - OBICNE BOJE
 document.getElementById('colorBtn').addEventListener('click', () => {
     document.getElementById('colorPicker').click();
@@ -797,6 +797,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
