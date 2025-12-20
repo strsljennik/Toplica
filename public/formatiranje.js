@@ -387,58 +387,76 @@ socket.on('newGuest', function (nickname) {
     guestList.appendChild(newGuest);
 });
 // Ažuriranje liste gostiju bez resetovanja stilova
+// ================== GUESTS ==================
+socket.on('newGuest', function (nickname) {
+    const guestId = `guest-${nickname}`;
+    const guestList = document.getElementById('guestList');
+
+    if (!guestsData[guestId]) {
+        const newGuest = document.createElement('div');
+        newGuest.classList.add('guest');
+        newGuest.id = guestId;
+        newGuest.dataset.nick = nickname;
+        // Prikaz ban stanja
+        newGuest.textContent = bannedSet.has(nickname) ? `${nickname} 🔒` : nickname;
+
+        guestsData[guestId] = { nickname, color: '' };
+        guestList.appendChild(newGuest);
+    }
+});
+
+// Ažuriranje liste gostiju
 socket.on('updateGuestList', function (users) {
     const guestList = document.getElementById('guestList');
-    const currentGuests = Array.from(guestList.children).map(guest => guest.textContent);
 
     // Ukloni goste koji više nisu u listi
-    currentGuests.forEach(nickname => {
-        if (!users.includes(nickname)) {
-            delete guestsData[`guest-${nickname}`];
-            const guestElement = Array.from(guestList.children).find(guest => guest.textContent === nickname);
-            if (guestElement) {
-                guestList.removeChild(guestElement);
-            }
+    Array.from(guestList.children).forEach(guestEl => {
+        if (!users.includes(guestEl.dataset.nick)) {
+            delete guestsData[`guest-${guestEl.dataset.nick}`];
+            guestList.removeChild(guestEl);
         }
     });
-   // Reorder: "Radio Galaksija" na vrhu
+
+    // Reorder: "Radio Galaksija" na vrhu
     if (users.includes("Radio Galaksija")) {
         users = ["Radio Galaksija", ...users.filter(n => n !== "Radio Galaksija")];
-
-        // Ulogovani korisnik na drugo mesto ako nije Galaksija
         if (myNickname !== "Radio Galaksija") {
             users = users.filter(n => n !== myNickname);
             users.splice(1, 0, myNickname);
         }
     } else {
-        // Ako nema Galaksije, korisnik ide na prvo mesto
         users = users.filter(n => n !== myNickname);
         users.unshift(myNickname);
     }
 
-    // Dodaj nove goste
+    // Dodaj ili update goste
     users.forEach(nickname => {
         const guestId = `guest-${nickname}`;
-        if (!guestsData[guestId]) {
-            const newGuest = document.createElement('div');
-            newGuest.className = 'guest';
-            newGuest.id = guestId;
-            newGuest.textContent = nickname;
+        let guestElement = document.getElementById(guestId);
 
-            // Dodaj boju ako je virtualni gost
-            const vg = virtualGuests.find(v => v.nickname === nickname);
-            if (vg) {
-                newGuest.style.color = vg.color;
-                guestsData[guestId] = { nickname, color: vg.color };
-            } else {
-                newGuest.style.color = '';
-                guestsData[guestId] = { nickname, color: '' };
-            }
+        if (!guestElement) {
+            guestElement = document.createElement('div');
+            guestElement.className = 'guest';
+            guestElement.id = guestId;
+            guestElement.dataset.nick = nickname;
+            guestList.appendChild(guestElement);
+        }
 
-            newGuest.setAttribute('data-guest-id', guestId);
-            guestList.appendChild(newGuest);
+        // Prikaz nadimka i ban stanja
+        guestElement.textContent = bannedSet.has(nickname) ? `${nickname} 🔒` : nickname;
+
+        // Ako je virtualni gost, dodaj boju
+        const vg = virtualGuests.find(v => v.nickname === nickname);
+        if (vg) {
+            guestElement.style.color = vg.color;
+            guestsData[guestId] = { nickname, color: vg.color };
+        } else {
+            guestElement.style.color = '';
+            guestsData[guestId] = { nickname, color: '' };
         }
     });
+});
+
 
     // Poređaj DOM elemente po redosledu iz `users`
     users.forEach(nickname => {
@@ -795,6 +813,7 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
+
 
 
 
