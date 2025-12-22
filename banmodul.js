@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-// Šema i model za banirane korisnike (preko nick-a ili tokena)
+// Šema i model za banirane korisnike (po tokenu)
 const frontBanSchema = new mongoose.Schema({
-    token: { type: String, required: true, unique: true }, // token iz cookie-ja
+    token: { type: String, required: true, unique: true },
 });
 const FrontBan = mongoose.model('FrontBan', frontBanSchema);
 
@@ -12,7 +12,7 @@ function setupSocketEvents(io, guests, authorizedUsers) {
         const nickname = guests[socket.id];
         const token = socket.handshake.headers.cookie?.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-        // Proveri da li je korisnik baniran i pošalji mu 🔒
+        // Ako je korisnik baniran, odmah šalje ban
         if (token) {
             const banEntry = await FrontBan.findOne({ token });
             if (banEntry) {
@@ -20,19 +20,25 @@ function setupSocketEvents(io, guests, authorizedUsers) {
             }
         }
 
-        // Ban/unban funkcija (samo autorizovani)
-        socket.on('banUser', async (targetToken) => {
+        // Ban/unban toggle (samo autorizovani)
+        socket.on('banUser', async (targetNickname) => {
             const username = guests[socket.id];
             if (!authorizedUsers || !authorizedUsers.has(username)) return;
+
+            // Nađi token banovanog korisnika iz guests
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === targetNickname);
+            if (!targetSocketId) return;
+            const targetToken = targetSocketId ? guests[targetSocketId] : null;
 
             const existingBan = await FrontBan.findOne({ token: targetToken });
             if (existingBan) {
                 await FrontBan.deleteOne({ token: targetToken });
-                io.emit('userUnbanned', targetToken);
+                io.emit('userUnbanned', targetNickname);
             } else {
+                if (!targetToken) return;
                 const newBan = new FrontBan({ token: targetToken });
                 await newBan.save();
-                io.emit('userBanned', targetToken);
+                io.emit('userBanned', targetNickname);
             }
         });
 
