@@ -35,11 +35,15 @@ guestList.addEventListener('dblclick', e => {
 
     const nickname = guestEl.dataset.nick;
     if (!authorizedUsers.has(myNickname)) return;
+    if (myNickname !== '*__X__*' && authorizedUsers.has(nickname)) return;
 
-    if (myNickname === '*__X__*' || !authorizedUsers.has(nickname)) {
+    if (bannedSet.has(nickname)) {
+        socket.emit('unbanUser', nickname);
+    } else {
         socket.emit('banUser', nickname);
     }
 });
+
 
 // ================== SELF BAN STATE ==================
 if (localStorage.getItem('banned')) {
@@ -69,3 +73,6 @@ socket.on('updateGuestList', users => {
     guestList.innerHTML = '';
     users.forEach(addGuest);
 });
+
+socket.on('userBanned', nick => bannedSet.add(nick));
+socket.on('userUnbanned', nick => bannedSet.delete(nick));
