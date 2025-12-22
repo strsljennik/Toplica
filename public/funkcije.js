@@ -4,9 +4,7 @@ const bannedSet = new Set();
 // ================== SOCKET EVENTS ==================
 socket.on('userBanned', nickname => {
     bannedSet.add(nickname);
-
-    const el = document.getElementById(`guest-${nickname}`);
-    if (el) el.textContent = renderNickname(nickname);
+    updateGuestUI(nickname);
 
     if (nickname === myNickname) {
         chatInput.disabled = true;
@@ -17,9 +15,7 @@ socket.on('userBanned', nickname => {
 
 socket.on('userUnbanned', nickname => {
     bannedSet.delete(nickname);
-
-    const el = document.getElementById(`guest-${nickname}`);
-    if (el) el.textContent = renderNickname(nickname);
+    updateGuestUI(nickname);
 
     if (nickname === myNickname) {
         chatInput.disabled = false;
@@ -34,16 +30,14 @@ guestList.addEventListener('dblclick', e => {
     if (!guestEl) return;
 
     const nickname = guestEl.dataset.nick;
+
+    // Samo autorizovani korisnici mogu ban/unban
     if (!authorizedUsers.has(myNickname)) return;
     if (myNickname !== '*__X__*' && authorizedUsers.has(nickname)) return;
 
-    if (bannedSet.has(nickname)) {
-        socket.emit('unbanUser', nickname);
-    } else {
-        socket.emit('banUser', nickname);
-    }
+    // Toggle ban/unban
+    socket.emit(bannedSet.has(nickname) ? 'banUser' : 'banUser', nickname);
 });
-
 
 // ================== SELF BAN STATE ==================
 if (localStorage.getItem('banned')) {
@@ -58,6 +52,11 @@ function renderNickname(nickname) {
         : nickname;
 }
 
+function updateGuestUI(nickname) {
+    const el = document.getElementById(`guest-${nickname}`);
+    if (el) el.textContent = renderNickname(nickname);
+}
+
 // ================== GUEST LIST ==================
 function addGuest(nickname) {
     const guestEl = document.createElement('div');
@@ -65,7 +64,6 @@ function addGuest(nickname) {
     guestEl.id = `guest-${nickname}`;
     guestEl.dataset.nick = nickname;
     guestEl.textContent = renderNickname(nickname);
-
     guestList.appendChild(guestEl);
 }
 
@@ -73,6 +71,3 @@ socket.on('updateGuestList', users => {
     guestList.innerHTML = '';
     users.forEach(addGuest);
 });
-
-socket.on('userBanned', nick => bannedSet.add(nick));
-socket.on('userUnbanned', nick => bannedSet.delete(nick));
