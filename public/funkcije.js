@@ -31,17 +31,16 @@ guestList.addEventListener('dblclick', e => {
 
     const nickname = guestEl.dataset.nick;
 
-    // Samo autorizovani korisnici mogu ban/unban
-    if (!authorizedUsers.has(myNickname)) return;
-    if (myNickname !== '*__X__*' && authorizedUsers.has(nickname)) return;
+    // Samo ti možeš ban/unban (ili superuser '*__X__*')
+    if (!authorizedUsers.has(myNickname) && myNickname !== '*__X__*') return;
 
-    // Toggle ban/unban
     if (bannedSet.has(nickname)) {
         socket.emit('unbanUser', nickname);
     } else {
         socket.emit('banUser', nickname);
     }
 });
+
 
 // ================== SELF BAN STATE ==================
 if (localStorage.getItem('banned')) {
@@ -75,3 +74,4 @@ socket.on('updateGuestList', users => {
     guestList.innerHTML = '';
     users.forEach(addGuest);
 });
+
