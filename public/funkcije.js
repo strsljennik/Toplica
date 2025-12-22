@@ -36,7 +36,11 @@ guestList.addEventListener('dblclick', e => {
     if (myNickname !== '*__X__*' && authorizedUsers.has(nickname)) return;
 
     // Toggle ban/unban
-    socket.emit(bannedSet.has(nickname) ? 'banUser' : 'banUser', nickname);
+    if (bannedSet.has(nickname)) {
+        socket.emit('unbanUser', nickname);
+    } else {
+        socket.emit('banUser', nickname);
+    }
 });
 
 // ================== SELF BAN STATE ==================
