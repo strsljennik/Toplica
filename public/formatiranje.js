@@ -1,3 +1,4 @@
+const hiddenImageUsers = new Set(['ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka','Dia💎', 'Dia']);
 let myNickname = ''; // biće postavljen od servera
 
 socket.off('yourNickname');
@@ -153,6 +154,9 @@ function applyAnimationToMessageName(strongElement, nickname) {
     // vratimo ":" iza animiranog imena
     strongElement.innerHTML += ': ';
 }
+function canSeeHiddenImage(userName) {
+  return hiddenImageUsers.has(userName);
+}
 
 socket.on('chatMessage', function (data) {
     if (!myNickname) return;
@@ -161,6 +165,18 @@ socket.on('chatMessage', function (data) {
 
     let raw = data.text.trim();
     let text = replaceTextEmoji(raw).replace(/#n/g, myName);
+
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = text;
+
+tempDiv.querySelectorAll('img').forEach(img => {
+    if (img.src.endsWith('lm.avif') && !canSeeHiddenImage(myName)) {
+        img.remove();
+    }
+});
+
+text = tempDiv.innerHTML;
+
 
     if (lastMessages[data.nickname] === text) return;
     lastMessages[data.nickname] = text;
@@ -270,16 +286,25 @@ socket.on('chatMessage', function (data) {
     }
 });
 
-socket.on('private_message', function(data) {
+socket.on('private_message', function (data) {
     if (!myNickname) return;
 
-    const myName = currentUser ? currentUser : myNickname;
+    const myName = currentUser || myNickname;
 
-    // Prvo zamena #n sa imenom korisnika, pa zamena emoji i kodova iz mape
     let raw = data.message.trim();
     let text = replaceTextEmoji(raw).replace(/#n/g, myName);
 
-    // Čuvamo samo poslednju poruku po korisniku
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = text;
+
+    tempDiv.querySelectorAll('img').forEach(img => {
+        if (img.src.endsWith('lm.avif') && !canSeeHiddenImage(myName)) {
+            img.remove();
+        }
+    });
+
+    text = tempDiv.innerHTML;
+
     if (lastMessages[data.from] === text) return;
     lastMessages[data.from] = text;
 
@@ -287,63 +312,83 @@ socket.on('private_message', function(data) {
     const newMessage = document.createElement('div');
     newMessage.classList.add('message');
 
-    // Stilovi fonta
+    // FONT
     newMessage.style.fontWeight = data.bold ? 'bold' : 'normal';
     newMessage.style.fontStyle = data.italic ? 'italic' : 'normal';
     newMessage.style.textDecoration =
         (data.underline ? 'underline ' : '') +
         (data.overline ? 'overline' : '');
 
-    // Boja ili gradijent
-    if (data.color) {
-        newMessage.style.backgroundImage = '';
-        newMessage.style.backgroundClip = '';
-        newMessage.style.webkitBackgroundClip = '';
-        newMessage.style.webkitTextFillColor = '';
-        newMessage.style.color = data.color;
-    } else if (data.gradient || window.defaultAdminGradient) {
+    // ===== RESET =====
+    newMessage.style.background = 'none';
+    newMessage.style.backgroundImage = 'none';
+    newMessage.style.backgroundClip = 'initial';
+    newMessage.style.webkitBackgroundClip = 'initial';
+    newMessage.style.webkitTextFillColor = 'initial';
+    newMessage.style.color = 'initial';
+
+    // ===== GLITTER =====
+    if (data.glitter) {
+        newMessage.style.background = `url('/glit/${data.glitter}')`;
+        newMessage.style.backgroundSize = 'cover';
+        newMessage.style.backgroundClip = 'text';
+        newMessage.style.webkitBackgroundClip = 'text';
+        newMessage.style.webkitTextFillColor = 'transparent';
+        newMessage.style.color = 'transparent';
+    }
+
+    // ===== GRADIENT =====
+    else if (data.gradient || window.defaultAdminGradient) {
         const gradClass = data.gradient || window.defaultAdminGradient;
-        const gradElement = document.querySelector(`.${gradClass}`);
-        if (gradElement) {
+        const gradEl = document.querySelector(`.${gradClass}`);
+        if (gradEl) {
+            newMessage.style.backgroundImage = getComputedStyle(gradEl).backgroundImage;
             newMessage.style.backgroundClip = 'text';
             newMessage.style.webkitBackgroundClip = 'text';
             newMessage.style.webkitTextFillColor = 'transparent';
             newMessage.style.color = 'transparent';
-            newMessage.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
         }
     }
 
-    // Dodavanje sadržaja poruke
+    // ===== COLOR =====
+    else if (data.color) {
+        newMessage.style.color = data.color;
+    }
+
+    // CONTENT
     newMessage.innerHTML = `
-        <strong>${data.from}:</strong> 
+        <strong>${data.from}:</strong>
         ${text.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp;&nbsp;')}
-        <span style="font-size: 0.8em; color: gray;">(${data.time})</span>
+        <span style="font-size:0.8em;color:gray;">(${data.time})</span>
     `;
 
-    // Animacija imena korisnika
+    // NAME ANIMATION
     const strongName = newMessage.querySelector('strong');
     const userAnim = allUserAnimations[data.from];
     if (userAnim && userAnim.animation) {
         strongName.style.animationName = userAnim.animation;
         strongName.style.animationDuration = `${userAnim.speed || 1}s`;
         strongName.style.animationIterationCount = 'infinite';
-        strongName.style.animationTimingFunction = 'ease-in-out';
         strongName.style.display = 'inline-block';
 
-        if (data.gradient || window.defaultAdminGradient) {
+        if (data.glitter) {
+            strongName.style.background = `url('/glit/${data.glitter}')`;
+            strongName.style.backgroundSize = 'cover';
+        } else if (data.gradient || window.defaultAdminGradient) {
             const gradClass = data.gradient || window.defaultAdminGradient;
-            const gradElement = document.querySelector(`.${gradClass}`);
-            if (gradElement) {
-                strongName.style.backgroundImage = getComputedStyle(gradElement).backgroundImage;
-                strongName.style.backgroundClip = 'text';
-                strongName.style.webkitBackgroundClip = 'text';
-                strongName.style.webkitTextFillColor = 'transparent';
-                strongName.style.color = 'transparent';
+            const gradEl = document.querySelector(`.${gradClass}`);
+            if (gradEl) {
+                strongName.style.backgroundImage = getComputedStyle(gradEl).backgroundImage;
             }
         }
+
+        strongName.style.backgroundClip = 'text';
+        strongName.style.webkitBackgroundClip = 'text';
+        strongName.style.webkitTextFillColor = 'transparent';
+        strongName.style.color = 'transparent';
     }
 
-    // Avatar za autorizovane korisnike
+    // AVATAR
     if (authorizedUsers.has(data.from) && data.avatar) {
         const img = document.createElement('img');
         img.src = data.avatar;
@@ -353,24 +398,21 @@ socket.on('private_message', function(data) {
         newMessage.appendChild(img);
     }
 
-    // Dodavanje poruke na početak chata
     messageArea.prepend(newMessage);
 
-    // Održavanje limita od 100 poruka u DOM-u
     while (messageArea.children.length > 100) {
         messageArea.removeChild(messageArea.lastChild);
     }
 
-    // Snimanje poruka ako je aktivno
     if (window.snimanjeAktivno) {
         porukeZaSnimanje.push(newMessage.outerHTML);
     }
 
-    // Scroll na vrh ako korisnik gleda gore
     if (messageArea.scrollTop < 50) {
         messageArea.scrollTop = 0;
     }
 });
+
 // Kada nov gost dođe
 socket.on('newGuest', function (nickname) {
     const guestId = `guest-${nickname}`;
@@ -455,36 +497,29 @@ document.getElementById('colorBtn').addEventListener('click', () => {
 });
 
 document.getElementById('colorPicker').addEventListener('input', function() {
-    currentGlitter = null;
+    currentGlitter = null; 
     currentColor = this.value;
-    currentGradient = null;
+    currentGradient = null; // reset gradijenta
 
     const myDiv = document.getElementById(`guest-${myNickname}`);
     if (!myDiv) return;
 
-    // ===== HARD RESET STILOVA =====
-    myDiv.style.background = '';
-    myDiv.style.backgroundSize = '';
-    myDiv.style.backgroundClip = '';
-    myDiv.style.webkitBackgroundClip = '';
-    myDiv.style.webkitTextFillColor = '';
-    myDiv.style.filter = '';
-    delete myDiv.dataset.userGlitter;
-
-    myDiv.style.color = '';
-    myDiv.style.backgroundImage = '';
-    delete myDiv.dataset.userColor;
-    delete myDiv.dataset.userGradient;
-
+    // Ukloni gradijent sa teksta (user i admin)
     myDiv.classList.forEach(cls => {
         if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
             myDiv.classList.remove(cls);
         }
     });
     myDiv.classList.remove('use-gradient', 'gradient-user');
+    myDiv.style.background = '';
+    myDiv.style.backgroundImage = '';
+    myDiv.style.webkitBackgroundClip = '';
+    myDiv.style.webkitTextFillColor = '';
 
-    // Postavi novu boju
+    // Postavi novu boju teksta
     myDiv.style.color = currentColor;
+
+    // **Obeleži korisnika da je sam birao boju**
     myDiv.dataset.userColor = currentColor;
 
     updateInputStyle();
@@ -499,30 +534,21 @@ socket.on('allColors', (colors) => {
         const myDiv = document.getElementById(`guest-${nickname}`);
         if (!myDiv) continue;
 
-        // ===== HARD RESET STILOVA =====
         myDiv.style.background = '';
-        myDiv.style.backgroundSize = '';
-        myDiv.style.backgroundClip = '';
+        myDiv.style.backgroundImage = '';
         myDiv.style.webkitBackgroundClip = '';
         myDiv.style.webkitTextFillColor = '';
-        myDiv.style.filter = '';
-        delete myDiv.dataset.userGlitter;
+        myDiv.style.color = colors[nickname];
 
-        myDiv.style.color = '';
-        myDiv.style.backgroundImage = '';
-        delete myDiv.dataset.userColor;
-        delete myDiv.dataset.userGradient;
+        // **Održavamo podatak da je korisnik birao svoju boju**
+        myDiv.dataset.userColor = colors[nickname];
 
+        myDiv.classList.remove('use-gradient', 'gradient-user');
         myDiv.classList.forEach(cls => {
             if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
                 myDiv.classList.remove(cls);
             }
         });
-        myDiv.classList.remove('use-gradient', 'gradient-user');
-
-        // Primeni boju
-        myDiv.style.color = colors[nickname];
-        myDiv.dataset.userColor = colors[nickname];
     }
 });
 
@@ -531,32 +557,22 @@ socket.on('colorChange', (data) => {
     const myDiv = document.getElementById(`guest-${data.nickname}`);
     if (!myDiv) return;
 
-    // ===== HARD RESET STILOVA =====
     myDiv.style.background = '';
-    myDiv.style.backgroundSize = '';
-    myDiv.style.backgroundClip = '';
+    myDiv.style.backgroundImage = '';
     myDiv.style.webkitBackgroundClip = '';
     myDiv.style.webkitTextFillColor = '';
-    myDiv.style.filter = '';
-    delete myDiv.dataset.userGlitter;
+    myDiv.style.color = data.color;
 
-    myDiv.style.color = '';
-    myDiv.style.backgroundImage = '';
-    delete myDiv.dataset.userColor;
-    delete myDiv.dataset.userGradient;
+    // **Označavamo da je korisnik birao boju**
+    myDiv.dataset.userColor = data.color;
 
+    myDiv.classList.remove('use-gradient', 'gradient-user');
     myDiv.classList.forEach(cls => {
         if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
             myDiv.classList.remove(cls);
         }
     });
-    myDiv.classList.remove('use-gradient', 'gradient-user');
-
-    // Primeni novu boju
-    myDiv.style.color = data.color;
-    myDiv.dataset.userColor = data.color;
 });
-
 // ZA GRADIJENTE
 document.getElementById('farbe').addEventListener('click', function () {
     const gradijentDiv = document.getElementById('gradijent');
@@ -568,38 +584,30 @@ document.getElementById('farbe').addEventListener('click', function () {
             const boxes = document.querySelectorAll('.gradijent-box');
             boxes.forEach(box => {
                 box.onclick = function () {
-                    currentGlitter = null;
-                    currentColor = '';
-                    currentGradient = this.classList[1];
+                     currentGlitter = null;  
+                     currentColor = '';      
+                     currentGradient = this.classList[1];
 
-                    const myDiv = document.getElementById(`guest-${myNickname}`);
-                    if (!myDiv) return;
+                    const myDivId = `guest-${myNickname}`;
+                    const myDiv = document.getElementById(myDivId);
+                    if (myDiv) {
+                        // Uklanjanje stare boje i gradijenata
+                        myDiv.classList.forEach(cls => {
+                            if (cls.startsWith('gradient-')) {
+                                myDiv.classList.remove(cls);
+                            }
+                        });
+                        myDiv.classList.remove('use-gradient', 'gradient-user');
+                        myDiv.style.color = '';
+                        myDiv.style.backgroundImage = '';
 
-                    // ===== HARD RESET STILOVA =====
-                    myDiv.style.background = '';
-                    myDiv.style.backgroundSize = '';
-                    myDiv.style.backgroundClip = '';
-                    myDiv.style.webkitBackgroundClip = '';
-                    myDiv.style.webkitTextFillColor = '';
-                    myDiv.style.filter = '';
-                    delete myDiv.dataset.userGlitter;
+                        // Dodavanje novog gradijenta
+                        myDiv.classList.add(currentGradient, 'use-gradient', 'gradient-user');
+                        myDiv.style.backgroundImage = getComputedStyle(this).backgroundImage;
 
-                    myDiv.style.color = '';
-                    myDiv.style.backgroundImage = '';
-                    delete myDiv.dataset.userColor;
-                    delete myDiv.dataset.userGradient;
-
-                    myDiv.classList.forEach(cls => {
-                        if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
-                            myDiv.classList.remove(cls);
-                        }
-                    });
-                    myDiv.classList.remove('use-gradient', 'gradient-user');
-
-                    // Dodavanje novog gradijenta
-                    myDiv.classList.add(currentGradient, 'use-gradient', 'gradient-user');
-                    myDiv.style.backgroundImage = getComputedStyle(this).backgroundImage;
-                    myDiv.dataset.userGradient = currentGradient;
+                        // **Dodato kao kod userColor**
+                        myDiv.dataset.userGradient = currentGradient;
+                    }
 
                     updateInputStyle();
 
@@ -611,72 +619,36 @@ document.getElementById('farbe').addEventListener('click', function () {
 });
 
 socket.on('gradientChange', function (data) {
-    const myDiv = document.getElementById(`guest-${data.nickname}`);
-    if (!myDiv) return;
+    const myDivId = `guest-${data.nickname}`;
+    const myDiv = document.getElementById(myDivId);
+    if (myDiv) {
+        myDiv.classList.forEach(cls => {
+            if (cls.startsWith('gradient-')) myDiv.classList.remove(cls);
+        });
+        myDiv.classList.remove('use-gradient', 'gradient-user');
+        myDiv.style.color = '';
+        myDiv.style.backgroundImage = '';
 
-    // ===== HARD RESET STILOVA =====
-    myDiv.style.background = '';
-    myDiv.style.backgroundSize = '';
-    myDiv.style.backgroundClip = '';
-    myDiv.style.webkitBackgroundClip = '';
-    myDiv.style.webkitTextFillColor = '';
-    myDiv.style.filter = '';
-    delete myDiv.dataset.userGlitter;
+        myDiv.classList.add(data.gradient, 'use-gradient', 'gradient-user');
+        myDiv.style.backgroundImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
 
-    myDiv.style.color = '';
-    myDiv.style.backgroundImage = '';
-    delete myDiv.dataset.userColor;
-    delete myDiv.dataset.userGradient;
-
-    myDiv.classList.forEach(cls => {
-        if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
-            myDiv.classList.remove(cls);
-        }
-    });
-    myDiv.classList.remove('use-gradient', 'gradient-user');
-
-    // Primeni novi gradijent
-    myDiv.classList.add(data.gradient, 'use-gradient', 'gradient-user');
-    myDiv.style.backgroundImage = getComputedStyle(document.querySelector(`.${data.gradient}`)).backgroundImage;
-    myDiv.dataset.userGradient = data.gradient;
+        // **Dodato kao kod userColor**
+        myDiv.dataset.userGradient = data.gradient;
+    }
 });
-
 // Slušanje svih gradijenata pri povezivanju novih korisnika
 socket.on('allGradients', (gradients) => {
     for (const nickname in gradients) {
         const div = document.getElementById(`guest-${nickname}`);
-        if (!div) continue;
+        if (div) {
+            div.classList.add(gradients[nickname], 'use-gradient', 'gradient-user');
+            div.style.backgroundImage = getComputedStyle(document.querySelector(`.${gradients[nickname]}`)).backgroundImage;
 
-        // ===== HARD RESET STILOVA =====
-        div.style.background = '';
-        div.style.backgroundSize = '';
-        div.style.backgroundClip = '';
-        div.style.webkitBackgroundClip = '';
-        div.style.webkitTextFillColor = '';
-        div.style.filter = '';
-        delete div.dataset.userGlitter;
-
-        div.style.color = '';
-        div.style.backgroundImage = '';
-        delete div.dataset.userColor;
-        delete div.dataset.userGradient;
-
-        div.classList.forEach(cls => {
-            if (cls.startsWith('gradient-') || cls.startsWith('grad-admin-')) {
-                div.classList.remove(cls);
-            }
-        });
-        div.classList.remove('use-gradient', 'gradient-user');
-
-        // Primeni gradijent
-        div.classList.add(gradients[nickname], 'use-gradient', 'gradient-user');
-        div.style.backgroundImage = getComputedStyle(document.querySelector(`.${gradients[nickname]}`)).backgroundImage;
-        div.dataset.userGradient = gradients[nickname];
+            // **Dodato kao kod userColor**
+            div.dataset.userGradient = gradients[nickname];
+        }
     }
 });
-
-
-
 // ZA ADMINA - DEFAULT COLOR
 const applyBtn = document.getElementById('applyDefaultColor');
 const adminPicker = document.getElementById('adminColorPicker');
@@ -865,7 +837,3 @@ socket.on('updateDefaultGradient', (data) => {
         });
     }, 3000);
 });
-
-
-
-
