@@ -1,85 +1,102 @@
-// ================== PERSISTENT CLIENT ID ==================
-let clientId = localStorage.getItem('clientId');
-if (!clientId) {
-    clientId = 'client-' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('clientId', clientId);
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const authorizedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', ' Dia💎', 'Dia']);
+    let hasBanPrivilege = false;
+    let isBanned = false; // Praćenje statusa banovanja
 
-// ================== BAN STATE ==================
-const bannedSet = new Set();
+    const guestList = document.getElementById("guestList");
+    const chatContainer = document.getElementById("chatContainer"); // Referenca na chat
 
-// ================== SOCKET INIT ==================
-socket.emit('init', clientId); // šalje serveru svoj persistent ID
-
-// ================== SOCKET EVENTS ==================
-socket.on('userBanned', bannedClientId => {
-    // Ako je event za nas
-    if (bannedClientId === clientId) {
-        chatInput.disabled = true;
-        messageArea.style.display = 'none';
-        localStorage.setItem('banned', '1');
+    if (!guestList) {
+        console.error("Element sa id='guestList' nije pronađen.");
+        return;
     }
-    bannedSet.add(bannedClientId);
-    updateGuestListUI();
-});
 
-socket.on('userUnbanned', unbannedClientId => {
-    bannedSet.delete(unbannedClientId);
-    if (unbannedClientId === clientId) {
-        chatInput.disabled = false;
-        messageArea.style.display = 'block';
-        localStorage.removeItem('banned');
+    // Prijava korisnika
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-socket-id': socket.id  
+            },
+            body: JSON.stringify({ username, password })
+        })
+        .then(response => {
+            if (response.ok) {
+                socket.emit('userLoggedIn', username);
+                this.reset();
+
+                // Provera da li je korisnik privilegovan
+                if (authorizedUsers.has(username)) {
+                    hasBanPrivilege = true; 
+                }
+            }
+        });
+
+            // Dvoklik na korisnike
+    guestList.addEventListener("dblclick", (event) => {
+    const target = event.target;
+    if (!target.classList.contains("guest")) return;
+
+    const nickname = target.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '');
+
+    // Samo *__X__* može banovati sve
+    if (hasBanPrivilege && username === '*__X__*') {
+        const action = target.classList.toggle("banned") ? "banUser" : "unbanUser";
+        target.style.backgroundColor = action === "banUser" ? "red" : "";
+        target.textContent = `${nickname}${action === "banUser" ? " (B)" : ""}`;
+        socket.emit(action, nickname);
+    } else if (hasBanPrivilege && !authorizedUsers.has(nickname)) {
+        // Ostali privilegovani ne mogu banovati autorizovane
+        const action = target.classList.toggle("banned") ? "banUser" : "unbanUser";
+        target.style.backgroundColor = action === "banUser" ? "red" : "";
+        target.textContent = `${nickname}${action === "banUser" ? " (B)" : ""}`;
+        socket.emit(action, nickname);
     }
-    updateGuestListUI();
 });
 
-// ================== DOUBLE CLICK BAN / UNBAN ==================
-guestList.addEventListener('dblclick', e => {
-    const guestEl = e.target.closest('.guest');
-    if (!guestEl) return;
+        // Slušanje događaja za banovanje
+        socket.on("userBanned", (nickname) => {
+            const elements = document.querySelectorAll('.guest');
+            elements.forEach((el) => {
+                if (el.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '') === nickname) {
+                    el.classList.add("banned");
+                    el.style.backgroundColor = "red";
+                    if (!el.textContent.includes(" (B)")) {
+                        el.textContent += " (B)";
+                    }
+                }
+            });
 
-    const targetId = guestEl.dataset.clientId;
-    if (!authorizedUsers.has(myNickname)) return;
+            if (nickname === socket.id) {
+                isBanned = true;
+                document.getElementById('chat-input').disabled = true;
+                chatContainer.style.display = 'none';
+            }
+        });
 
-    socket.emit('banUser', targetId);
-});
+        // Slušanje događaja za odbanovanje
+        socket.on("userUnbanned", (nickname) => {
+            const elements = document.querySelectorAll('.guest');
+            elements.forEach((el) => {
+                if (el.textContent.split(" (")[0].trim().replace(/( (B|I))/g, '') === nickname) {
+                    el.classList.remove("banned");
+                    el.style.backgroundColor = "";
+                    el.textContent = el.textContent.replace(" (B)", "");
+                }
+            });
 
-// ================== RENDER ==================
-function renderNickname(nickname, clientId) {
-    return bannedSet.has(clientId)
-        ? `${nickname} 🔒`
-        : nickname;
-}
+                   if (nickname === socket.id) {
+                isBanned = false;
+                document.getElementById('chat-input').disabled = false;
+                chatContainer.style.display = 'block';
+            }
+        }); 
+    }); 
+}); 
 
-// ================== GUEST LIST ==================
-function addGuest(nickname, clientId) {
-    const guestEl = document.createElement('div');
-    guestEl.className = 'guest';
-    guestEl.id = `guest-${clientId}`;
-    guestEl.dataset.nick = nickname;
-    guestEl.dataset.clientId = clientId;
-    guestEl.textContent = renderNickname(nickname, clientId);
-
-    guestList.appendChild(guestEl);
-}
-
-// ================== UPDATE LIST ==================
-function updateGuestListUI() {
-    const allGuests = Array.from(guestList.children);
-    allGuests.forEach(el => {
-        const clientId = el.dataset.clientId;
-        el.textContent = renderNickname(el.dataset.nick, clientId);
-    });
-}
-
-// ================== SELF BAN STATE ==================
-if (localStorage.getItem('banned')) {
-    chatInput.disabled = true;
-    messageArea.style.display = 'none';
-}
-
-// ================== UPDATE GUEST LIST FROM SERVER ==================
-socket.on('updateGuestList', users => {
-    guestList.innerHTML = '';
-    users.forEach(u => addGuest(u.nickname, u.clientId));
-});
