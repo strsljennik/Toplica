@@ -1,42 +1,55 @@
-const userSockets = new Map(); // socket.id → username
+const mongoose = require('mongoose');
 
-function setupSocketEvents(io, guests, bannedUsers, authorizedUsers) {
-    io.on("connection", socket => {
+// Šema i model za banirane korisnike (po tokenu)
+const frontBanSchema = new mongoose.Schema({
+    token: { type: String, required: true, unique: true },
+});
+const FrontBan = mongoose.model('FrontBan', frontBanSchema);
 
-        socket.on("userLoggedIn", username => {
-            userSockets.set(socket.id, username);
-            guests[socket.id] = username;
+function setupSocketEvents(io, guests, authorizedUsers) {
 
-            // 🔑 pošalji postojeće banove SAMO novom klijentu
-            bannedUsers.forEach(banNick => {
-                socket.emit("userBanned", banNick);
-            });
-        });
+    io.on('connection', async (socket) => {
+        const nickname = guests[socket.id];
+        const token = socket.handshake.headers.cookie?.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-        socket.on("banUser", targetNickname => {
-            const username = userSockets.get(socket.id);
-            if (!authorizedUsers.has(username)) return;
-            if (targetNickname === "*__X__*") return;
+        // Ako je korisnik baniran, odmah šalje ban
+        if (token) {
+            const banEntry = await FrontBan.findOne({ token });
+            if (banEntry) {
+                socket.emit('userBanned', nickname);
+            }
+        }
 
-            if (bannedUsers.has(targetNickname)) {
-                bannedUsers.delete(targetNickname);
-                console.log(`ODBAN: ${targetNickname}`);
-                io.emit("userUnbanned", targetNickname);
+        // Ban/unban toggle (samo autorizovani)
+        socket.on('banUser', async (targetNickname) => {
+            const username = guests[socket.id];
+            if (!authorizedUsers || !authorizedUsers.has(username)) return;
+
+            // Nađi token banovanog korisnika iz guests
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === targetNickname);
+            if (!targetSocketId) return;
+            const targetToken = targetSocketId ? guests[targetSocketId] : null;
+
+            const existingBan = await FrontBan.findOne({ token: targetToken });
+            if (existingBan) {
+                await FrontBan.deleteOne({ token: targetToken });
+                io.emit('userUnbanned', targetNickname);
             } else {
-                bannedUsers.add(targetNickname);
-                console.log(`BAN: ${targetNickname}`);
-                io.emit("userBanned", targetNickname);
+                if (!targetToken) return;
+                const newBan = new FrontBan({ token: targetToken });
+                await newBan.save();
+                io.emit('userBanned', targetNickname);
             }
         });
 
-        socket.on("chatMessage", msg => {
+        // Chat blokada za banovane korisnike
+        socket.on('chatMessage', async (msg) => {
             const nickname = guests[socket.id];
-            if (bannedUsers.has(nickname)) return;
-            io.emit("chatMessage", nickname, msg);
-        });
-
-        socket.on("disconnect", () => {
-            userSockets.delete(socket.id);
+            if (token) {
+                const isBanned = await FrontBan.findOne({ token });
+                if (isBanned) return;
+            }
+            io.emit('chatMessage', nickname, msg);
         });
     });
 }
