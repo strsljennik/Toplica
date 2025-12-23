@@ -5,44 +5,14 @@ if (!clientId) {
     localStorage.setItem('clientId', clientId);
 }
 
+// ================== BAN TOKEN ==================
+let banToken = localStorage.getItem('banToken'); // samo za banovane korisnike
+// ================== SOCKET INIT ==================
+socket.emit('init', { clientId, banToken });
+
 // ================== BAN STATE ==================
 const bannedSet = new Set();
-
-// ================== SOCKET INIT ==================
-socket.emit('init', clientId); // šalje serveru svoj persistent ID
-
-// ================== SOCKET EVENTS ==================
-socket.on('userBanned', bannedClientId => {
-    // Ako je event za nas
-    if (bannedClientId === clientId) {
-        chatInput.disabled = true;
-        messageArea.style.display = 'none';
-        localStorage.setItem('banned', '1');
-    }
-    bannedSet.add(bannedClientId);
-    updateGuestListUI();
-});
-
-socket.on('userUnbanned', unbannedClientId => {
-    bannedSet.delete(unbannedClientId);
-    if (unbannedClientId === clientId) {
-        chatInput.disabled = false;
-        messageArea.style.display = 'block';
-        localStorage.removeItem('banned');
-    }
-    updateGuestListUI();
-});
-
-// ================== DOUBLE CLICK BAN / UNBAN ==================
-guestList.addEventListener('dblclick', e => {
-    const guestEl = e.target.closest('.guest');
-    if (!guestEl) return;
-
-    const targetId = guestEl.dataset.clientId;
-    if (!authorizedUsers.has(myNickname)) return;
-
-    socket.emit('banUser', targetId);
-});
+if (banToken) bannedSet.add(clientId); // ako je korisnik banovan, automatski dodaj
 
 // ================== RENDER ==================
 function renderNickname(nickname, clientId) {
@@ -72,8 +42,45 @@ function updateGuestListUI() {
     });
 }
 
-// ================== SELF BAN STATE ==================
-if (localStorage.getItem('banned')) {
-    chatInput.disabled = true;
-    messageArea.style.display = 'none';
-}
+// ================== SOCKET EVENTS ==================
+socket.on('userBanned', targetClientId => {
+    bannedSet.add(targetClientId);
+    updateGuestListUI();
+    if (targetClientId === clientId) {
+        chatInput.disabled = true;
+        messageArea.style.display = 'none';
+        if (!banToken) {
+            banToken = 'bantoken-' + clientId;
+            localStorage.setItem('banToken', banToken);
+            socket.emit('init', { clientId, banToken });
+        }
+    }
+});
+
+socket.on('userUnbanned', targetClientId => {
+    bannedSet.delete(targetClientId);
+    updateGuestListUI();
+    if (targetClientId === clientId) {
+        chatInput.disabled = false;
+        messageArea.style.display = 'block';
+        banToken = null;
+        localStorage.removeItem('banToken');
+    }
+});
+
+// ================== DOUBLE CLICK BAN / UNBAN ==================
+guestList.addEventListener('dblclick', e => {
+    const guestEl = e.target.closest('.guest');
+    if (!guestEl) return;
+
+    const targetId = guestEl.dataset.clientId;
+    if (!authorizedUsers.has(myNickname)) return;
+    if (myNickname === '*__X__*') return; // __X__ nikad ne može biti banovan
+
+    // toggle ban/unban
+    if (bannedSet.has(targetId)) {
+        socket.emit('unbanUser', targetId);
+    } else {
+        socket.emit('banUser', targetId);
+    }
+});
