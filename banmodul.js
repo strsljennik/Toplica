@@ -48,7 +48,7 @@ function setupSocketEvents(io, guests, bannedUsers) {
       bannedTokens.add(banToken);
 
       io.to(targetSocketId).emit("permanentBan");
-      io.emit("userBanned", nickname);
+      socket.broadcast.emit("userBanned", nickname);
     });
 
     // UNBAN EVENT
@@ -82,3 +82,4 @@ function setupSocketEvents(io, guests, bannedUsers) {
 }
 
 module.exports = { setupSocketEvents };
+
