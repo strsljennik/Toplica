@@ -4,29 +4,24 @@ let privilegedUsers = new Set([
   'Najlepsa Ciganka','Dia'
 ]);
 
-const userSockets = new Map();   // socket.id -> username
-const socketMeta = new Map();    // socket.id -> { banToken, fingerprint }
-const bannedTokens = new Map();  // banToken -> { fingerprint, by, date }
+const userSockets = new Map(); // socket.id -> username
+const bannedTokens = new Set(); // token -> ban
 
 function setupSocketEvents(io, guests, bannedUsers) {
 
   io.on('connection', (socket) => {
 
-    /* =========================
-       IDENTIFIKACIJA (TOKEN + FP)
-    ========================= */
-    socket.on("identifyUser", ({ username, banToken, fingerprint }) => {
-      socketMeta.set(socket.id, { banToken, fingerprint });
+    // IDENTIFIKACIJA KORISNIKA PRI CONNECTU
+    socket.on("identifyUser", ({ username, banToken }) => {
+      userSockets.set(socket.id, username);
+      socket.banToken = banToken;
 
-      // Ako ima trajni ban → samo zaključa UI
       if (bannedTokens.has(banToken)) {
-        socket.emit("permanentBan");
+        socket.emit("permanentBan"); // blokira UI
       }
     });
 
-    /* =========================
-       LOGIN
-    ========================= */
+    // LOGIN EVENT
     socket.on('userLoggedIn', (username) => {
       userSockets.set(socket.id, username);
 
@@ -35,73 +30,51 @@ function setupSocketEvents(io, guests, bannedUsers) {
       }
     });
 
-    /* =========================
-       BAN USER (bez disconnect)
-    ========================= */
-    socket.on('banUser', ({ nickname }) => {
+    // BAN EVENT
+    socket.on('banUser', ({ nickname, banToken }) => {
       const admin = userSockets.get(socket.id);
       if (!privilegedUsers.has(admin)) return;
 
-      // *__X__* nikad ne može biti banovan
       if (nickname === '*__X__*') return;
 
       const targetSocketId = Object.keys(guests)
         .find(id => guests[id] === nickname);
-
       if (!targetSocketId) return;
 
-      const meta = socketMeta.get(targetSocketId);
-      if (!meta) return;
-
-      // SESSION BAN
+      // session ban
       bannedUsers.add(targetSocketId);
-      io.to(targetSocketId).emit("sessionBan");
 
-      // TRAJNI BAN (token)
-      bannedTokens.set(meta.banToken, {
-        fingerprint: meta.fingerprint,
-        by: admin,
-        date: Date.now()
-      });
+      // persistent ban po tokenu
+      bannedTokens.add(banToken);
 
+      io.to(targetSocketId).emit("permanentBan");
       io.emit("userBanned", nickname);
     });
 
-    /* =========================
-       UNBAN USER
-    ========================= */
-    socket.on('unbanUser', (nickname) => {
+    // UNBAN EVENT
+    socket.on('unbanUser', ({ nickname, banToken }) => {
       const admin = userSockets.get(socket.id);
       if (!privilegedUsers.has(admin)) return;
 
       const targetSocketId = Object.keys(guests)
         .find(id => guests[id] === nickname);
-
       if (!targetSocketId) return;
 
-      const meta = socketMeta.get(targetSocketId);
-      if (meta) {
-        bannedTokens.delete(meta.banToken);
-      }
-
       bannedUsers.delete(targetSocketId);
+      bannedTokens.delete(banToken);
+
       io.emit("userUnbanned", nickname);
     });
 
-    /* =========================
-       BLOKIRANJE CHAT PORUKA
-    ========================= */
+    // CHAT PORUKE
     socket.on("chatMessage", (msg) => {
       if (bannedUsers.has(socket.id)) return;
       io.emit("chatMessage", msg);
     });
 
-    /* =========================
-       DISCONNECT (čisto čišćenje)
-    ========================= */
+    // DISCONNECT
     socket.on('disconnect', () => {
       userSockets.delete(socket.id);
-      socketMeta.delete(socket.id);
       bannedUsers.delete(socket.id); // samo session ban
     });
 
@@ -109,4 +82,3 @@ function setupSocketEvents(io, guests, bannedUsers) {
 }
 
 module.exports = { setupSocketEvents };
-
