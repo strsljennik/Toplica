@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const messageArea = document.getElementById("messageArea");
   const guestList = document.getElementById("guestList");
 
-  let isBanned = false;
-  let hasBanPrivilege = false;
   let username = null;
+  let hasBanPrivilege = false;
+  let isBanned = false;
 
   // BAN UI
   function applyBanUI() {
@@ -40,12 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.emit("identifyUser", { username, banToken });
 
-    if (authorizedUsers.has(username)) {
-      hasBanPrivilege = true;
-    }
+    hasBanPrivilege = authorizedUsers.has(username);
   });
 
-  // DVOKLIK NA GOSTE – samo auth može banovati
+  // DVOKLIK NA GOSTE – SAMO AUTH MOŽE BANOVATI
   guestList.addEventListener("dblclick", e => {
     const target = e.target;
     if (!target.classList.contains("guest")) return;
@@ -54,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // *__X__* nikad ne može biti banovan
     if (nickname === '*__X__*') return;
-
     if (!hasBanPrivilege) return;
 
     const action = target.classList.toggle("banned") ? "banUser" : "unbanUser";
@@ -64,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.emit(action, { nickname });
   });
 
-  // SOCKET EVENTS
+  // CHAT PORUKE – OČUVANJE jedinstvenog listener-a
   socket.off("chatMessage");
   socket.on("chatMessage", data => {
     if (!data || !data.message) return;
@@ -73,21 +70,28 @@ document.addEventListener("DOMContentLoaded", () => {
     messageArea.appendChild(div);
   });
 
+  // BAN EVENTS – samo ciljani korisnik
+  socket.off("permanentBan");
   socket.on("permanentBan", applyBanUI);
+
+  socket.off("sessionBan");
   socket.on("sessionBan", applyBanUI);
+
+  socket.off("userUnbanned");
   socket.on("userUnbanned", nick => {
     if (nick === username) removeBanUI();
   });
 
-  // SLANJE PORUKE
+  // SLANJE PORUKA
   chatInput.addEventListener("keydown", e => {
     if (e.key !== "Enter") return;
     if (isBanned) return;
+
     const msg = chatInput.value.trim();
     if (!msg) return;
+
     socket.emit("chatMessage", { username, message: msg });
     chatInput.value = "";
   });
 
 });
-
