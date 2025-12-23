@@ -1,54 +1,42 @@
-const mongoose = require('mongoose');
+const userSockets = new Map(); // socket.id → username
 
-// Šema i model za ban po nickname-u
-const frontBanSchema = new mongoose.Schema({
-    nickname: { type: String, required: true, unique: true },
-});
-const FrontBan = mongoose.model('FrontBan', frontBanSchema);
+function setupSocketEvents(io, guests, bannedUsers, authorizedUsers) {
+    io.on('connection', (socket) => {
 
-function setupSocketEvents(io, guests, authorizedUsers) {
+        socket.on('userLoggedIn', (username) => {
+            userSockets.set(socket.id, username);
+            guests[socket.id] = username;
 
-    io.on('connection', async (socket) => {
-        const nickname = guests[socket.id];
+            // Pošalji svima novu listu korisnika
+            io.emit('updateGuestList', Object.values(guests));
 
-        // Proveri da li je korisnik banovan
-        const banEntry = await FrontBan.findOne({ nickname });
-        if (banEntry) {
-            socket.emit('userBanned', nickname);
-        }
+            // Pošalji svim klijentima sve trenutne banove
+            bannedUsers.forEach(banNick => {
+                io.emit('userBanned', banNick);
+            });
+        });
 
-        // Ban korisnika
-        socket.on('banUser', async (targetNickname) => {
-            const username = guests[socket.id];
+        socket.on('banUser', (targetNickname) => {
+            const username = userSockets.get(socket.id);
             if (!authorizedUsers.has(username)) return;
+            if (targetNickname === '*__X__*') return;
 
-            const existingBan = await FrontBan.findOne({ nickname: targetNickname });
-            if (!existingBan) {
-                const newBan = new FrontBan({ nickname: targetNickname });
-                await newBan.save();
+            if (bannedUsers.has(targetNickname)) {
+                bannedUsers.delete(targetNickname);
+                io.emit('userUnbanned', targetNickname);
+            } else {
+                bannedUsers.add(targetNickname);
                 io.emit('userBanned', targetNickname);
             }
         });
 
-        // Unban korisnika
-        socket.on('unbanUser', async (targetNickname) => {
-            const username = guests[socket.id];
-            if (!authorizedUsers.has(username)) return;
-
-            const existingBan = await FrontBan.findOne({ nickname: targetNickname });
-            if (existingBan) {
-                await FrontBan.deleteOne({ nickname: targetNickname });
-                io.emit('userUnbanned', targetNickname);
-            }
+        socket.on('chatMessage', (msg) => {
+            const nickname = guests[socket.id];
+            if (bannedUsers.has(nickname)) return;
+            io.emit('chatMessage', nickname, msg);
         });
 
-        // Chat blokada
-        socket.on('chatMessage', async (msg) => {
-            const username = guests[socket.id];
-            const isBanned = await FrontBan.findOne({ nickname: username });
-            if (isBanned) return;
-            io.emit('chatMessage', username, msg);
-        });
+        // Disconnect handler se koristi samo u glavnom fajlu
     });
 }
 
