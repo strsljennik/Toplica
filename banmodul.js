@@ -1,86 +1,51 @@
-let privilegedUsers = new Set([
-  'Radio Galaksija','R-Galaksija','ZI ZU',
-  '*___F117___*','*__X__*','𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊',
-  'Najlepsa Ciganka','Dia💎','Dia'
-]);
+const mongoose = require('mongoose');
 
-const userSockets = new Map(); // socket.id -> username
-const bannedTokens = new Set(); // token -> ban
-const bannedSockets = new Set(); // session ban po socket.id
+// Šema i model za banirane korisnike (preko nick-a ili tokena)
+const frontBanSchema = new mongoose.Schema({
+    token: { type: String, required: true, unique: true }, // token iz cookie-ja
+});
+const FrontBan = mongoose.model('FrontBan', frontBanSchema);
 
-function setupSocketEvents(io, guests) {
+function setupSocketEvents(io, guests, authorizedUsers) {
 
-  io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
+        const nickname = guests[socket.id];
+        const token = socket.handshake.headers.cookie?.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-    // IDENTIFIKACIJA KORISNIKA
-    socket.on("identifyUser", ({ username, banToken }) => {
-      userSockets.set(socket.id, username);
-      socket.banToken = banToken;
+        // Proveri da li je korisnik baniran i pošalji mu 🔒
+        if (token) {
+            const banEntry = await FrontBan.findOne({ token });
+            if (banEntry) {
+                socket.emit('userBanned', nickname);
+            }
+        }
 
-      if (bannedTokens.has(banToken)) {
-        socket.emit("permanentBan"); // blokira UI samo ciljanom
-        bannedSockets.add(socket.id);
-      }
+        // Ban/unban funkcija (samo autorizovani)
+        socket.on('banUser', async (targetToken) => {
+            const username = guests[socket.id];
+            if (!authorizedUsers || !authorizedUsers.has(username)) return;
+
+            const existingBan = await FrontBan.findOne({ token: targetToken });
+            if (existingBan) {
+                await FrontBan.deleteOne({ token: targetToken });
+                io.emit('userUnbanned', targetToken);
+            } else {
+                const newBan = new FrontBan({ token: targetToken });
+                await newBan.save();
+                io.emit('userBanned', targetToken);
+            }
+        });
+
+        // Chat blokada za banovane korisnike
+        socket.on('chatMessage', async (msg) => {
+            const nickname = guests[socket.id];
+            if (token) {
+                const isBanned = await FrontBan.findOne({ token });
+                if (isBanned) return;
+            }
+            io.emit('chatMessage', nickname, msg);
+        });
     });
-
-    // LOGIN EVENT (opcionalno)
-    socket.on('userLoggedIn', (username) => {
-      userSockets.set(socket.id, username);
-    });
-
-    // BAN EVENT – SAMO PRIVILEGOVANI
-    socket.on('banUser', ({ nickname }) => {
-      const admin = userSockets.get(socket.id);
-      if (!privilegedUsers.has(admin)) return;
-      if (nickname === '*__X__*') return;
-
-      const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
-      if (!targetSocketId) return;
-
-      const targetSocket = io.sockets.sockets.get(targetSocketId);
-      if (!targetSocket) return;
-
-      // session ban
-      bannedSockets.add(targetSocketId);
-
-      // persistent ban po tokenu
-      if (targetSocket.banToken) {
-        bannedTokens.add(targetSocket.banToken);
-      }
-
-      targetSocket.emit("permanentBan"); // samo ciljanom
-      io.to(socket.id).emit("userBanned", nickname); // admin vidi da je ban uspeo
-    });
-
-    // UNBAN EVENT
-    socket.on('unbanUser', ({ nickname }) => {
-      const admin = userSockets.get(socket.id);
-      if (!privilegedUsers.has(admin)) return;
-
-      const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
-      if (!targetSocketId) return;
-
-      bannedSockets.delete(targetSocketId);
-      const targetSocket = io.sockets.sockets.get(targetSocketId);
-      if (targetSocket?.banToken) bannedTokens.delete(targetSocket.banToken);
-
-      io.to(targetSocketId)?.emit("userUnbanned", nickname); // samo ciljanom
-      io.to(socket.id).emit("userUnbanned", nickname); // admin vidi
-    });
-
-    // CHAT PORUKE
-    socket.on("chatMessage", (msg) => {
-      if (bannedSockets.has(socket.id)) return; // ignorisi poruke banovanih
-      io.emit("chatMessage", msg); // svi vide poruku
-    });
-
-    // DISCONNECT
-    socket.on('disconnect', () => {
-      userSockets.delete(socket.id);
-      bannedSockets.delete(socket.id); // session ban se gubi
-    });
-
-  });
 }
 
 module.exports = { setupSocketEvents };
