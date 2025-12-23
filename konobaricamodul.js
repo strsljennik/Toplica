@@ -122,7 +122,7 @@ socket.on('new_guest', () => {
   socket.on('animationChange', (data) => {
     const { nickname, animation, speed } = data;
  allUserAnimations[nickname] = { animation, speed };
-  io.emit('animationChange', data);
+  socket.broadcast.emit('animationChange', data);
   });
 
      socket.emit("pocetnoStanje", stanje);
@@ -185,6 +185,7 @@ if (defaultGradient.value) {
   socket.on('disconnect', () => {});
     });
 };
+
 
 
 
