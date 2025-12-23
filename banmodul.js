@@ -1,44 +1,49 @@
-function setupSocketEvents(io, guests, authorizedUsers) {
-    // Trenutno banovani korisnici (samo povezani klijenti)
-    const bannedSet = new Set();
 
-    io.on('connection', socket => {
-        const { clientId, banToken } = socket.handshake.query;
+const userSockets = new Map(); // socket.id → username
+
+function setupSocketEvents(io, guests, bannedUsers, authorizedUsers) {
+    io.on('connection', (socket) => {
         const nickname = guests[socket.id];
 
-        // Ako klijent ima banToken, automatski ga označava kao banovanog
-        if (banToken) {
-            bannedSet.add(clientId);
-            io.emit('userBanned', clientId);
-        }
+        // Odmah po konekciji pošalji listu banovanih korisnika ovom socketu
+        bannedUsers.forEach(banNick => {
+            io.to(socket.id).emit('userBanned', banNick);
+        });
 
-        // Ban event od autorizovanih korisnika
-        socket.on('banUser', targetClientId => {
-            const username = guests[socket.id];
-            if (!authorizedUsers.has(username)) return;
-            if (guests[socket.id] === '*__X__*') return; // __X__ ne može biti banovan
+        // Praćenje prijavljenih korisnika (za autorizaciju ban/unban)
+        socket.on('userLoggedIn', (username) => {
+            userSockets.set(socket.id, username);
+            guests[socket.id] = username;
 
-            if (!bannedSet.has(targetClientId)) {
-                bannedSet.add(targetClientId);
-                io.emit('userBanned', targetClientId);
+            // Pošalji svima novu listu korisnika
+            io.emit('updateGuestList', Object.values(guests));
+
+            // Pošalji svim klijentima sve trenutne banove
+            bannedUsers.forEach(banNick => {
+                io.emit('userBanned', banNick);
+            });
+        });
+
+        // Ban/unban funkcija (samo autorizovani)
+        socket.on('banUser', (targetNickname) => {
+            const username = userSockets.get(socket.id);
+            if (!authorizedUsers || !authorizedUsers.has(username)) return;
+            if (targetNickname === '*__X__*') return;
+
+            if (bannedUsers.has(targetNickname)) {
+                bannedUsers.delete(targetNickname);
+                io.emit('userUnbanned', targetNickname);
+            } else {
+                bannedUsers.add(targetNickname);
+                io.emit('userBanned', targetNickname);
             }
         });
 
-        // Unban event od autorizovanih korisnika
-        socket.on('unbanUser', targetClientId => {
-            const username = guests[socket.id];
-            if (!authorizedUsers.has(username)) return;
-
-            if (bannedSet.has(targetClientId)) {
-                bannedSet.delete(targetClientId);
-                io.emit('userUnbanned', targetClientId);
-            }
-        });
-
-        // Chat blokada za banovane korisnike
-        socket.on('chatMessage', msg => {
-            if (bannedSet.has(clientId)) return;
-            io.emit('chatMessage', nickname, msg);
+        // Chat blokada za banovane
+        socket.on('chatMessage', (msg) => {
+            const currentNickname = guests[socket.id];
+            if (bannedUsers.has(currentNickname)) return;
+            io.emit('chatMessage', currentNickname, msg);
         });
     });
 }
