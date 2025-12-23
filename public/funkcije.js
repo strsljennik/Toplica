@@ -14,8 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let hasBanPrivilege = false;
   let username = null;
 
-  const socket = io();
-
   // BAN UI
   function applyBanUI() {
     if (isBanned) return;
@@ -92,3 +90,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
