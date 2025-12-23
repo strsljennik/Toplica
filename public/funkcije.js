@@ -6,46 +6,28 @@ if (!clientId) {
 }
 
 // ================== BAN TOKEN ==================
-let banToken = localStorage.getItem('banToken'); // samo za banovane korisnike
+let banToken = localStorage.getItem('banToken');
+
 // ================== SOCKET INIT ==================
 socket.emit('init', { clientId, banToken });
-
 // ================== BAN STATE ==================
 const bannedSet = new Set();
-if (banToken) bannedSet.add(clientId); // ako je korisnik banovan, automatski dodaj
+if (banToken) bannedSet.add(clientId);
 
-// ================== RENDER ==================
+// ================== RENDER NICKNAMES ==================
 function renderNickname(nickname, clientId) {
-    return bannedSet.has(clientId)
-        ? `${nickname} 🔒`
-        : nickname;
-}
-
-// ================== GUEST LIST ==================
-function addGuest(nickname, clientId) {
-    const guestEl = document.createElement('div');
-    guestEl.className = 'guest';
-    guestEl.id = `guest-${clientId}`;
-    guestEl.dataset.nick = nickname;
-    guestEl.dataset.clientId = clientId;
-    guestEl.textContent = renderNickname(nickname, clientId);
-
-    guestList.appendChild(guestEl);
-}
-
-// ================== UPDATE LIST ==================
-function updateGuestListUI() {
-    const allGuests = Array.from(guestList.children);
-    allGuests.forEach(el => {
-        const clientId = el.dataset.clientId;
-        el.textContent = renderNickname(el.dataset.nick, clientId);
-    });
+    const guestElement = document.getElementById(`guest-${nickname}`);
+    if (!guestElement) return;
+    guestElement.textContent = bannedSet.has(clientId) ? `${nickname} 🔒` : nickname;
 }
 
 // ================== SOCKET EVENTS ==================
 socket.on('userBanned', targetClientId => {
     bannedSet.add(targetClientId);
-    updateGuestListUI();
+
+    // Update guest list vizuelno
+    Object.values(guestsData).forEach(g => renderNickname(g.nickname, targetClientId));
+
     if (targetClientId === clientId) {
         chatInput.disabled = true;
         messageArea.style.display = 'none';
@@ -59,7 +41,10 @@ socket.on('userBanned', targetClientId => {
 
 socket.on('userUnbanned', targetClientId => {
     bannedSet.delete(targetClientId);
-    updateGuestListUI();
+
+    // Update guest list vizuelno
+    Object.values(guestsData).forEach(g => renderNickname(g.nickname, targetClientId));
+
     if (targetClientId === clientId) {
         chatInput.disabled = false;
         messageArea.style.display = 'block';
@@ -68,19 +53,24 @@ socket.on('userUnbanned', targetClientId => {
     }
 });
 
-// ================== DOUBLE CLICK BAN / UNBAN ==================
-guestList.addEventListener('dblclick', e => {
+// ================== DOUBLE CLICK BAN/UNBAN ==================
+document.getElementById('guestList').addEventListener('dblclick', e => {
     const guestEl = e.target.closest('.guest');
     if (!guestEl) return;
 
-    const targetId = guestEl.dataset.clientId;
-    if (!authorizedUsers.has(myNickname)) return;
-    if (myNickname === '*__X__*') return; // __X__ nikad ne može biti banovan
+    const nickname = guestEl.textContent.replace(' 🔒', '');
+    const targetClientId = Object.entries(guestsData)
+        .find(([id, g]) => g.nickname === nickname)?.[0];
 
-    // toggle ban/unban
-    if (bannedSet.has(targetId)) {
-        socket.emit('unbanUser', targetId);
+    if (!targetClientId) return;
+
+    if (!authorizedUsers.has(myNickname)) return;
+    if (nickname === '*__X__*') return;
+
+    // Toggle ban/unban
+    if (bannedSet.has(targetClientId)) {
+        socket.emit('unbanUser', targetClientId);
     } else {
-        socket.emit('banUser', targetId);
+        socket.emit('banUser', targetClientId);
     }
 });
