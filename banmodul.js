@@ -1,51 +1,74 @@
+let privilegedUsers = new Set(['Radio Galaksija','R-Galaksija', 'ZI ZU', '*___F117___*', '*__X__*', '𝕯𝖔𝖈𝖙𝖔𝖗 𝕷𝖔𝖛𝖊','Najlepsa Ciganka', 'Dia']);
+const userSockets = new Map(); // Mapa koja čuva socket.id → username
 
-const userSockets = new Map(); // socket.id → username
-
-function setupSocketEvents(io, guests, bannedUsers, authorizedUsers) {
+function setupSocketEvents(io, guests, bannedUsers) {
     io.on('connection', (socket) => {
-        const nickname = guests[socket.id];
+        // Provera da li je korisnik banovan
+        if (bannedUsers.has(socket.id)) {
+            socket.emit('banned', 'Banovani ste sa servera.');
+            socket.disconnect(true);
+            return;
+        }
 
-        // Odmah po konekciji pošalji listu banovanih korisnika ovom socketu
-        bannedUsers.forEach(banNick => {
-            io.to(socket.id).emit('userBanned', banNick);
-        });
-
-        // Praćenje prijavljenih korisnika (za autorizaciju ban/unban)
+        // Kada se korisnik prijavi
         socket.on('userLoggedIn', (username) => {
-            userSockets.set(socket.id, username);
-            guests[socket.id] = username;
+            userSockets.set(socket.id, username); // Sačuvaj socket ID i username
 
-            // Pošalji svima novu listu korisnika
-            io.emit('updateGuestList', Object.values(guests));
-
-            // Pošalji svim klijentima sve trenutne banove
-            bannedUsers.forEach(banNick => {
-                io.emit('userBanned', banNick);
-            });
-        });
-
-        // Ban/unban funkcija (samo autorizovani)
-        socket.on('banUser', (targetNickname) => {
-            const username = userSockets.get(socket.id);
-            if (!authorizedUsers || !authorizedUsers.has(username)) return;
-            if (targetNickname === '*__X__*') return;
-
-            if (bannedUsers.has(targetNickname)) {
-                bannedUsers.delete(targetNickname);
-                io.emit('userUnbanned', targetNickname);
-            } else {
-                bannedUsers.add(targetNickname);
-                io.emit('userBanned', targetNickname);
+            if (privilegedUsers.has(username)) {
+                socket.emit('adminAccess', "Pristup odobren.");
             }
         });
 
-        // Chat blokada za banovane
-        socket.on('chatMessage', (msg) => {
-            const currentNickname = guests[socket.id];
-            if (bannedUsers.has(currentNickname)) return;
-            io.emit('chatMessage', currentNickname, msg);
+        // Banovanje korisnika
+        socket.on('banUser', (nickname) => {
+            const username = userSockets.get(socket.id); // Dobavi username iz mape
+
+            if (!privilegedUsers.has(username)) {
+                socket.emit('error', "Nemate prava za banovanje.");
+                return;
+            }
+
+            // Pronađi socket.id na osnovu nadimka iz `guests` objekta
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
+
+            if (!targetSocketId) {
+                socket.emit('error', "Korisnik nije pronađen.");
+                return;
+            }
+
+            bannedUsers.add(targetSocketId);
+            io.to(targetSocketId).emit('banned', "Banovani ste sa servera.");
+            const targetSocket = io.sockets.sockets.get(targetSocketId);
+            if (targetSocket) targetSocket.disconnect(true);
+
+            io.emit('userBanned', nickname);
+        });
+
+        // Odbanovanje korisnika
+        socket.on('unbanUser', (nickname) => {
+            const username = userSockets.get(socket.id);
+
+            if (!privilegedUsers.has(username)) {
+                socket.emit('error', "Nemate prava za odbanovanje.");
+                return;
+            }
+
+            const targetSocketId = Object.keys(guests).find(id => guests[id] === nickname);
+
+            if (targetSocketId) {
+                bannedUsers.delete(targetSocketId);
+                io.emit('userUnbanned', nickname);
+            }
+        });
+
+        // Diskonekcija korisnika
+        socket.on('disconnect', () => {
+            const username = userSockets.get(socket.id);
+            userSockets.delete(socket.id);
+            bannedUsers.delete(socket.id);
         });
     });
 }
 
 module.exports = { setupSocketEvents };
+
